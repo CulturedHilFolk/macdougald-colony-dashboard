@@ -595,7 +595,7 @@ table.data tbody tr:last-child td { border-bottom: none; }
             <option value="Female">Female</option>
             <option value="Male">Male</option>
           </select>
-          <input id="cb-genotype" type="text" placeholder="Genotype contains…" />
+          <select id="cb-genotype"><option value="">All genotypes</option></select>
           <input id="cb-age-min" type="number" min="0" step="0.1" placeholder="Min age (mo)" />
           <input id="cb-age-max" type="number" min="0" step="0.1" placeholder="Max age (mo)" />
           <select id="cb-use">
@@ -12622,16 +12622,64 @@ function cbInit() {
   // Populate strain dropdown
   $("#cb-strain").innerHTML = `<option value="">All strains</option>` +
     COLONY.strain_order.map(s => `<option>${s}</option>`).join("");
+
+  // Populate genotype dropdown — grouped by strain
+  cbPopulateGenotypes($("#cb-strain").value);
+
+  // Re-populate genotype options whenever strain changes
+  $("#cb-strain").addEventListener("change", () => {
+    cbPopulateGenotypes($("#cb-strain").value);
+    $("#cb-genotype").value = "";  // reset to "all genotypes"
+    cbApplyFilter();
+  });
+
   ["cb-strain", "cb-sex", "cb-genotype", "cb-age-min", "cb-age-max", "cb-use"]
     .forEach(id => $("#" + id).addEventListener("input", cbApplyFilter));
   cbApplyFilter();
   cbRenderCohort();
 }
 
+function cbPopulateGenotypes(strainFilter) {
+  const sel = $("#cb-genotype");
+  sel.innerHTML = "";
+  const allOpt = document.createElement("option");
+  allOpt.value = "";
+  allOpt.textContent = "All genotypes";
+  sel.appendChild(allOpt);
+
+  // Build (strain → Map<genotype, count>)
+  const byStrain = new Map();
+  for (const m of INV) {
+    if (strainFilter && m.strain !== strainFilter) continue;
+    const g = (m.genotype || "").trim();
+    if (!g) continue;
+    if (!byStrain.has(m.strain)) byStrain.set(m.strain, new Map());
+    const inner = byStrain.get(m.strain);
+    inner.set(g, (inner.get(g) || 0) + 1);
+  }
+  // Order strains using COLONY.strain_order, then any extras
+  const orderedStrains = COLONY.strain_order.filter(s => byStrain.has(s))
+    .concat(Array.from(byStrain.keys()).filter(s => !COLONY.strain_order.includes(s)));
+
+  for (const strain of orderedStrains) {
+    const inner = byStrain.get(strain);
+    const og = document.createElement("optgroup");
+    og.label = strain + (strainFilter ? "" : "");
+    const sorted = Array.from(inner.entries()).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    for (const [g, n] of sorted) {
+      const opt = document.createElement("option");
+      opt.value = g;
+      opt.textContent = `${g}  (n=${n})`;
+      og.appendChild(opt);
+    }
+    sel.appendChild(og);
+  }
+}
+
 function cbApplyFilter() {
   const strain = $("#cb-strain").value;
   const sex = $("#cb-sex").value;
-  const geno = $("#cb-genotype").value.trim().toLowerCase();
+  const geno = $("#cb-genotype").value.trim();
   const ageMin = parseFloat($("#cb-age-min").value);
   const ageMax = parseFloat($("#cb-age-max").value);
   const use = $("#cb-use").value;
@@ -12640,7 +12688,7 @@ function cbApplyFilter() {
     if (strain && m.strain !== strain) return false;
     if (sex && m.sex !== sex) return false;
     if (use && m.use !== use) return false;
-    if (geno && !(m.genotype || "").toLowerCase().includes(geno)) return false;
+    if (geno && (m.genotype || "").trim() !== geno) return false;
     if (!isNaN(ageMin) && (m.age_months ?? -1) < ageMin) return false;
     if (!isNaN(ageMax) && (m.age_months ?? 9999) > ageMax) return false;
     return true;
