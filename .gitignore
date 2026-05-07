@@ -32,8 +32,5 @@ Transnetyx_Submission_*.xlsx
 *.swo
 .vscode/
 
-# Existing artifacts from prior dashboard work — held back until visibility decision
-# Remove these lines once we commit to public/private and have sanitized as needed
-mouse_colony_dashboard.html
-mouse_colony_dashboard_data.json
-mouse_colony_analysis.ipynb
+# (The old prototype dashboard files have been retired and replaced with index.html
+#  + data/colony.json — see README. The notebook will be re-pointed at the new pipeline.)

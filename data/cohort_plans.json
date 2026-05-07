@@ -1,0 +1,102 @@
+[
+  {
+    "strain": "AdipoGlo",
+    "cross_desc": "Adipoq-Cre+/- ; Dendra2<+/-> \u00d7 Adipoq-Cre+/- ; Dendra2<+/->",
+    "purpose": "Generate adipocyte-specific Dendra2 mice for mitochondrial transfer experiments",
+    "target_geno": "Adipoq-cre ; Dendra2<+/->",
+    "target_label": "Adipoq-Cre+ Dendra2+/- (EXPERIMENTAL TARGET)",
+    "expected_ratios": [
+      {
+        "genotype": "Adipoq-cre ; Dendra2<+/->",
+        "pct": 37.5,
+        "target": true
+      },
+      {
+        "genotype": "Adipoq-cre ; Dendra2<+/+>",
+        "pct": 18.75,
+        "target": false
+      },
+      {
+        "genotype": "Adipoq-cre ; Dendra2<-/->",
+        "pct": 18.75,
+        "target": false
+      },
+      {
+        "genotype": "WT ; Dendra2<+/->",
+        "pct": 12.5,
+        "target": false
+      },
+      {
+        "genotype": "WT ; Dendra2<+/+>",
+        "pct": 6.25,
+        "target": false
+      },
+      {
+        "genotype": "WT ; Dendra2<-/->",
+        "pct": 6.25,
+        "target": false
+      }
+    ],
+    "currently_available": 87,
+    "currently_available_f": 47,
+    "currently_available_m": 38,
+    "total_of_target_geno": 91,
+    "active_breeders": 4,
+    "note": "37.5% of pups from these crosses will be the experimental genotype."
+  },
+  {
+    "strain": "AdipoGlo+",
+    "cross_desc": "mTmG<mTmG/mTmG> ; Adipoq-Cre+ ; Dendra2<+/+> \u00d7 same",
+    "purpose": "Generate triple-reporter mice (mTmG + Adipoq-Cre + Dendra2) for adipocyte mitochondrial transfer with membrane labeling",
+    "target_geno": "mTmG<mTmG/mTmG> ; Adipoq-cre ; Dendra2<+/+>",
+    "target_label": "mTmG hom + Adipoq-Cre+ + Dendra2+/+ (EXPERIMENTAL TARGET)",
+    "expected_ratios": [
+      {
+        "genotype": "mTmG<mTmG/mTmG> ; Adipoq-cre ; Dendra2<+/+>",
+        "pct": 75.0,
+        "target": true
+      },
+      {
+        "genotype": "mTmG<mTmG/mTmG> ; WT ; Dendra2<+/+>",
+        "pct": 25.0,
+        "target": false
+      }
+    ],
+    "currently_available": 21,
+    "currently_available_f": 10,
+    "currently_available_m": 11,
+    "total_of_target_geno": 25,
+    "active_breeders": 2,
+    "note": "~75% of pups from homozygous crosses will be the experimental genotype \u2014 highly efficient."
+  },
+  {
+    "strain": "Dendra2",
+    "cross_desc": "Dendra2<+/-> \u00d7 Dendra2<+/-> (expansion/maintenance)",
+    "purpose": "Expand Dendra2 colony for backcrossing into other lines",
+    "target_geno": "Dendra2<+/+>",
+    "target_label": "Dendra2<+/+> homozygous (for colony expansion)",
+    "expected_ratios": [
+      {
+        "genotype": "Dendra2<+/+>",
+        "pct": 25.0,
+        "target": true
+      },
+      {
+        "genotype": "Dendra2<+/->",
+        "pct": 50.0,
+        "target": false
+      },
+      {
+        "genotype": "Dendra2<-/->",
+        "pct": 25.0,
+        "target": false
+      }
+    ],
+    "currently_available": 37,
+    "currently_available_f": 23,
+    "currently_available_m": 14,
+    "total_of_target_geno": 7,
+    "active_breeders": 2,
+    "note": "Active Dendra2 breeder pairs \u2014 ensure Transnetyx litter records are kept current."
+  }
+]
