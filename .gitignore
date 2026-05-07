@@ -1,0 +1,39 @@
+# macOS
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+
+# Raw colony exports — these come from the colony software, treat as source data
+# (kept local; not pushed to GitHub)
+CageListExcel.xlsx
+MacLab - Brian_Mice.xlsx
+StrainList.xlsx
+Breedings.xlsx
+Mouse tracking sheet.xlsx
+
+# Generated rack walkthrough templates (printable forms, regenerable from script)
+Rack_Template_*.xlsx
+Cage_Walkthrough_*.xlsx
+
+# Filled walkthrough scans / digitized observed inventory (sensitive — keep local)
+Walkthrough_Filled_*.xlsx
+Observed_Inventory_*.xlsx
+
+# Transnetyx submission files (contain mouse-level metadata — keep local)
+Transnetyx_Submission_*.xlsx
+
+# OS / editor cruft
+*.swp
+*.swo
+.vscode/
+
+# Existing artifacts from prior dashboard work — held back until visibility decision
+# Remove these lines once we commit to public/private and have sanitized as needed
+mouse_colony_dashboard.html
+mouse_colony_dashboard_data.json
+mouse_colony_analysis.ipynb
