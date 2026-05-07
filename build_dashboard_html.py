@@ -25,6 +25,7 @@ HTML = r"""<!DOCTYPE html>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
 * { box-sizing: border-box; }
@@ -250,6 +251,67 @@ table.data tbody tr:last-child td { border-bottom: none; }
 }
 .cohort-ratio .bar > span { height: 100%; display: block; background: var(--accent); }
 .cohort-ratio.target .bar > span { background: var(--ok); }
+
+/* ---- Cohort builder ---- */
+.cb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 980px) { .cb-grid { grid-template-columns: 1fr; } }
+.cb-side {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 16px 18px; box-shadow: var(--shadow);
+}
+.cb-side h4 { margin: 0 0 10px; font-size: .95rem; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+.cb-side h4 .badge { background: var(--brand); color: #fff; padding: 2px 9px; border-radius: 999px; font-size: .72rem; font-weight: 700; }
+.cb-filter-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 12px; }
+.cb-filter-row input, .cb-filter-row select {
+  padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px;
+  font-size: .8rem; font-family: inherit; background: #fff; color: var(--ink); width: 100%;
+}
+.cb-filter-row input:focus, .cb-filter-row select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
+.cb-filter-row label { display: flex; align-items: center; gap: 6px; font-size: .78rem; color: var(--ink-muted); }
+.cb-action-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
+.cb-table-wrap { max-height: 380px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--line-soft); border-radius: 7px; }
+.cb-empty {
+  padding: 24px; text-align: center; color: var(--ink-soft); font-size: .85rem; font-style: italic;
+}
+.btn {
+  background: var(--brand); color: #fff; border: none; padding: 8px 14px; border-radius: 7px;
+  font-size: .8rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  display: inline-flex; align-items: center; gap: 6px; transition: background .12s;
+}
+.btn:hover { background: #1e40af; }
+.btn.ghost { background: var(--neutral-soft); color: var(--ink); }
+.btn.ghost:hover { background: #e5e9f0; }
+.btn.ok { background: var(--ok); }
+.btn.ok:hover { background: #166534; }
+.btn.small { padding: 4px 9px; font-size: .72rem; }
+.btn.danger { background: var(--danger); }
+.btn.danger:hover { background: #991b1b; }
+.cohort-summary {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 8px; padding: 10px; background: var(--neutral-soft); border-radius: 7px;
+  margin-bottom: 10px;
+}
+.cohort-summary .item { text-align: center; }
+.cohort-summary .item .v { font-size: 1.05rem; font-weight: 700; color: var(--ink); }
+.cohort-summary .item .l { font-size: .68rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: .04em; }
+.role-tag { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.role-tag.exp { background: var(--brand-soft); color: var(--brand); }
+.role-tag.ctrl { background: var(--ok-soft); color: var(--ok); }
+.control-suggestions {
+  background: #fafbfd; border: 1px solid var(--line); border-radius: 7px;
+  padding: 12px 14px; margin-top: 10px;
+}
+.control-suggestions h5 {
+  margin: 0 0 8px; font-size: .82rem; color: var(--brand); font-weight: 700;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.control-suggestions h5 .target {
+  font-family: 'JetBrains Mono', monospace; font-size: .72rem; color: var(--ink-muted); font-weight: 500;
+}
+.control-suggestions table { width: 100%; font-size: .76rem; }
+.control-suggestions table td { padding: 5px 8px; border-bottom: 1px solid var(--line-soft); }
+.age-diff { font-size: .68rem; color: var(--ink-soft); margin-left: 4px; }
+.age-diff.close { color: var(--ok); font-weight: 600; }
 
 /* ---- Modal ---- */
 .modal-bg {
@@ -527,6 +589,80 @@ table.data tbody tr:last-child td { border-bottom: none; }
     </p>
   </div>
   <div id="cohort-list"></div>
+
+  <!-- ===== Cohort Builder ===== -->
+  <div class="panel" style="margin-top: 24px;">
+    <h3>Build a cohort
+      <button class="info-btn" onclick="openModal('cohort-builder')">i</button>
+    </h3>
+    <p class="muted" style="font-size: .85rem; margin: 0 0 16px;">
+      Filter the live colony, hand-pick experimental mice, surface genetic controls
+      best matched by sex and age, and export the assembled cohort to Excel.
+    </p>
+
+    <div class="cb-grid">
+      <!-- LEFT: filter + candidates -->
+      <div class="cb-side">
+        <h4>1 · Available mice <span class="badge" id="cb-cand-count">0</span></h4>
+        <div class="cb-filter-row">
+          <select id="cb-strain"><option value="">All strains</option></select>
+          <select id="cb-sex">
+            <option value="">All sexes</option>
+            <option value="Female">Female</option>
+            <option value="Male">Male</option>
+          </select>
+          <input id="cb-genotype" type="text" placeholder="Genotype contains…" />
+          <input id="cb-age-min" type="number" min="0" step="0.1" placeholder="Min age (mo)" />
+          <input id="cb-age-max" type="number" min="0" step="0.1" placeholder="Max age (mo)" />
+          <select id="cb-use">
+            <option value="Available">Only Available</option>
+            <option value="">Any use status</option>
+            <option value="Breeding">Only Breeding</option>
+          </select>
+        </div>
+        <div class="cb-table-wrap">
+          <table class="data" id="cb-cand-table">
+            <thead><tr>
+              <th></th><th>ID</th><th>Strain</th><th>Sex</th><th>Age</th>
+              <th>Genotype</th><th>Cage</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="cb-action-row">
+          <button class="btn small ghost" onclick="cbAddAllVisible('experimental')">+ Add all visible as experimental</button>
+          <button class="btn small ghost" onclick="cbAddAllVisible('control')">+ Add all visible as control</button>
+        </div>
+      </div>
+
+      <!-- RIGHT: cohort + controls + export -->
+      <div class="cb-side">
+        <h4>2 · My cohort <span class="badge" id="cb-cohort-count">0</span></h4>
+        <div class="cohort-summary" id="cb-cohort-summary">
+          <div class="item"><div class="v">0</div><div class="l">Total</div></div>
+          <div class="item"><div class="v">0</div><div class="l">Experimental</div></div>
+          <div class="item"><div class="v">0</div><div class="l">Controls</div></div>
+          <div class="item"><div class="v">—</div><div class="l">F : M</div></div>
+          <div class="item"><div class="v">—</div><div class="l">Mean age (mo)</div></div>
+        </div>
+        <div class="cb-table-wrap">
+          <table class="data" id="cb-cohort-table">
+            <thead><tr>
+              <th>Role</th><th>ID</th><th>Strain</th><th>Sex</th><th>Age</th>
+              <th>Genotype</th><th>Cage</th><th></th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="cb-action-row">
+          <button class="btn" onclick="cbSuggestControls()">🔍 Suggest controls</button>
+          <button class="btn ok" onclick="cbExportXlsx()">⬇ Export to Excel</button>
+          <button class="btn ghost" onclick="cbClear()">Clear cohort</button>
+        </div>
+        <div id="cb-control-area"></div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- ============= CULL CANDIDATES ============= -->
@@ -1241,6 +1377,273 @@ $("#breeding-stats-table tbody").innerHTML = BR.map((b, i) => {
   `;
 }).join("");
 
+// ============= COHORT BUILDER =============
+const CB = {
+  selected: new Map(),  // mouse_id -> { mouse, role: "experimental" | "control" }
+  candidates: [],       // current filtered list
+};
+
+function normalizeGeno(g) {
+  return (g || "").toLowerCase().replace(/\s+/g, "").replace(/;+/g, ";");
+}
+
+function cbInit() {
+  // Populate strain dropdown
+  $("#cb-strain").innerHTML = `<option value="">All strains</option>` +
+    COLONY.strain_order.map(s => `<option>${s}</option>`).join("");
+  ["cb-strain", "cb-sex", "cb-genotype", "cb-age-min", "cb-age-max", "cb-use"]
+    .forEach(id => $("#" + id).addEventListener("input", cbApplyFilter));
+  cbApplyFilter();
+  cbRenderCohort();
+}
+
+function cbApplyFilter() {
+  const strain = $("#cb-strain").value;
+  const sex = $("#cb-sex").value;
+  const geno = $("#cb-genotype").value.trim().toLowerCase();
+  const ageMin = parseFloat($("#cb-age-min").value);
+  const ageMax = parseFloat($("#cb-age-max").value);
+  const use = $("#cb-use").value;
+
+  CB.candidates = INV.filter(m => {
+    if (strain && m.strain !== strain) return false;
+    if (sex && m.sex !== sex) return false;
+    if (use && m.use !== use) return false;
+    if (geno && !(m.genotype || "").toLowerCase().includes(geno)) return false;
+    if (!isNaN(ageMin) && (m.age_months ?? -1) < ageMin) return false;
+    if (!isNaN(ageMax) && (m.age_months ?? 9999) > ageMax) return false;
+    return true;
+  });
+
+  $("#cb-cand-count").textContent = CB.candidates.length;
+  const tbody = $("#cb-cand-table tbody");
+  if (!CB.candidates.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="cb-empty">No mice match these filters.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = CB.candidates.slice(0, 200).map(m => {
+    const inCohort = CB.selected.has(m.mouse_id);
+    return `
+      <tr>
+        <td>
+          ${inCohort
+            ? `<span class="role-tag ${CB.selected.get(m.mouse_id).role === 'experimental' ? 'exp' : 'ctrl'}">in</span>`
+            : `<button class="btn small" onclick="cbAdd('${m.mouse_id}','experimental')">+ exp</button>
+               <button class="btn small ghost" onclick="cbAdd('${m.mouse_id}','control')">+ ctrl</button>`
+          }
+        </td>
+        <td class="id-mono">${m.mouse_id}</td>
+        <td>${tagFor(m.strain, "strain")}</td>
+        <td>${tagFor(m.sex, "sex")}</td>
+        <td>${m.age_months ?? "—"}</td>
+        <td class="id-mono" style="font-size:.74rem">${m.genotype || ""}</td>
+        <td class="id-mono">${m.cage_id}</td>
+      </tr>`;
+  }).join("");
+  if (CB.candidates.length > 200) {
+    tbody.innerHTML += `<tr><td colspan="7" class="cb-empty">…showing first 200 of ${CB.candidates.length}. Narrow filters to see more.</td></tr>`;
+  }
+}
+
+window.cbAdd = function(mouseId, role) {
+  const m = INV.find(x => x.mouse_id === mouseId);
+  if (!m) return;
+  CB.selected.set(mouseId, { mouse: m, role });
+  cbRenderCohort();
+  cbApplyFilter();
+};
+
+window.cbRemove = function(mouseId) {
+  CB.selected.delete(mouseId);
+  cbRenderCohort();
+  cbApplyFilter();
+};
+
+window.cbAddAllVisible = function(role) {
+  CB.candidates.slice(0, 200).forEach(m => {
+    if (!CB.selected.has(m.mouse_id)) CB.selected.set(m.mouse_id, { mouse: m, role });
+  });
+  cbRenderCohort();
+  cbApplyFilter();
+};
+
+window.cbClear = function() {
+  if (CB.selected.size === 0) return;
+  if (!confirm("Clear the cohort? (" + CB.selected.size + " mice)")) return;
+  CB.selected.clear();
+  cbRenderCohort();
+  cbApplyFilter();
+  $("#cb-control-area").innerHTML = "";
+};
+
+function cbRenderCohort() {
+  const all = Array.from(CB.selected.values());
+  const exp = all.filter(x => x.role === "experimental");
+  const ctrl = all.filter(x => x.role === "control");
+  const f = all.filter(x => x.mouse.sex === "Female").length;
+  const ml = all.filter(x => x.mouse.sex === "Male").length;
+  const ages = all.map(x => x.mouse.age_months).filter(a => a != null);
+  const meanAge = ages.length ? (ages.reduce((s,a)=>s+a,0)/ages.length).toFixed(1) : "—";
+
+  $("#cb-cohort-count").textContent = all.length;
+  $("#cb-cohort-summary").innerHTML = `
+    <div class="item"><div class="v">${all.length}</div><div class="l">Total</div></div>
+    <div class="item"><div class="v" style="color:var(--brand)">${exp.length}</div><div class="l">Experimental</div></div>
+    <div class="item"><div class="v" style="color:var(--ok)">${ctrl.length}</div><div class="l">Controls</div></div>
+    <div class="item"><div class="v">${f}:${ml}</div><div class="l">F : M</div></div>
+    <div class="item"><div class="v">${meanAge}</div><div class="l">Mean age (mo)</div></div>
+  `;
+  const tbody = $("#cb-cohort-table tbody");
+  if (!all.length) {
+    tbody.innerHTML = `<tr><td colspan="8" class="cb-empty">Pick mice from the left to build a cohort.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = all.map(({mouse: m, role}) => `
+    <tr>
+      <td><span class="role-tag ${role==='experimental'?'exp':'ctrl'}">${role==='experimental'?'Exp':'Ctrl'}</span></td>
+      <td class="id-mono">${m.mouse_id}</td>
+      <td>${tagFor(m.strain, "strain")}</td>
+      <td>${tagFor(m.sex, "sex")}</td>
+      <td>${m.age_months ?? "—"}</td>
+      <td class="id-mono" style="font-size:.74rem">${m.genotype || ""}</td>
+      <td class="id-mono">${m.cage_id}</td>
+      <td><button class="btn small danger" onclick="cbRemove('${m.mouse_id}')">×</button></td>
+    </tr>`).join("");
+}
+
+window.cbSuggestControls = function() {
+  const exp = Array.from(CB.selected.values()).filter(x => x.role === "experimental");
+  if (!exp.length) {
+    $("#cb-control-area").innerHTML = `<div class="cb-empty" style="margin-top:10px;">Add at least one experimental mouse first, then click "Suggest controls".</div>`;
+    return;
+  }
+  // Build map: strain -> set of "control genotypes" from cohort plans (target=false)
+  const ctrlGenosByStrain = {};
+  COLONY.cohort_plans.forEach(c => {
+    const set = new Set((c.expected_ratios || [])
+      .filter(r => !r.target)
+      .map(r => normalizeGeno(r.genotype)));
+    ctrlGenosByStrain[c.strain] = set;
+  });
+
+  let html = `<h4 style="margin: 18px 0 10px; font-size:.92rem; color: var(--ink);">Suggested genetic controls</h4>`;
+  exp.forEach(({mouse: m}) => {
+    const targetGenoNorm = normalizeGeno(m.genotype);
+    const candidates = INV.filter(x => {
+      if (x.strain !== m.strain) return false;
+      if (x.sex !== m.sex) return false;
+      if (x.mouse_id === m.mouse_id) return false;
+      if (CB.selected.has(x.mouse_id)) return false;  // already in cohort
+      if (normalizeGeno(x.genotype) === targetGenoNorm) return false;  // same geno = not control
+      if (x.use === "Breeding") return false;
+      return true;
+    });
+
+    // Score: prefer mice whose genotype is in the cohort plan's "control" list,
+    // then by absolute age difference.
+    const ctrlSet = ctrlGenosByStrain[m.strain] || new Set();
+    candidates.forEach(c => {
+      const inPlan = ctrlSet.has(normalizeGeno(c.genotype));
+      const ageDiff = (c.age_months != null && m.age_months != null)
+        ? Math.abs(c.age_months - m.age_months) : 999;
+      c._score = (inPlan ? 0 : 100) + ageDiff;
+      c._inPlan = inPlan;
+      c._ageDiff = ageDiff;
+    });
+    candidates.sort((a,b) => a._score - b._score);
+    const top = candidates.slice(0, 5);
+
+    html += `
+      <div class="control-suggestions">
+        <h5>
+          <span>For <span class="id-mono">${m.mouse_id}</span> · ${m.strain} · ${m.sex} · ${m.age_months}mo</span>
+          <span class="target">${m.genotype || ""}</span>
+        </h5>
+        ${top.length ? `
+        <table>
+          <thead><tr>
+            <th>ID</th><th>Sex</th><th>Age</th><th>Δ age</th><th>Genotype</th><th>Cage</th><th></th>
+          </tr></thead>
+          <tbody>
+            ${top.map(c => `
+              <tr>
+                <td class="id-mono">${c.mouse_id}${c._inPlan ? ' <span class="role-tag ctrl" style="margin-left:4px">plan</span>' : ''}</td>
+                <td>${tagFor(c.sex, "sex")}</td>
+                <td>${c.age_months ?? "—"}</td>
+                <td><span class="age-diff ${c._ageDiff < 1 ? 'close' : ''}">±${c._ageDiff.toFixed(1)} mo</span></td>
+                <td class="id-mono" style="font-size:.72rem">${c.genotype || ""}</td>
+                <td class="id-mono">${c.cage_id}</td>
+                <td><button class="btn small ok" onclick="cbAdd('${c.mouse_id}','control'); cbSuggestControls();">+ add</button></td>
+              </tr>`).join("")}
+          </tbody>
+        </table>` : `<p class="muted" style="font-size:.8rem">No matching controls found in the colony.</p>`}
+      </div>`;
+  });
+  $("#cb-control-area").innerHTML = html;
+};
+
+window.cbExportXlsx = function() {
+  if (CB.selected.size === 0) {
+    alert("Cohort is empty. Add some mice first.");
+    return;
+  }
+  const rows = Array.from(CB.selected.values()).map(({mouse: m, role}) => ({
+    role,
+    mouse_id: m.mouse_id,
+    strain: m.strain,
+    sex: m.sex,
+    age_months: m.age_months,
+    age_days: m.age_days,
+    dob: m.dob,
+    genotype: m.genotype,
+    cage_id: m.cage_id,
+    use: m.use,
+    flags: (m.cull_flags || []).join("; "),
+  }));
+
+  // Group summary
+  const exp = rows.filter(r => r.role === "experimental");
+  const ctrl = rows.filter(r => r.role === "control");
+  const summary = [
+    ["Cohort exported", new Date().toISOString().slice(0,19).replace("T", " ")],
+    ["Source dashboard", "MacDougald Lab Mouse Colony Dashboard"],
+    ["Data as of", COLONY.as_of],
+    [],
+    ["Total mice in cohort", rows.length],
+    ["  Experimental", exp.length],
+    ["  Controls", ctrl.length],
+    [],
+    ["Filters used at time of export"],
+    ["  Strain", $("#cb-strain").value || "(all)"],
+    ["  Sex", $("#cb-sex").value || "(all)"],
+    ["  Genotype contains", $("#cb-genotype").value || "(any)"],
+    ["  Age min (mo)", $("#cb-age-min").value || "(any)"],
+    ["  Age max (mo)", $("#cb-age-max").value || "(any)"],
+    ["  Use", $("#cb-use").value || "(any)"],
+  ];
+
+  const wb = XLSX.utils.book_new();
+  const ws1 = XLSX.utils.json_to_sheet(rows, {
+    header: ["role", "mouse_id", "strain", "sex", "age_months", "age_days", "dob", "genotype", "cage_id", "use", "flags"]
+  });
+  // Auto column widths
+  const cols = Object.keys(rows[0] || {});
+  ws1["!cols"] = cols.map(k => {
+    const max = Math.max(k.length, ...rows.map(r => String(r[k] ?? "").length));
+    return { wch: Math.min(40, Math.max(8, max + 2)) };
+  });
+  XLSX.utils.book_append_sheet(wb, ws1, "Cohort");
+
+  const ws2 = XLSX.utils.aoa_to_sheet(summary);
+  ws2["!cols"] = [{ wch: 30 }, { wch: 30 }];
+  XLSX.utils.book_append_sheet(wb, ws2, "Summary");
+
+  const fname = `Cohort_${COLONY.as_of}_${rows.length}mice.xlsx`;
+  XLSX.writeFile(wb, fname);
+};
+
+cbInit();
+
 // ============= EXPERIMENT =============
 $("#exp-strain-list").innerHTML = COLONY.strain_summary.map(s => `
   <li><strong>${s.strain}</strong> — ${s.alive_mice} alive · ${s.active_breedings} active breeding(s) · ${s.active_cages} cages</li>
@@ -1333,6 +1736,34 @@ git push</pre>
     title: "Unassigned cages",
     body: `<p>Cages without a recorded rack position. These need to be located physically and
               their position entered in the colony software.</p>` },
+  "cohort-builder": {
+    title: "How the cohort builder works",
+    body: `
+      <h3>Steps</h3>
+      <ol>
+        <li><strong>Filter</strong> the colony by strain, sex, genotype text, age range, and use status.</li>
+        <li><strong>Add</strong> mice as <em>experimental</em> or <em>control</em>. Mice already in the cohort are tagged.</li>
+        <li>Click <strong>"Suggest controls"</strong> — for each experimental mouse, the dashboard surfaces
+            up to 5 best-matched controls by:
+          <ul>
+            <li>Same strain</li>
+            <li>Same sex</li>
+            <li>Different genotype than the experimental mouse</li>
+            <li>Closest age (Δ months shown)</li>
+            <li>Bonus: prioritizes genotypes listed as non-target in that strain's cohort plan
+                (marked with the <span class="role-tag ctrl">plan</span> tag)</li>
+          </ul>
+        </li>
+        <li>Click <strong>"Export to Excel"</strong> — produces a 2-sheet workbook (Cohort + Summary)
+            ready to share or import into Prism / R / Excel directly.</li>
+      </ol>
+      <h3>Notes</h3>
+      <ul>
+        <li>Breeders are excluded from control suggestions automatically.</li>
+        <li>Mice already in the cohort cannot be re-suggested.</li>
+        <li>The Δ age is shown in months; differences under 1 month are highlighted green.</li>
+      </ul>
+    ` },
 };
 
 function renderInsightSummary() {
