@@ -416,6 +416,7 @@ table.data tbody tr:last-child td { border-bottom: none; }
   <button class="tab" data-pane="breeding">Breeding</button>
   <button class="tab" data-pane="cohort">Cohort Planning</button>
   <button class="tab" data-pane="cull">Cull Candidates</button>
+  <button class="tab" data-pane="smartcull">Smart Cull Plan</button>
   <button class="tab" data-pane="walkthrough">Walkthrough</button>
   <button class="tab" data-pane="experiment">Experiment Details</button>
   <button class="tab" data-pane="stats">Statistics</button>
@@ -697,6 +698,91 @@ table.data tbody tr:last-child td { border-bottom: none; }
       </table>
     </div>
   </div>
+</section>
+
+<!-- ============= SMART CULL PLAN ============= -->
+<section class="tab-pane" id="pane-smartcull">
+  <div class="panel" style="margin-bottom: 16px;">
+    <h3>What this tab does
+      <button class="info-btn" onclick="openModal('smart-cull')">i</button>
+    </h3>
+    <p style="font-size: .9rem; margin: 0 0 6px;">
+      Generates a preserve / cull recommendation by combining (a) per-strain priority,
+      (b) cohort-rebuild insurance per (strain × genotype × sex) cell, and
+      (c) automatic rescue-donor preservation for orphan strains that can be regenerated
+      from compound strains.
+    </p>
+    <p class="muted" style="font-size: .82rem; margin: 6px 0 0;">
+      Defaults: <strong>Expand → Marrow Glo</strong> ·
+      <strong>Wind down → Adipoq-Cre, mTmG, Dendra2</strong> (rescuable from AdipoGlo / AdipoGlo+) ·
+      <strong>Maintain → AdipoGlo, AdipoGlo+</strong>. Adjust below.
+    </p>
+  </div>
+
+  <!-- Strain priorities -->
+  <div class="panel" style="margin-bottom: 16px;">
+    <h3>1 · Strain priorities</h3>
+    <div id="sc-priority-grid"></div>
+    <div class="cb-action-row" style="margin-top: 14px;">
+      <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;">
+        Keep-floor (≥ youngest mice per strain × genotype × sex cell):
+        <input id="sc-keepfloor" type="number" min="1" max="20" value="4" style="width:60px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;font-family:inherit;">
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;">
+        <input id="sc-rescue-on" type="checkbox" checked> Auto-preserve rescue donors
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;">
+        Donors per sex per orphan strain:
+        <input id="sc-donor-n" type="number" min="1" max="10" value="4" style="width:50px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;font-family:inherit;">
+      </label>
+      <button class="btn" onclick="scRecompute()">↻ Recompute plan</button>
+    </div>
+  </div>
+
+  <!-- Plan summary -->
+  <div class="row cols-3" id="sc-summary" style="margin-bottom: 14px;"></div>
+
+  <!-- Recommended actions -->
+  <div class="panel" id="sc-actions" style="margin-bottom: 14px; display:none;">
+    <h3>2 · Recommended actions before culling</h3>
+    <div id="sc-actions-body"></div>
+  </div>
+
+  <!-- Cull list -->
+  <div class="table-wrap" style="margin-bottom: 14px;">
+    <div class="table-controls">
+      <strong style="font-size:.92rem; color: var(--ink);">3 · Cull list</strong>
+      <button class="btn ok" style="padding:6px 12px;font-size:.78rem" onclick="scExportCull()">⬇ Export to Excel</button>
+      <button class="btn ghost" style="padding:6px 12px;font-size:.78rem" onclick="scExportCullCSV()">⬇ CSV</button>
+      <span class="count" id="sc-cull-count">— mice</span>
+    </div>
+    <div class="scroll-y scroll-x" style="max-height: 500px;">
+      <table class="data" id="sc-cull-table">
+        <thead><tr>
+          <th>ID</th><th>Strain</th><th>Sex</th><th>Age</th><th>Genotype</th>
+          <th>Cage</th><th>Use</th><th>Reason</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Preserve list -->
+  <details class="table-wrap" style="margin-bottom: 14px;">
+    <summary style="padding: 14px 16px; cursor: pointer; font-weight: 700; font-size: .92rem; color: var(--ink); display: flex; align-items: center; gap: 10px;">
+      4 · Preserved (do NOT cull)
+      <span class="count" id="sc-preserve-count" style="font-weight: 500; color: var(--ink-muted);">— mice</span>
+    </summary>
+    <div class="scroll-y scroll-x" style="max-height: 500px; border-top: 1px solid var(--line);">
+      <table class="data" id="sc-preserve-table">
+        <thead><tr>
+          <th>ID</th><th>Strain</th><th>Sex</th><th>Age</th><th>Genotype</th>
+          <th>Cage</th><th>Use</th><th>Reason(s)</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </details>
 </section>
 
 <!-- ============= WALKTHROUGH ============= -->
@@ -1692,6 +1778,453 @@ window.cbExportXlsx = function() {
 
 cbInit();
 
+// ============= SMART CULL PLAN =============
+const SC = {
+  // Defaults derived from user's biology:
+  //   Marrow Glo → expand
+  //   Adipoq-Cre, mTmG, Dendra2 → wind-down (rescuable)
+  //   AdipoGlo, AdipoGlo+ → maintain
+  defaultPriority: {
+    "AdipoGlo": "maintain",
+    "AdipoGlo+": "maintain",
+    "Marrow Glo": "expand",
+    "Adipoq-Cre": "winddown",
+    "mTmG": "winddown",
+    "Dendra2": "winddown",
+  },
+  priority: {},
+  keepFloor: 4,
+  rescueOn: true,
+  donorN: 4,
+  plan: null,
+};
+
+// Rescue-donor predicates: identify mice in OTHER strains that can serve as
+// breeding stock to regenerate an orphan single-transgene line.
+const RESCUE_RULES = {
+  "Adipoq-Cre": {
+    label: "Adipoq-Cre alone",
+    note: "Find offspring carrying only the Adipoq-Cre transgene (Dendra2 null, no mTmG).",
+    candidate: m => {
+      const g = (m.genotype || "").toLowerCase().replace(/\s+/g, "");
+      return /adipoq-cre/.test(g) && /dendra2<-\/->/.test(g) && !/mtmg<mtmg/.test(g);
+    },
+  },
+  "Dendra2": {
+    label: "Dendra2 alone",
+    note: "Find offspring carrying Dendra2 (+/- or +/+) without Adipoq-Cre and without mTmG.",
+    candidate: m => {
+      const g = (m.genotype || "").toLowerCase().replace(/\s+/g, "");
+      return /dendra2<\+\/[+-]>/.test(g) && !/adipoq-cre/.test(g) && !/mtmg<mtmg/.test(g);
+    },
+  },
+  "mTmG": {
+    label: "mTmG alone",
+    note: "Find offspring carrying mTmG hom without Adipoq-Cre and without Dendra2 transgene.",
+    candidate: m => {
+      const g = (m.genotype || "").toLowerCase().replace(/\s+/g, "");
+      return /mtmg<mtmg\/mtmg>/.test(g) && !/adipoq-cre/.test(g) && !/dendra2<\+\/[+-]>/.test(g);
+    },
+  },
+};
+
+function scInit() {
+  // Initialize priorities from defaults (only for strains present in the colony)
+  COLONY.strain_order.forEach(s => {
+    SC.priority[s] = SC.defaultPriority[s] || "maintain";
+  });
+
+  renderPriorityGrid();
+
+  // Wire inputs
+  $("#sc-keepfloor").addEventListener("input", () => {
+    SC.keepFloor = parseInt($("#sc-keepfloor").value) || 4;
+  });
+  $("#sc-rescue-on").addEventListener("change", () => { SC.rescueOn = $("#sc-rescue-on").checked; });
+  $("#sc-donor-n").addEventListener("input", () => {
+    SC.donorN = parseInt($("#sc-donor-n").value) || 4;
+  });
+
+  // Compute initial plan
+  scRecompute();
+}
+
+function renderPriorityGrid() {
+  const html = COLONY.strain_order.map(s => {
+    const n = COLONY.strain_counts[s] || 0;
+    const rescueNote = RESCUE_RULES[s]
+      ? `<div class="muted" style="font-size:.74rem;margin-top:4px;">↪︎ ${RESCUE_RULES[s].note}</div>`
+      : "";
+    const cur = SC.priority[s];
+    return `
+      <div class="cull-card ${cur === 'expand' ? 'info' : cur === 'winddown' ? 'warn' : ''}"
+           style="cursor:default;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+          <div>
+            <div class="label" style="font-weight:700;color:var(--ink)">${s}</div>
+            <div class="desc" style="margin-top:2px">${n} mice in colony</div>
+          </div>
+          <select onchange="scSetPriority('${s.replace(/'/g, "\\'")}', this.value)"
+                  style="padding:6px 10px;border:1px solid var(--line);border-radius:7px;font-size:.82rem;font-family:inherit;background:#fff;">
+            <option value="expand" ${cur === 'expand' ? 'selected' : ''}>Expand</option>
+            <option value="maintain" ${cur === 'maintain' ? 'selected' : ''}>Maintain</option>
+            <option value="winddown" ${cur === 'winddown' ? 'selected' : ''}>Wind down</option>
+          </select>
+        </div>
+        ${rescueNote}
+      </div>`;
+  }).join("");
+  $("#sc-priority-grid").innerHTML = `<div class="cull-list">${html}</div>`;
+}
+
+window.scSetPriority = function(strain, value) {
+  SC.priority[strain] = value;
+  renderPriorityGrid();
+  scRecompute();
+};
+
+// Cohort plan that produced this strain (for "rescuable" tag in UI)
+function isRescuable(strain) {
+  return RESCUE_RULES[strain] != null;
+}
+
+// Active-breeder mouse_ids parsed from breedings
+function getActiveBreederIds() {
+  const ids = new Set();
+  COLONY.breedings.forEach(b => {
+    if (b.status !== "Active") return;
+    [b.mother, b.father].forEach(s => {
+      if (!s) return;
+      const id = String(s).split("|")[0].trim();
+      if (id) ids.add(id);
+    });
+  });
+  // Also use anyone marked as Use=Breeding in inventory
+  INV.forEach(m => { if (m.use === "Breeding") ids.add(m.mouse_id); });
+  return ids;
+}
+
+window.scRecompute = function() {
+  const breederIds = getActiveBreederIds();
+
+  // Step 1: identify rescue donors for each wind-down rescuable strain
+  const rescueDonors = new Map(); // mouseId -> targetStrain
+  if (SC.rescueOn) {
+    Object.entries(RESCUE_RULES).forEach(([target, rule]) => {
+      if (SC.priority[target] !== "winddown") return;
+      const candidates = INV.filter(m =>
+        m.strain !== target &&
+        rule.candidate(m) &&
+        m.use === "Available" &&
+        !breederIds.has(m.mouse_id) &&
+        m.sex !== "Unknown"
+      );
+      ["Female", "Male"].forEach(sex => {
+        candidates
+          .filter(c => c.sex === sex)
+          .sort((a, b) => (a.age_months ?? 999) - (b.age_months ?? 999))
+          .slice(0, SC.donorN)
+          .forEach(m => rescueDonors.set(m.mouse_id, target));
+      });
+    });
+  }
+
+  // Step 2: precompute (strain × genotype × sex) cell rankings
+  const cellMembers = new Map();
+  for (const m of INV) {
+    const key = `${m.strain}||${(m.genotype || "").trim()}||${m.sex}`;
+    if (!cellMembers.has(key)) cellMembers.set(key, []);
+    cellMembers.get(key).push(m);
+  }
+  cellMembers.forEach(arr => arr.sort((a, b) => (a.age_months ?? 999) - (b.age_months ?? 999)));
+  const cellSizesGeno = new Map();
+  for (const m of INV) {
+    const key = `${m.strain}||${(m.genotype || "").trim()}`;
+    cellSizesGeno.set(key, (cellSizesGeno.get(key) || 0) + 1);
+  }
+
+  // Step 3: classify
+  const preserve = [];
+  const cull = [];
+
+  for (const m of INV) {
+    const reasons = [];
+    let preserveDecision = false;
+    const priority = SC.priority[m.strain] || "maintain";
+
+    if (m.use === "Breeding" || breederIds.has(m.mouse_id)) {
+      preserveDecision = true; reasons.push("active breeder");
+    }
+    if (m.sex === "Unknown") {
+      preserveDecision = true; reasons.push("sex unknown — ID first");
+    }
+    if (rescueDonors.has(m.mouse_id)) {
+      preserveDecision = true;
+      reasons.push(`rescue donor for ${rescueDonors.get(m.mouse_id)}`);
+    }
+
+    // Singleton genotype protection (unless rescuable)
+    const genoCellSize = cellSizesGeno.get(`${m.strain}||${(m.genotype || "").trim()}`) || 0;
+    if (genoCellSize === 1 && !isRescuable(m.strain)) {
+      preserveDecision = true;
+      reasons.push("singleton genotype (last of kind)");
+    }
+
+    // Strain-priority rules
+    if (!preserveDecision) {
+      if (priority === "expand") {
+        preserveDecision = true; reasons.push("strain priority: EXPAND");
+      } else if (priority === "winddown") {
+        // Cull most; only preserve if young (<6mo) or if singleton (handled above)
+        if ((m.age_months ?? 999) < 6) {
+          preserveDecision = true; reasons.push("under 6 mo — preserve in wind-down");
+        }
+      } else if (priority === "maintain") {
+        // Keep ≥keepFloor youngest of (strain × genotype × sex)
+        const cellKey = `${m.strain}||${(m.genotype || "").trim()}||${m.sex}`;
+        const cellArr = cellMembers.get(cellKey) || [];
+        const idx = cellArr.findIndex(x => x.mouse_id === m.mouse_id);
+        const floor = Math.min(SC.keepFloor, cellArr.length);
+        if (idx < floor) {
+          preserveDecision = true; reasons.push(`youngest in ${m.strain}/${m.sex} for this genotype (rank ${idx + 1}/${cellArr.length})`);
+        } else if ((m.age_months ?? 999) < 12) {
+          preserveDecision = true; reasons.push("under 12 mo — too young to cull");
+        }
+      }
+    }
+
+    const row = { mouse: m, reasons };
+    if (preserveDecision) preserve.push(row);
+    else {
+      // default cull reason
+      if (!reasons.length) reasons.push("aged surplus");
+      else reasons.push("aged surplus");
+      cull.push(row);
+    }
+  }
+
+  SC.plan = { preserve, cull, rescueDonors };
+
+  // Render summary, actions, tables
+  scRenderSummary();
+  scRenderActions();
+  scRenderTables();
+};
+
+function scRenderSummary() {
+  const { preserve, cull } = SC.plan;
+  const breederCount = preserve.filter(p => p.reasons.some(r => r.startsWith("active"))).length;
+  const rescueCount = preserve.filter(p => p.reasons.some(r => r.startsWith("rescue"))).length;
+  const sexUnkCount = preserve.filter(p => p.reasons.some(r => r.startsWith("sex unknown"))).length;
+  const expandCount = preserve.filter(p => p.reasons.some(r => r.includes("EXPAND"))).length;
+  const insuranceCount = preserve.filter(p => p.reasons.some(r => r.startsWith("youngest"))).length;
+  const youngCount = preserve.filter(p => p.reasons.some(r => r.startsWith("under"))).length;
+  const singletonCount = preserve.filter(p => p.reasons.some(r => r.startsWith("singleton"))).length;
+
+  $("#sc-summary").innerHTML = `
+    <div class="kpi alert">
+      <div class="kpi-label">Cull</div>
+      <div class="kpi-value">${cull.length}</div>
+      <div class="kpi-sub">${Math.round(100 * cull.length / INV.length)}% of colony</div>
+    </div>
+    <div class="kpi ok">
+      <div class="kpi-label">Preserve</div>
+      <div class="kpi-value">${preserve.length}</div>
+      <div class="kpi-sub">colony goes to ${preserve.length} mice</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Preservation reasons</div>
+      <div class="kpi-sub" style="margin-top:8px; line-height:1.7;">
+        <span class="tag warn">${breederCount}</span> breeders ·
+        <span class="tag neutral">${sexUnkCount}</span> sex unknown ·
+        <span class="tag ok">${rescueCount}</span> rescue donors ·
+        <span class="tag brand">${expandCount}</span> expand-strain ·
+        <span class="tag">${insuranceCount}</span> cohort insurance ·
+        <span class="tag">${youngCount}</span> too young ·
+        <span class="tag danger">${singletonCount}</span> singleton geno
+      </div>
+    </div>
+  `;
+}
+
+function scRenderActions() {
+  const actions = [];
+  // Expand strains: recommend breedings if no active breeders exist
+  Object.entries(SC.priority).forEach(([strain, p]) => {
+    if (p !== "expand") return;
+    const strainMice = INV.filter(m => m.strain === strain);
+    const breeders = strainMice.filter(m => m.use === "Breeding");
+    if (breeders.length === 0) {
+      // Recommend a pair from young mice
+      const candidates = strainMice.filter(m => m.use === "Available");
+      const f = candidates.filter(m => m.sex === "Female").sort((a, b) => (a.age_months ?? 999) - (b.age_months ?? 999));
+      const ml = candidates.filter(m => m.sex === "Male").sort((a, b) => (a.age_months ?? 999) - (b.age_months ?? 999));
+      const suggF = f[0], suggM = ml[0];
+      actions.push(`
+        <div class="control-suggestions" style="background:#f0f9ff;border-color:#bae6fd;">
+          <h5 style="color:#0369a1">⚙ Set up breeding for <strong>${strain}</strong> (priority: EXPAND, no active breeders)</h5>
+          <p style="font-size:.82rem;margin:0 0 8px;color:var(--ink-muted)">
+            ${strain} has ${strainMice.length} mice but no active breeding pairs. Suggested pair (youngest available):
+          </p>
+          ${(suggF && suggM) ? `
+            <table>
+              <tr><td>♀ Female</td><td class="id-mono">${suggF.mouse_id}</td><td>${suggF.age_months}mo</td><td class="id-mono" style="font-size:.74rem">${suggF.genotype || ""}</td></tr>
+              <tr><td>♂ Male</td><td class="id-mono">${suggM.mouse_id}</td><td>${suggM.age_months}mo</td><td class="id-mono" style="font-size:.74rem">${suggM.genotype || ""}</td></tr>
+            </table>
+          ` : `<p class="muted">Not enough Available mice of both sexes to suggest a pair.</p>`}
+        </div>`);
+    } else {
+      actions.push(`
+        <div class="control-suggestions" style="background:#f0fdf4;border-color:#bbf7d0;">
+          <h5 style="color:#15803d">✓ <strong>${strain}</strong> (EXPAND) — already has ${breeders.length} active breeder(s)</h5>
+          <p style="font-size:.82rem;margin:0;color:var(--ink-muted)">No new breeding setup required; preserving all ${strainMice.length} mice in this strain.</p>
+        </div>`);
+    }
+  });
+  // Rescue donor announcements
+  Object.entries(RESCUE_RULES).forEach(([target, rule]) => {
+    if (SC.priority[target] !== "winddown" || !SC.rescueOn) return;
+    const donors = Array.from(SC.plan.rescueDonors.entries())
+      .filter(([id, t]) => t === target)
+      .map(([id]) => INV.find(m => m.mouse_id === id))
+      .filter(Boolean);
+    if (donors.length === 0) {
+      actions.push(`
+        <div class="control-suggestions" style="background:#fef2f2;border-color:#fecaca;">
+          <h5 style="color:var(--danger)">⚠ No rescue donors found for <strong>${target}</strong></h5>
+          <p style="font-size:.82rem;margin:0;color:var(--ink-muted)">
+            ${rule.note} The colony does not currently contain candidate donors.
+            Consider sourcing fresh ${target} stock or cryopreserving any ${target} mouse before culling.
+          </p>
+        </div>`);
+    } else {
+      const f = donors.filter(d => d.sex === "Female"), ml = donors.filter(d => d.sex === "Male");
+      actions.push(`
+        <div class="control-suggestions" style="background:#f0fdf4;border-color:#bbf7d0;">
+          <h5 style="color:#15803d">✓ Rescue donors preserved for <strong>${target}</strong></h5>
+          <p style="font-size:.82rem;margin:0 0 6px;color:var(--ink-muted)">
+            ${rule.note} ${donors.length} donor(s) preserved (${f.length} F · ${ml.length} M):
+          </p>
+          <table>
+            ${donors.map(d => `<tr>
+              <td class="id-mono">${d.mouse_id}</td>
+              <td>${tagFor(d.strain, "strain")}</td>
+              <td>${tagFor(d.sex, "sex")}</td>
+              <td>${d.age_months}mo</td>
+              <td class="id-mono" style="font-size:.72rem">${d.genotype || ""}</td>
+              <td class="id-mono">${d.cage_id}</td>
+            </tr>`).join("")}
+          </table>
+        </div>`);
+    }
+  });
+
+  if (actions.length) {
+    $("#sc-actions").style.display = "block";
+    $("#sc-actions-body").innerHTML = actions.join("");
+  } else {
+    $("#sc-actions").style.display = "none";
+  }
+}
+
+function scRenderTables() {
+  const cull = SC.plan.cull.slice().sort((a, b) =>
+    a.mouse.strain.localeCompare(b.mouse.strain) ||
+    (b.mouse.age_months ?? 0) - (a.mouse.age_months ?? 0));
+  const preserve = SC.plan.preserve.slice().sort((a, b) =>
+    a.mouse.strain.localeCompare(b.mouse.strain) ||
+    (a.mouse.age_months ?? 0) - (b.mouse.age_months ?? 0));
+
+  $("#sc-cull-count").textContent = cull.length + " mice";
+  $("#sc-preserve-count").textContent = preserve.length + " mice";
+
+  $("#sc-cull-table tbody").innerHTML = cull.map(({mouse: m, reasons}) => `
+    <tr>
+      <td class="id-mono">${m.mouse_id}</td>
+      <td>${tagFor(m.strain, "strain")}</td>
+      <td>${tagFor(m.sex, "sex")}</td>
+      <td>${m.age_months ?? "—"}</td>
+      <td class="id-mono" style="font-size:.74rem">${m.genotype || ""}</td>
+      <td class="id-mono">${m.cage_id}</td>
+      <td>${tagFor(m.use, "use")}</td>
+      <td style="font-size:.78rem;color:var(--ink-muted)">${reasons.join("; ")}</td>
+    </tr>`).join("") || `<tr><td colspan="8" class="cb-empty">No mice flagged for cull with current settings.</td></tr>`;
+
+  $("#sc-preserve-table tbody").innerHTML = preserve.map(({mouse: m, reasons}) => `
+    <tr>
+      <td class="id-mono">${m.mouse_id}</td>
+      <td>${tagFor(m.strain, "strain")}</td>
+      <td>${tagFor(m.sex, "sex")}</td>
+      <td>${m.age_months ?? "—"}</td>
+      <td class="id-mono" style="font-size:.74rem">${m.genotype || ""}</td>
+      <td class="id-mono">${m.cage_id}</td>
+      <td>${tagFor(m.use, "use")}</td>
+      <td style="font-size:.78rem;color:var(--ink-muted)">${reasons.join("; ")}</td>
+    </tr>`).join("");
+}
+
+window.scExportCullCSV = function() {
+  if (!SC.plan || !SC.plan.cull.length) { alert("Cull list is empty."); return; }
+  const headers = ["mouse_id","strain","sex","age_months","dob","genotype","cage_id","use","reason"];
+  const csv = [headers.join(",")].concat(
+    SC.plan.cull.map(({mouse: m, reasons}) => [
+      m.mouse_id, m.strain, m.sex, m.age_months ?? "", m.dob ?? "",
+      '"'+(m.genotype||'').replace(/"/g,'""')+'"', m.cage_id, m.use,
+      '"'+reasons.join("; ")+'"'
+    ].join(","))
+  ).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `Smart_Cull_Plan_${COLONY.as_of}.csv`; a.click();
+  URL.revokeObjectURL(url);
+};
+
+window.scExportCull = function() {
+  if (!SC.plan || !SC.plan.cull.length) { alert("Cull list is empty."); return; }
+  const cullRows = SC.plan.cull.map(({mouse: m, reasons}) => ({
+    mouse_id: m.mouse_id, strain: m.strain, sex: m.sex,
+    age_months: m.age_months, dob: m.dob, genotype: m.genotype,
+    cage_id: m.cage_id, use: m.use, reason: reasons.join("; ")
+  }));
+  const preserveRows = SC.plan.preserve.map(({mouse: m, reasons}) => ({
+    mouse_id: m.mouse_id, strain: m.strain, sex: m.sex,
+    age_months: m.age_months, dob: m.dob, genotype: m.genotype,
+    cage_id: m.cage_id, use: m.use, reason: reasons.join("; ")
+  }));
+  const summary = [
+    ["Smart Cull Plan generated", new Date().toISOString().slice(0,19).replace("T", " ")],
+    ["Colony data as of", COLONY.as_of],
+    [],
+    ["Total mice", INV.length],
+    ["  Cull", cullRows.length],
+    ["  Preserve", preserveRows.length],
+    [],
+    ["Strain priorities used"],
+    ...COLONY.strain_order.map(s => [`  ${s}`, SC.priority[s], `${COLONY.strain_counts[s] || 0} mice`]),
+    [],
+    ["Settings"],
+    ["  Keep-floor (per strain × genotype × sex cell)", SC.keepFloor],
+    ["  Auto-preserve rescue donors", SC.rescueOn ? "Yes" : "No"],
+    ["  Donors per sex per orphan strain", SC.donorN],
+  ];
+  const wb = XLSX.utils.book_new();
+  const wsCull = XLSX.utils.json_to_sheet(cullRows);
+  const wsPreserve = XLSX.utils.json_to_sheet(preserveRows);
+  const wsSum = XLSX.utils.aoa_to_sheet(summary);
+  [wsCull, wsPreserve].forEach(ws => {
+    ws["!cols"] = ["mouse_id","strain","sex","age_months","dob","genotype","cage_id","use","reason"]
+      .map(k => ({ wch: k === "genotype" ? 36 : k === "reason" ? 40 : 14 }));
+  });
+  wsSum["!cols"] = [{ wch: 40 }, { wch: 22 }, { wch: 18 }];
+  XLSX.utils.book_append_sheet(wb, wsCull, "Cull");
+  XLSX.utils.book_append_sheet(wb, wsPreserve, "Preserve");
+  XLSX.utils.book_append_sheet(wb, wsSum, "Summary");
+  XLSX.writeFile(wb, `Smart_Cull_Plan_${COLONY.as_of}.xlsx`);
+};
+
+scInit();
+
 // ============= EXPERIMENT =============
 $("#exp-strain-list").innerHTML = COLONY.strain_summary.map(s => `
   <li><strong>${s.strain}</strong> — ${s.alive_mice} alive · ${s.active_breedings} active breeding(s) · ${s.active_cages} cages</li>
@@ -1784,6 +2317,44 @@ git push</pre>
     title: "Unassigned cages",
     body: `<p>Cages without a recorded rack position. These need to be located physically and
               their position entered in the colony software.</p>` },
+  "smart-cull": {
+    title: "How the Smart Cull Plan works",
+    body: `
+      <h3>Inputs</h3>
+      <ul>
+        <li><strong>Strain priority</strong> — set per strain to <em>Expand</em> (preserve all),
+            <em>Maintain</em> (keep youngest insurance, cull aged surplus), or
+            <em>Wind down</em> (cull aggressively, but auto-preserve rescue donors).</li>
+        <li><strong>Keep-floor</strong> — for each (strain × genotype × sex) cell, the algorithm
+            preserves at least the N youngest mice as cohort-rebuild insurance. Default 4.</li>
+        <li><strong>Rescue donors</strong> — for orphan strains that can be regenerated by selecting
+            offspring from compound crosses, the algorithm finds 4 donors per sex from other strains
+            and preserves them.</li>
+      </ul>
+      <h3>Built-in rescue rules</h3>
+      <ul>
+        <li><strong>Adipoq-Cre</strong> rescue donors: any mouse with <span class="id-mono">Adipoq-cre; Dendra2&lt;-/-&gt;</span>
+            (no mTmG) — found primarily in AdipoGlo strain.</li>
+        <li><strong>Dendra2</strong> rescue donors: any mouse with <span class="id-mono">WT; Dendra2&lt;+/-&gt;</span> or
+            <span class="id-mono">WT; Dendra2&lt;+/+&gt;</span> (no Adipoq-Cre, no mTmG).</li>
+        <li><strong>mTmG</strong> rescue donors: any mouse with <span class="id-mono">mTmG&lt;mTmG/mTmG&gt;; WT</span>
+            (no Adipoq-Cre, no Dendra2 transgene).</li>
+      </ul>
+      <h3>Always preserved (regardless of strain priority)</h3>
+      <ul>
+        <li>Active breeders (parsed from the Breedings sheet + use=Breeding flag)</li>
+        <li>Sex-unknown mice (until ID'd at the next walkthrough)</li>
+        <li>Singleton genotypes — the only mouse of its (strain × genotype) cell —
+            unless that strain is rescuable, in which case the rescue rule supersedes the singleton rule</li>
+      </ul>
+      <h3>Outputs</h3>
+      <ul>
+        <li>Cull list with the reason for each mouse</li>
+        <li>Preserve list with the reason for each mouse</li>
+        <li>Recommended actions: breeding setups for Expand strains; rescue-donor manifest for Wind-down strains</li>
+        <li>Excel export: 3-sheet workbook (Cull, Preserve, Summary)</li>
+      </ul>
+    ` },
   "cohort-builder": {
     title: "How the cohort builder works",
     body: `
