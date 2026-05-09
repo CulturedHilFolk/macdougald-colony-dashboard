@@ -252,6 +252,228 @@ summary = {
     "n_strains": int(mice["Strain"].nunique()),
 }
 
+# ---------- Cage costs (UMich ULAM CY26 rates, effective 04/01/2026) ----------
+RATE_VENT_STD = 1.19
+RATE_VENT_BREED = 2.16
+
+def cage_rate(c):
+    return RATE_VENT_BREED if c["has_breeders"] else RATE_VENT_STD
+
+cost_total_day = 0.0
+cost_breakdown = {
+    "by_strain": {},
+    "by_breeding": {"breeding": 0.0, "non_breeding": 0.0},
+    "by_housing": {"single": 0.0, "group": 0.0, "empty": 0.0},
+    "by_room": {},
+    "by_rack_status": {"located": 0.0, "unassigned": 0.0},
+    "by_sex_dominant": {"female": 0.0, "male": 0.0, "mixed": 0.0, "empty": 0.0},
+}
+strain_lines = {}
+strain_geno_lines = {}
+cost_per_cage = []
+
+for c in cage_records:
+    rate = cage_rate(c)
+    cost_total_day += rate
+    strain = c["strain"] or "(blank)"
+    cost_breakdown["by_strain"][strain] = cost_breakdown["by_strain"].get(strain, 0.0) + rate
+    cost_breakdown["by_breeding"]["breeding" if c["has_breeders"] else "non_breeding"] += rate
+    if c["n_mice"] == 1:
+        cost_breakdown["by_housing"]["single"] += rate
+    elif c["n_mice"] >= 2:
+        cost_breakdown["by_housing"]["group"] += rate
+    else:
+        cost_breakdown["by_housing"]["empty"] += rate
+    cost_breakdown["by_rack_status"]["located" if c["position"] else "unassigned"] += rate
+    rm = c["room"] or "Unassigned room"
+    cost_breakdown["by_room"][rm] = cost_breakdown["by_room"].get(rm, 0.0) + rate
+    sx = c["sexes"]
+    if not sx:
+        cost_breakdown["by_sex_dominant"]["empty"] += rate
+    elif all(s == "Female" for s in sx):
+        cost_breakdown["by_sex_dominant"]["female"] += rate
+    elif all(s == "Male" for s in sx):
+        cost_breakdown["by_sex_dominant"]["male"] += rate
+    else:
+        cost_breakdown["by_sex_dominant"]["mixed"] += rate
+
+    strain_lines.setdefault(strain, {"cages": 0, "mice": 0, "day": 0.0, "breeding_cages": 0})
+    strain_lines[strain]["cages"] += 1
+    strain_lines[strain]["mice"] += c["n_mice"]
+    strain_lines[strain]["day"] += rate
+    if c["has_breeders"]:
+        strain_lines[strain]["breeding_cages"] += 1
+
+    if c["genotypes"]:
+        dom = max(set(c["genotypes"]), key=c["genotypes"].count)
+    else:
+        dom = "(empty)"
+    k = (strain, dom)
+    strain_geno_lines.setdefault(k, {"cages": 0, "mice": 0, "day": 0.0})
+    strain_geno_lines[k]["cages"] += 1
+    strain_geno_lines[k]["mice"] += c["n_mice"]
+    strain_geno_lines[k]["day"] += rate
+
+    cost_per_cage.append({
+        "cage_id": c["cage_id"],
+        "strain": strain,
+        "n_mice": c["n_mice"],
+        "has_breeders": c["has_breeders"],
+        "rate_per_day": rate,
+    })
+
+# ---------- Post-cull projection ----------
+# Recompute the 173 killed today using the same smart-cull logic the dashboard ships,
+# then project costs assuming cages with zero surviving mice retire (standard practice).
+import re as _re_post
+
+_priority_post = {"AdipoGlo": "maintain", "AdipoGlo+": "maintain", "Marrow Glo": "expand",
+                  "Adipoq-Cre": "winddown", "mTmG": "winddown", "Dendra2": "winddown"}
+_KEEP_FLOOR_POST = 4
+_DONOR_N_POST = 4
+
+def _is_adipoq_donor(g):
+    g = (g or "").lower().replace(" ", "")
+    return "adipoq-cre" in g and "dendra2<-/->" in g and "mtmg<mtmg" not in g
+def _is_dendra2_donor(g):
+    g = (g or "").lower().replace(" ", "")
+    return bool(_re_post.search(r"dendra2<\+/[+-]>", g)) and "adipoq-cre" not in g and "mtmg<mtmg" not in g
+def _is_mtmg_donor(g):
+    g = (g or "").lower().replace(" ", "")
+    return "mtmg<mtmg/mtmg>" in g and "adipoq-cre" not in g and not _re_post.search(r"dendra2<\+/[+-]>", g)
+
+_breeders_post = set()
+for b in breeding_records:
+    for k in ("mother", "father"):
+        v = str(b.get(k, ""))
+        s = v.split("|")[0].strip() if "|" in v else v.strip()
+        if s:
+            _breeders_post.add(s)
+for r in inventory:
+    if r["use"] == "Breeding":
+        _breeders_post.add(str(r["mouse_id"]))
+
+inv_df = pd.DataFrame(inventory)
+inv_df["mouse_id"] = inv_df["mouse_id"].astype(str)
+inv_df["genotype"] = inv_df["genotype"].fillna("").astype(str)
+
+_rescue_donors = set()
+for target, fn in [("Adipoq-Cre", _is_adipoq_donor), ("Dendra2", _is_dendra2_donor), ("mTmG", _is_mtmg_donor)]:
+    if _priority_post.get(target) != "winddown":
+        continue
+    cands = inv_df[(inv_df["strain"] != target) & (inv_df["use"] == "Available") &
+                   (~inv_df["mouse_id"].isin(_breeders_post)) & (inv_df["sex"] != "Unknown")].copy()
+    cands = cands[cands["genotype"].apply(fn)]
+    for sex in ("Female", "Male"):
+        sub = cands[cands["sex"] == sex].dropna(subset=["age_months"]).sort_values("age_months").head(_DONOR_N_POST)
+        for mid in sub["mouse_id"]:
+            _rescue_donors.add(mid)
+
+_inv_sorted = inv_df.sort_values("age_months", na_position="last")
+_cell_rank = {}
+for (_s, _g, _sx), grp in _inv_sorted.groupby(["strain", "genotype", "sex"], sort=False):
+    for i, mid in enumerate(grp["mouse_id"]):
+        _cell_rank[mid] = (i, len(grp))
+_geno_size = inv_df.groupby(["strain", "genotype"]).size().to_dict()
+_RESCUABLE_POST = {"Adipoq-Cre", "mTmG", "Dendra2"}
+
+def _is_culled(m):
+    mid = m["mouse_id"]
+    if m["use"] == "Breeding" or mid in _breeders_post: return False
+    if m["sex"] == "Unknown": return False
+    if mid in _rescue_donors: return False
+    if _geno_size.get((m["strain"], m["genotype"]), 0) == 1 and m["strain"] not in _RESCUABLE_POST: return False
+    p = _priority_post.get(m["strain"], "maintain")
+    if p == "expand": return False
+    am = m.get("age_months")
+    if p == "winddown": return not (pd.notna(am) and am < 6)
+    idx, total = _cell_rank.get(mid, (999, 0))
+    if idx < min(_KEEP_FLOOR_POST, total): return False
+    if pd.notna(am) and am < 12: return False
+    return True
+
+_UNFOUND = {"0023","100","101","102","130","132","179","207","293","294","295",
+            "48","68","85","87","92","141","166","225",
+            "00001","00002","00008","00016","0417","202","204"}
+inv_df["plan_cull"] = inv_df.apply(_is_culled, axis=1)
+killed_ids = set(inv_df[(inv_df["plan_cull"]) & (~inv_df["mouse_id"].isin(_UNFOUND))]["mouse_id"])
+
+# Cage-level survivors
+cage_survivors = {}
+for r in inventory:
+    cid = str(r["cage_id"])
+    cage_survivors.setdefault(cid, 0)
+    if str(r["mouse_id"]) not in killed_ids:
+        cage_survivors[cid] += 1
+
+post_cull_day = 0.0
+post_cull_active_cages = 0
+post_cull_breakdown = {
+    "by_strain": {},
+    "by_breeding": {"breeding": 0.0, "non_breeding": 0.0},
+    "by_housing": {"single": 0.0, "group": 0.0, "empty": 0.0},
+}
+for c in cage_records:
+    survivors_n = cage_survivors.get(c["cage_id"], 0)
+    if survivors_n == 0:
+        continue  # cage retired
+    rate = cage_rate(c)
+    post_cull_day += rate
+    post_cull_active_cages += 1
+    strain = c["strain"] or "(blank)"
+    post_cull_breakdown["by_strain"][strain] = post_cull_breakdown["by_strain"].get(strain, 0.0) + rate
+    post_cull_breakdown["by_breeding"]["breeding" if c["has_breeders"] else "non_breeding"] += rate
+    if survivors_n == 1:
+        post_cull_breakdown["by_housing"]["single"] += rate
+    else:
+        post_cull_breakdown["by_housing"]["group"] += rate
+
+cost_summary = {
+    "rate_vent_standard": RATE_VENT_STD,
+    "rate_vent_breeding": RATE_VENT_BREED,
+    "rates_effective": "04/01/2026 (CY26)",
+    "rate_source": "UMich ULAM rate schedule",
+    "total_cages": len(cage_records),
+    "per_day": round(cost_total_day, 2),
+    "per_month": round(cost_total_day * 30, 2),
+    "per_year": round(cost_total_day * 365, 2),
+    "post_cull": {
+        "killed_count": int(len(killed_ids)),
+        "active_cages": post_cull_active_cages,
+        "retired_cages": len(cage_records) - post_cull_active_cages,
+        "per_day": round(post_cull_day, 2),
+        "per_month": round(post_cull_day * 30, 2),
+        "per_year": round(post_cull_day * 365, 2),
+        "savings_per_day": round(cost_total_day - post_cull_day, 2),
+        "savings_per_month": round((cost_total_day - post_cull_day) * 30, 2),
+        "savings_per_year": round((cost_total_day - post_cull_day) * 365, 2),
+        "savings_pct": round(100 * (cost_total_day - post_cull_day) / cost_total_day, 1) if cost_total_day else 0,
+        "breakdown": {
+            k: ({kk: round(vv, 2) for kk, vv in v.items()} if isinstance(v, dict) else round(v, 2))
+            for k, v in post_cull_breakdown.items()
+        },
+    },
+    "breakdown": {
+        k: ({kk: round(vv, 2) for kk, vv in v.items()} if isinstance(v, dict) else round(v, 2))
+        for k, v in cost_breakdown.items()
+    },
+    "by_strain_table": [
+        {"strain": s, "cages": d["cages"], "mice": d["mice"],
+         "breeding_cages": d["breeding_cages"],
+         "day": round(d["day"], 2),
+         "month": round(d["day"] * 30, 2),
+         "year": round(d["day"] * 365, 2)}
+        for s, d in sorted(strain_lines.items(), key=lambda x: -x[1]["day"])
+    ],
+    "by_strain_geno_table": [
+        {"strain": s, "genotype": g, "cages": d["cages"], "mice": d["mice"],
+         "day": round(d["day"], 2),
+         "month": round(d["day"] * 30, 2),
+         "year": round(d["day"] * 365, 2)}
+        for (s, g), d in sorted(strain_geno_lines.items(), key=lambda x: -x[1]["day"])
+    ],
+}
+
 # ---------- Final output ----------
 out = {
     "generated_at": datetime.now().isoformat(timespec="seconds"),
@@ -271,6 +493,7 @@ out = {
     "cages": cage_records,
     "inventory": inventory,
     "cull_summary": cull_summary,
+    "cost_summary": cost_summary,
 }
 
 with open(DATA / "colony.json", "w") as f:

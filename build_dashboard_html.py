@@ -417,6 +417,7 @@ table.data tbody tr:last-child td { border-bottom: none; }
   <button class="tab" data-pane="cohort">Cohort Planning</button>
   <button class="tab" data-pane="cull">Cull Candidates</button>
   <button class="tab" data-pane="smartcull">Smart Cull Plan</button>
+  <button class="tab" data-pane="costs">Cage Costs</button>
   <button class="tab" data-pane="walkthrough">Walkthrough</button>
   <button class="tab" data-pane="experiment">Experiment Details</button>
   <button class="tab" data-pane="stats">Statistics</button>
@@ -783,6 +784,112 @@ table.data tbody tr:last-child td { border-bottom: none; }
       </table>
     </div>
   </details>
+</section>
+
+<!-- ============= CAGE COSTS ============= -->
+<section class="tab-pane" id="pane-costs">
+  <div class="panel" style="margin-bottom: 16px;">
+    <h3>Cage costs — UMich ULAM per-diem
+      <button class="info-btn" onclick="openModal('cage-costs')">i</button>
+    </h3>
+    <p style="font-size: .9rem; margin: 0 0 6px;">
+      Live cost model based on the colony's current cage count, applying ULAM CY26 ventilated rates:
+      <strong>$1.19/day</strong> per non-breeding cage and <strong>$2.16/day</strong> per breeding cage
+      (effective 04/01/2026). Cages with zero mice are projected to retire and not bill.
+    </p>
+    <p class="muted" style="font-size: .78rem; margin: 0;">
+      Source: <a href="https://animalcare.umich.edu/business-services/rates/" target="_blank"
+                style="color: var(--brand);">animalcare.umich.edu/business-services/rates</a>
+      · rate schedule revised annually.
+    </p>
+  </div>
+
+  <!-- Current vs post-cull KPIs -->
+  <div class="row cols-3" id="cost-kpis" style="margin-bottom: 8px;"></div>
+  <div class="row cols-3" id="cost-kpis-post" style="margin-bottom: 8px;"></div>
+  <div class="row cols-3" id="cost-kpis-savings" style="margin-bottom: 18px;"></div>
+
+  <!-- Charts row -->
+  <div class="row cols-3">
+    <div class="panel">
+      <h3>Cost per day by strain</h3>
+      <div id="chart-cost-strain" class="chart"></div>
+    </div>
+    <div class="panel">
+      <h3>Breeding vs non-breeding</h3>
+      <div id="chart-cost-breeding" class="chart"></div>
+    </div>
+    <div class="panel">
+      <h3>Single vs group housing</h3>
+      <div id="chart-cost-housing" class="chart"></div>
+    </div>
+  </div>
+
+  <div class="row cols-2">
+    <div class="panel">
+      <h3>Sex composition of cages
+        <button class="info-btn" onclick="openModal('cost-sex')">i</button>
+      </h3>
+      <div id="chart-cost-sex" class="chart"></div>
+    </div>
+    <div class="panel">
+      <h3>Located on Rack 7A vs unassigned
+        <button class="info-btn" onclick="openModal('cost-rack')">i</button>
+      </h3>
+      <div id="chart-cost-rack" class="chart"></div>
+    </div>
+  </div>
+
+  <!-- Strain breakdown table -->
+  <div class="table-wrap" style="margin-bottom: 14px;">
+    <div class="table-controls">
+      <strong style="font-size:.92rem; color: var(--ink);">By strain</strong>
+      <span class="count" id="cost-strain-count">— strains</span>
+    </div>
+    <div class="scroll-x">
+      <table class="data" id="cost-strain-table">
+        <thead><tr>
+          <th>Strain</th><th>Cages</th><th>Mice</th><th>Breeding cages</th>
+          <th>$/day</th><th>$/month</th><th>$/year</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Strain × genotype table -->
+  <details class="table-wrap" style="margin-bottom: 14px;">
+    <summary style="padding: 14px 16px; cursor: pointer; font-weight: 700; font-size: .92rem; color: var(--ink);">
+      By strain × genotype (dominant per cage)
+      <span class="count" id="cost-geno-count" style="font-weight: 500; color: var(--ink-muted);">— rows</span>
+    </summary>
+    <div class="scroll-y scroll-x" style="max-height: 500px; border-top: 1px solid var(--line);">
+      <table class="data" id="cost-geno-table">
+        <thead><tr>
+          <th>Strain</th><th>Genotype (dominant in cage)</th><th>Cages</th><th>Mice</th>
+          <th>$/day</th><th>$/month</th><th>$/year</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </details>
+
+  <!-- Methodology -->
+  <div class="panel">
+    <h3>Methodology</h3>
+    <ul class="bullet-list">
+      <li>Per-cage rate is set by the cage's <em>"Has Breeders"</em> flag in the colony software:
+          breeding cages bill at the higher CY26 rate.</li>
+      <li>Monthly = day × 30. Annual = day × 365. (ULAM bills daily, so partial months pro-rate.)</li>
+      <li>"Single-housed" = 1 mouse in the cage; "Group" = 2+. Single-housed cost is structurally
+          the same per-cage rate but reflects sub-optimal density.</li>
+      <li>Post-cull projection assumes cages with 0 surviving mice are returned to ULAM and
+          stop billing. If retirement is delayed by even a few days, the actual savings will be
+          slightly less than projected for that period.</li>
+      <li>Husbandry technician labor (specialty handling, surgeries, etc.) is billed separately
+          at $41.15/hr regular / $61.73/hr overtime. Not included here.</li>
+    </ul>
+  </div>
 </section>
 
 <!-- ============= WALKTHROUGH ============= -->
@@ -1778,6 +1885,192 @@ window.cbExportXlsx = function() {
 
 cbInit();
 
+// ============= CAGE COSTS =============
+const COST = COLONY.cost_summary;
+
+const fmt$ = n => "$" + new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+const fmt$0 = n => "$" + new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Math.round(n));
+
+function renderCostKPIs() {
+  $("#cost-kpis").innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">Current per day</div>
+      <div class="kpi-value">${fmt$(COST.per_day)}</div>
+      <div class="kpi-sub">${COST.total_cages} cages billing now</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Current per month</div>
+      <div class="kpi-value">${fmt$0(COST.per_month)}</div>
+      <div class="kpi-sub">≈ 30-day run rate</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Current per year</div>
+      <div class="kpi-value">${fmt$0(COST.per_year)}</div>
+      <div class="kpi-sub">365-day run rate</div>
+    </div>
+  `;
+  const pc = COST.post_cull;
+  $("#cost-kpis-post").innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">Post-cull per day</div>
+      <div class="kpi-value">${fmt$(pc.per_day)}</div>
+      <div class="kpi-sub">${pc.active_cages} active · ${pc.retired_cages} retiring</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Post-cull per month</div>
+      <div class="kpi-value">${fmt$0(pc.per_month)}</div>
+      <div class="kpi-sub">if retired cages billed off promptly</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Post-cull per year</div>
+      <div class="kpi-value">${fmt$0(pc.per_year)}</div>
+      <div class="kpi-sub">${pc.killed_count} mice removed</div>
+    </div>
+  `;
+  $("#cost-kpis-savings").innerHTML = `
+    <div class="kpi ok">
+      <div class="kpi-label">Savings per day</div>
+      <div class="kpi-value">${fmt$(pc.savings_per_day)}</div>
+      <div class="kpi-sub">${pc.savings_pct}% reduction</div>
+    </div>
+    <div class="kpi ok">
+      <div class="kpi-label">Savings per month</div>
+      <div class="kpi-value">${fmt$0(pc.savings_per_month)}</div>
+      <div class="kpi-sub">≈ 30-day basis</div>
+    </div>
+    <div class="kpi ok">
+      <div class="kpi-label">Savings per year</div>
+      <div class="kpi-value">${fmt$0(pc.savings_per_year)}</div>
+      <div class="kpi-sub">recurring annualized</div>
+    </div>
+  `;
+}
+
+function renderCostCharts() {
+  // 1. Cost per day by strain (bar)
+  const strainBar = echarts.init($("#chart-cost-strain"));
+  const sb = COST.by_strain_table;
+  strainBar.setOption({
+    grid: { left: 10, right: 24, top: 16, bottom: 36, containLabel: true },
+    xAxis: { type: "category", data: sb.map(r => r.strain),
+             axisLabel: { rotate: 25, fontSize: 10 } },
+    yAxis: { type: "value", axisLabel: { formatter: v => "$" + v } },
+    tooltip: {
+      trigger: "axis",
+      formatter: p => {
+        const r = sb[p[0].dataIndex];
+        return `<b>${r.strain}</b><br/>$${r.day.toFixed(2)}/day · $${Math.round(r.month)}/mo · $${Math.round(r.year).toLocaleString()}/yr<br/>${r.cages} cages · ${r.mice} mice`;
+      }
+    },
+    series: [{
+      type: "bar", barMaxWidth: 50,
+      data: sb.map(r => ({ value: r.day, itemStyle: { color: STRAIN_COLOR(r.strain) } })),
+      label: { show: true, position: "top", formatter: p => "$" + p.value.toFixed(0), fontSize: 10, fontWeight: 600 }
+    }]
+  });
+  charts.costStrain = strainBar;
+
+  // 2. Breeding vs non-breeding (donut)
+  const brk = COST.breakdown;
+  const brChart = echarts.init($("#chart-cost-breeding"));
+  brChart.setOption({
+    tooltip: { trigger: "item", formatter: p => `${p.name}: $${p.value.toFixed(2)}/day (${p.percent}%)` },
+    legend: { bottom: 0, textStyle: { fontSize: 11 } },
+    series: [{
+      type: "pie", radius: ["55%", "80%"], center: ["50%", "45%"],
+      avoidLabelOverlap: true, label: { show: false },
+      data: [
+        { name: "Non-breeding", value: brk.by_breeding.non_breeding, itemStyle: { color: "#1e40af" } },
+        { name: "Breeding", value: brk.by_breeding.breeding, itemStyle: { color: "#b45309" } },
+      ]
+    }]
+  });
+  charts.costBreeding = brChart;
+
+  // 3. Single vs group housing
+  const housingChart = echarts.init($("#chart-cost-housing"));
+  housingChart.setOption({
+    tooltip: { trigger: "item", formatter: p => `${p.name}: $${p.value.toFixed(2)}/day (${p.percent}%)` },
+    legend: { bottom: 0, textStyle: { fontSize: 11 } },
+    series: [{
+      type: "pie", radius: ["55%", "80%"], center: ["50%", "45%"],
+      avoidLabelOverlap: true, label: { show: false },
+      data: [
+        { name: "Group (≥2)", value: brk.by_housing.group, itemStyle: { color: "#15803d" } },
+        { name: "Single", value: brk.by_housing.single, itemStyle: { color: "#dc2626" } },
+        { name: "Empty", value: brk.by_housing.empty, itemStyle: { color: "#94a3b8" } },
+      ].filter(d => d.value > 0)
+    }]
+  });
+  charts.costHousing = housingChart;
+
+  // 4. Sex composition of cages
+  const sexChart = echarts.init($("#chart-cost-sex"));
+  sexChart.setOption({
+    tooltip: { trigger: "item", formatter: p => `${p.name}: $${p.value.toFixed(2)}/day (${p.percent}%)` },
+    legend: { bottom: 0, textStyle: { fontSize: 11 } },
+    series: [{
+      type: "pie", radius: ["55%", "80%"], center: ["50%", "45%"],
+      avoidLabelOverlap: true, label: { show: false },
+      data: [
+        { name: "Female-only cages", value: brk.by_sex_dominant.female, itemStyle: { color: "#db2777" } },
+        { name: "Male-only cages", value: brk.by_sex_dominant.male, itemStyle: { color: "#2563eb" } },
+        { name: "Mixed-sex cages", value: brk.by_sex_dominant.mixed, itemStyle: { color: "#7c3aed" } },
+        { name: "Empty cages", value: brk.by_sex_dominant.empty, itemStyle: { color: "#94a3b8" } },
+      ].filter(d => d.value > 0)
+    }]
+  });
+  charts.costSex = sexChart;
+
+  // 5. Located vs unassigned
+  const rackChart = echarts.init($("#chart-cost-rack"));
+  rackChart.setOption({
+    tooltip: { trigger: "item", formatter: p => `${p.name}: $${p.value.toFixed(2)}/day (${p.percent}%)` },
+    legend: { bottom: 0, textStyle: { fontSize: 11 } },
+    series: [{
+      type: "pie", radius: ["55%", "80%"], center: ["50%", "45%"],
+      avoidLabelOverlap: true, label: { show: false },
+      data: [
+        { name: "Located on Rack 7A", value: brk.by_rack_status.located, itemStyle: { color: "#15803d" } },
+        { name: "Unassigned location", value: brk.by_rack_status.unassigned, itemStyle: { color: "#b45309" } },
+      ]
+    }]
+  });
+  charts.costRack = rackChart;
+}
+
+function renderCostTables() {
+  const sb = COST.by_strain_table;
+  $("#cost-strain-count").textContent = sb.length + " strains";
+  $("#cost-strain-table tbody").innerHTML = sb.map(r => `
+    <tr>
+      <td>${tagFor(r.strain, "strain")}</td>
+      <td>${r.cages}</td>
+      <td>${r.mice}</td>
+      <td>${r.breeding_cages}</td>
+      <td>${fmt$(r.day)}</td>
+      <td>${fmt$0(r.month)}</td>
+      <td>${fmt$0(r.year)}</td>
+    </tr>`).join("");
+
+  const sg = COST.by_strain_geno_table;
+  $("#cost-geno-count").textContent = sg.length + " rows";
+  $("#cost-geno-table tbody").innerHTML = sg.map(r => `
+    <tr>
+      <td>${tagFor(r.strain, "strain")}</td>
+      <td class="id-mono" style="font-size:.78rem">${r.genotype}</td>
+      <td>${r.cages}</td>
+      <td>${r.mice}</td>
+      <td>${fmt$(r.day)}</td>
+      <td>${fmt$0(r.month)}</td>
+      <td>${fmt$0(r.year)}</td>
+    </tr>`).join("");
+}
+
+renderCostKPIs();
+renderCostCharts();
+renderCostTables();
+
 // ============= SMART CULL PLAN =============
 const SC = {
   // Defaults derived from user's biology:
@@ -2317,6 +2610,34 @@ git push</pre>
     title: "Unassigned cages",
     body: `<p>Cages without a recorded rack position. These need to be located physically and
               their position entered in the colony software.</p>` },
+  "cage-costs": {
+    title: "Cage cost methodology",
+    body: `
+      <p>Cost is computed from the colony's current cage roster, applying the
+         <strong>UMich ULAM CY26 ventilated rates</strong> (effective 04/01/2026):</p>
+      <ul>
+        <li><strong>$1.19/day</strong> per mouse cage (ventilated, non-breeding)</li>
+        <li><strong>$2.16/day</strong> per breeding colony cage (ventilated)</li>
+      </ul>
+      <p>The "Has Breeders" flag in the colony software determines which rate applies per cage.
+         Monthly figures are day × 30. Annual figures are day × 365.</p>
+      <p>Source: <a href="https://animalcare.umich.edu/business-services/rates/" target="_blank">animalcare.umich.edu/business-services/rates</a> · rate schedule revised annually.</p>
+      <p>The post-cull projection assumes cages whose mice are <em>all</em> on today's cull list
+         are returned to ULAM and stop billing. Real-world savings will track that projection
+         as long as retired cages are returned promptly.</p>
+    `
+  },
+  "cost-sex": {
+    title: "Sex composition by cage",
+    body: `<p>A cage is "Female-only" if every mouse inside is female (and similarly for male).
+              "Mixed-sex" cages contain both. Helpful for spotting underused space — e.g. lots of
+              single-housed males that could potentially be co-housed if non-aggressive.</p>` },
+  "cost-rack": {
+    title: "Located vs unassigned cost",
+    body: `<p>Cages without a recorded rack position still bill at the same rate. This split shows
+              how much of your monthly burden is attached to cages that aren't even tracked
+              in the colony software's location grid — fixing this is a free cost-reduction lever
+              (no science impact).</p>` },
   "smart-cull": {
     title: "How the Smart Cull Plan works",
     body: `
