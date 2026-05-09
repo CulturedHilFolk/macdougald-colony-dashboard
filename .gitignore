@@ -24,8 +24,10 @@ Cage_Walkthrough_*.xlsx
 Walkthrough_Filled_*.xlsx
 Observed_Inventory_*.xlsx
 
-# Transnetyx submission files (contain mouse-level metadata — keep local)
+# Transnetyx submission / upload files (contain mouse-level metadata — keep local)
 Transnetyx_Submission_*.xlsx
+*_Transnetyx_Upload_*.xlsx
+MacLab_Brian_Mice_*.xlsx
 
 # OS / editor cruft
 *.swp
