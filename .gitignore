@@ -28,6 +28,8 @@ Observed_Inventory_*.xlsx
 Transnetyx_Submission_*.xlsx
 *_Transnetyx_Upload_*.xlsx
 MacLab_Brian_Mice_*.xlsx
+Cull_Checklist_*.xlsx
+Mouse_Colony_Cull_Summary_*.pptx
 
 # OS / editor cruft
 *.swp
