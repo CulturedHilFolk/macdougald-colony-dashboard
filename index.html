@@ -521,7 +521,8 @@ table.data tbody tr:last-child td { border-bottom: none; }
       <button class="info-btn" onclick="openModal('consolidation')">i</button>
     </h3>
     <p class="muted" style="font-size: .82rem; margin: 0 0 10px;">
-      Singly-housed (n=1) mice that could be merged with compatible same-strain + same-sex peers to save cage costs.
+      Singly-housed <strong>adult females</strong> of the same strain that could be merged to save cage costs.
+      Adult males are excluded — established singly-housed males will fight when re-introduced.
       ULAM allows up to 5 adult mice per ventilated cage.
     </p>
     <div class="row cols-3" id="consolidation-kpis" style="margin-bottom: 14px;"></div>
@@ -13159,28 +13160,31 @@ $("#unassigned-table tbody").innerHTML = UNASSIGNED.map(c => `
 // Find singly-housed mice that could be merged with same-strain, same-sex peers.
 // ULAM ventilated cage allows up to 5 adult mice.
 const ULAM_VENT_RATE = 1.19; // $/day
+// Adult females only — adult males kept in the same cage fight, so they
+// stay singly-housed. Adult = ≥ 1.5 months (~6 weeks) per ULAM husbandry guidance.
+const CONS_MIN_AGE_MO = 1.5;
 function computeConsolidation() {
   const singles = COLONY.cages.filter(c => c.n_mice === 1 && !c.has_breeders);
-  // Group by (strain, sex)
-  const byKey = new Map();
+  // Group by strain (sex is forced to Female)
+  const byStrain = new Map();
   for (const c of singles) {
     if (!c.ids || !c.ids.length) continue;
     const m = INV.find(x => x.mouse_id === c.ids[0]);
-    if (!m || !m.sex || m.sex === "Unknown") continue;
+    if (!m) continue;
+    if (m.sex !== "Female") continue;              // adult-male fighting risk → exclude
+    if (m.age_months != null && m.age_months < CONS_MIN_AGE_MO) continue;
     if (m.use === "Breeding") continue;
-    const key = m.strain + "||" + m.sex;
-    if (!byKey.has(key)) byKey.set(key, []);
-    byKey.get(key).push({ cage: c, mouse: m });
+    if (!byStrain.has(m.strain)) byStrain.set(m.strain, []);
+    byStrain.get(m.strain).push({ cage: c, mouse: m });
   }
   const groups = [];
-  for (const [key, arr] of byKey) {
+  for (const [strain, arr] of byStrain) {
     if (arr.length < 2) continue;
-    const [strain, sex] = key.split("||");
     arr.sort((a, b) => (a.mouse.age_months || 0) - (b.mouse.age_months || 0));
     const cagesAfterMerge = Math.ceil(arr.length / 5);
     const cagesSaved = arr.length - cagesAfterMerge;
     const annualSavings = cagesSaved * ULAM_VENT_RATE * 365;
-    groups.push({ strain, sex, members: arr, cagesNow: arr.length,
+    groups.push({ strain, sex: "Female", members: arr, cagesNow: arr.length,
                   cagesAfterMerge, cagesSaved, annualSavings });
   }
   groups.sort((a, b) => b.cagesSaved - a.cagesSaved);
@@ -15482,19 +15486,25 @@ git push</pre>
   "consolidation": {
     title: "Cage consolidation candidates",
     body: `
-      <p>Lists every group of singly-housed (n = 1) mice of the same strain and sex that could be combined into shared cages. ULAM permits up to 5 adult mice per ventilated cage.</p>
+      <p>Lists every group of singly-housed (n = 1) <strong>adult females</strong> of the same strain that could be combined into shared cages.</p>
+      <h3>Why females only</h3>
+      <p>Adult male mice kept in the same cage typically fight, especially when previously singly-housed males are re-introduced — outcomes range from wounding to mortality. Standard ULAM husbandry guidance is to leave singly-housed adult males alone unless they're naïve cage-mates from the same litter being introduced together.</p>
       <h3>What's flagged</h3>
       <ul>
-        <li>Only Available mice are considered (breeders are excluded automatically).</li>
-        <li>Sex-unknown mice are excluded until ID'd.</li>
-        <li>Each group is ranked by how many cages you could retire.</li>
+        <li>Sex = Female, age ≥ 1.5 months (~6 weeks, adult)</li>
+        <li>Currently housed alone (n = 1 in cage)</li>
+        <li>Same strain (avoid mixing strains for genetic / experimental cleanliness)</li>
+        <li>Available (not in active breeding)</li>
+        <li>Sex-unknown mice are excluded until ID'd</li>
+        <li>Each group is ranked by how many cages you could retire</li>
       </ul>
       <h3>Savings</h3>
       <p>Computed at $${1.19.toFixed(2)}/day (CY26 ULAM ventilated rate). One retired cage = ~$435/year.</p>
-      <h3>Caveats</h3>
+      <h3>Even for females — best practice</h3>
       <ul>
-        <li>Adult males that have been singly-housed for a long time may fight when introduced — best practice is to merge them in a clean cage simultaneously.</li>
-        <li>The dashboard does not check past pairing history; experimenter judgment required.</li>
+        <li>Introduce in a fresh, clean cage simultaneously — neutral territory minimizes aggression.</li>
+        <li>Watch for the first 24 – 48 hours; separate if any sustained wounding.</li>
+        <li>Avoid mixing very-aged (&gt; 18 mo) females with much younger ones if it's not necessary.</li>
       </ul>
     ` },
   "breeder-alerts": {
