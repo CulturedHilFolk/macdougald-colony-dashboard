@@ -582,7 +582,8 @@ table.data tbody tr:last-child td { border-bottom: none; }
     <h3>Projected — if Smart Cull Plan is carried out
       <button class="info-btn" onclick="openModal('costs-projected')">i</button>
     </h3>
-    <div class="row cols-3" id="costs-projected-kpis"></div>
+    <div id="costs-projected-kpis"
+         style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;"></div>
   </div>
 
   <!-- Strain breakdown -->
@@ -3822,6 +3823,9 @@ function renderCosts() {
     <div class="kpi ok"><div class="kpi-label">After plan — per day</div>
       <div class="kpi-value">${fmtUSD2(totalAfter)}</div>
       <div class="kpi-sub" style="color:var(--ok)">${fmtUSDsigned(-savingsDay)}/day saved</div></div>
+    <div class="kpi ok"><div class="kpi-label">After plan — per month</div>
+      <div class="kpi-value">${fmtUSD(totalAfter * 30)}</div>
+      <div class="kpi-sub" style="color:var(--ok)">${fmtUSDsigned(-savingsDay * 30)}/month saved</div></div>
     <div class="kpi ok"><div class="kpi-label">After plan — per year</div>
       <div class="kpi-value">${fmtUSD(totalAfter * 365)}</div>
       <div class="kpi-sub" style="color:var(--ok)">${fmtUSDsigned(-savingsDay * 365)}/year saved</div></div>
