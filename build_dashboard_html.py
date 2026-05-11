@@ -573,13 +573,13 @@ table.data tbody tr:last-child td { border-bottom: none; }
   <div class="row cols-3" id="breeding-kpis"></div>
   <div class="row cols-2">
     <div class="panel">
-      <h3>Active breeding pairs — performance
+      <h3>Total pups by pair
         <button class="info-btn" onclick="openModal('breeding-perf')">i</button>
       </h3>
       <div id="chart-breeding-perf" class="chart"></div>
     </div>
     <div class="panel">
-      <h3>Months active by pair
+      <h3>Productivity — pups per month
         <button class="info-btn" onclick="openModal('breeding-age')">i</button>
       </h3>
       <div id="chart-breeding-age" class="chart"></div>
@@ -1580,34 +1580,90 @@ $("#breeding-kpis").innerHTML = brKpis.map(k => `
   </div>
 `).join("");
 
-const brLabels = BR.map((b, i) => (b.offspring_strain || "?") + " #" + (i+1));
+// ---- Active breeding-pair performance chart ----
+// Sort pairs by total pups born (descending) so productive pairs anchor the top.
+// Horizontal bars are easier to read with longer labels, and we drop the dual-axis
+// line/bar combo (which produced misleading zero-flatlines when a pair had no litters yet).
+const brSortedPerf = BR.map((b, i) => ({ ...b, origIdx: i }))
+  .sort((a, b) => (b.born || 0) - (a.born || 0));
+const perfLabels = brSortedPerf.map(b => `#${b.origIdx + 1} ${b.offspring_strain || "?"}`);
+const perfBorn = brSortedPerf.map(b => b.born || 0);
+const perfPupsPerMo = brSortedPerf.map(b =>
+  (b.months_active && b.born) ? +(b.born / b.months_active).toFixed(2) : 0);
+
 charts.brPerf = echarts.init($("#chart-breeding-perf"));
 charts.brPerf.setOption({
-  grid: { left: 10, right: 24, top: 30, bottom: 60, containLabel: true },
-  xAxis: { type: "category", data: brLabels, axisLabel: { rotate: 30, fontSize: 10 } },
-  yAxis: [{ type: "value", name: "Born", nameTextStyle: { fontSize: 11 } },
-          { type: "value", name: "Litters", nameTextStyle: { fontSize: 11 } }],
-  tooltip: { trigger: "axis" },
-  legend: { top: 0, textStyle: { fontSize: 11 } },
-  series: [
-    { name: "Born", type: "bar", data: BR.map(b => b.born || 0),
-      itemStyle: { color: "#1e40af" }, barMaxWidth: 30 },
-    { name: "Litters", type: "line", yAxisIndex: 1, data: BR.map(b => b.litters || 0),
-      itemStyle: { color: "#dc2626" }, lineStyle: { color: "#dc2626", width: 2 },
-      symbolSize: 8 }
-  ]
+  grid: { left: 10, right: 40, top: 30, bottom: 30, containLabel: true },
+  xAxis: { type: "value", name: "Pups", nameLocation: "middle", nameGap: 24,
+           nameTextStyle: { fontSize: 11, color: "#475569" },
+           splitLine: { lineStyle: { color: "#f1f5f9" } } },
+  yAxis: { type: "category", data: perfLabels.slice().reverse(),
+           axisLabel: { fontSize: 10, color: "#0f172a", fontWeight: 600 },
+           axisLine: { show: false }, axisTick: { show: false } },
+  legend: { show: false },
+  tooltip: {
+    trigger: "axis", axisPointer: { type: "shadow" },
+    formatter: (params) => {
+      const idx = perfLabels.length - 1 - params[0].dataIndex; // reversed for y-axis order
+      const b = brSortedPerf[idx];
+      return `<strong>${perfLabels[idx]}</strong><br>
+              ${b.born || 0} pups born · ${b.litters || 0} litter(s)<br>
+              Avg ${b.avg_litter_size != null ? b.avg_litter_size.toFixed(1) : "—"} pups/litter<br>
+              ${(b.months_active && b.born) ? (b.born / b.months_active).toFixed(2) : "—"} pups/mo over ${b.months_active != null ? b.months_active.toFixed(1) : "—"} mo`;
+    }
+  },
+  series: [{
+    type: "bar", data: perfBorn.slice().reverse(),
+    barMaxWidth: 22,
+    itemStyle: {
+      color: params => {
+        const idx = perfLabels.length - 1 - params.dataIndex;
+        const b = brSortedPerf[idx];
+        if ((b.born || 0) === 0) return "#cbd5e1";          // gray = no pups yet
+        if (b.months_active > 6 && (b.born / b.months_active) < 1) return "#f59e0b"; // amber = low productivity
+        return "#1e40af";                                    // blue = productive
+      }
+    },
+    label: {
+      show: true, position: "right", fontSize: 10, color: "#0f172a", fontWeight: 600,
+      formatter: params => {
+        const idx = perfLabels.length - 1 - params.dataIndex;
+        const b = brSortedPerf[idx];
+        if ((b.born || 0) === 0) return "0 (no litter yet)";
+        return `${b.born} pups / ${b.litters} litters`;
+      }
+    }
+  }]
 });
 
+// ---- Pups-per-month productivity chart (replaces months-active) ----
+// Same sort order as the performance chart so the two read together.
 charts.brAge = echarts.init($("#chart-breeding-age"));
 charts.brAge.setOption({
-  grid: { left: 10, right: 24, top: 10, bottom: 60, containLabel: true },
-  xAxis: { type: "category", data: brLabels, axisLabel: { rotate: 30, fontSize: 10 } },
-  yAxis: { type: "value", name: "Months active", nameTextStyle: { fontSize: 11 } },
-  tooltip: { trigger: "axis" },
+  grid: { left: 10, right: 40, top: 30, bottom: 30, containLabel: true },
+  xAxis: { type: "value", name: "Pups / month", nameLocation: "middle", nameGap: 24,
+           nameTextStyle: { fontSize: 11, color: "#475569" },
+           splitLine: { lineStyle: { color: "#f1f5f9" } } },
+  yAxis: { type: "category", data: perfLabels.slice().reverse(),
+           axisLabel: { fontSize: 10, color: "#0f172a", fontWeight: 600 },
+           axisLine: { show: false }, axisTick: { show: false } },
+  legend: { show: false },
+  tooltip: {
+    trigger: "axis", axisPointer: { type: "shadow" },
+    formatter: params => {
+      const idx = perfLabels.length - 1 - params[0].dataIndex;
+      const b = brSortedPerf[idx];
+      return `<strong>${perfLabels[idx]}</strong><br>
+              ${(b.months_active && b.born) ? (b.born / b.months_active).toFixed(2) : "0"} pups/month<br>
+              Active ${b.months_active != null ? b.months_active.toFixed(1) : "—"} mo · ${b.born || 0} pups total`;
+    }
+  },
   series: [{
-    type: "bar", data: BR.map(b => b.months_active || 0),
-    itemStyle: { color: "#7c3aed" }, barMaxWidth: 30,
-    label: { show: true, position: "top", fontSize: 10 }
+    type: "bar", data: perfPupsPerMo.slice().reverse(),
+    barMaxWidth: 22,
+    itemStyle: { color: "#0f766e" },
+    label: { show: true, position: "right", fontSize: 10, color: "#0f172a",
+             fontWeight: 600, formatter: "{c}" }
   }]
 });
 
@@ -3693,13 +3749,22 @@ git push</pre>
     body: `<p>Pulled directly from the colony software's <span class="code">StrainList.xlsx</span>.
               Includes deceased counts as a record-of-history.</p>` },
   "breeding-perf": {
-    title: "Breeding pair performance",
-    body: `<p>Each pair's pup count (bars) plotted against litter count (line). Pairs with low
-              productivity may need to be retired or replaced.</p>` },
+    title: "Total pups by pair",
+    body: `
+      <p>Horizontal bars showing total pups born per active breeding pair, sorted descending.
+      Bar color encodes status:</p>
+      <ul>
+        <li><span style="display:inline-block;width:10px;height:10px;background:#1e40af;vertical-align:middle;margin-right:6px;"></span><strong>Blue</strong> — productive</li>
+        <li><span style="display:inline-block;width:10px;height:10px;background:#f59e0b;vertical-align:middle;margin-right:6px;"></span><strong>Amber</strong> — active &gt; 6 months at &lt; 1 pup/mo (low productivity, also flagged in Breeder Alerts)</li>
+        <li><span style="display:inline-block;width:10px;height:10px;background:#cbd5e1;vertical-align:middle;margin-right:6px;"></span><strong>Gray</strong> — no pups recorded yet</li>
+      </ul>
+      <p>Label shows pups / litters; hover for full stats (avg litter size, pups/mo, months active).</p>` },
   "breeding-age": {
-    title: "Breeder age",
-    body: `<p>Months elapsed since the breeding cage went active. Older breedings sometimes
-              need rotation due to declining productivity.</p>` },
+    title: "Productivity — pups per month",
+    body: `<p>Each pair's pups born ÷ months active. Same sort order as the chart on the left,
+    so the two read together: pairs at the top produced the most pups, and the productivity bar
+    shows whether that came from a fast cadence (high pups/mo) or slow accumulation over many months.
+    Pairs underperforming the lab average (~2.5 pups/mo) are flagged in Breeder Alerts.</p>` },
   "cage-grid": {
     title: "Rack 7A layout",
     body: `<p>Visual layout of the rack: rows 1–7 × columns A–J. Click a cage for details.
