@@ -685,35 +685,36 @@ table.data tbody tr:last-child td { border-bottom: none; }
     </div>
   </div>
 
-  <!-- Breeding Planner -->
+  <!-- Breeding Planner (reverse: target → parents) -->
   <div class="panel" style="margin-top: 18px;">
-    <h3>Breeding planner
+    <h3>Breeding planner — reverse
       <button class="info-btn" onclick="openModal('breeding-planner')">i</button>
     </h3>
     <p class="muted" style="font-size: .85rem; margin: 0 0 14px;">
-      Given a target genotype and a cohort size you need, the planner uses your strain's historical breeding stats
-      and the predicted Mendelian distribution to estimate how many breeding pairs and litters you'll need to set up.
+      Tell the planner the offspring genotype you need. It searches every available ♀ × ♂ combination in the colony,
+      ranks viable crosses by predicted target % and number of candidate mice, and suggests the best specific breeders.
     </p>
     <div class="cb-grid">
       <div class="cb-side">
-        <h4>Plan inputs</h4>
+        <h4>1 · What do you need?</h4>
         <div class="cb-filter-row">
-          <select id="bp-strain"><option value="">Strain…</option></select>
-          <select id="bp-mom-geno"><option value="">Mother genotype…</option></select>
-          <select id="bp-dad-geno"><option value="">Father genotype…</option></select>
-          <select id="bp-target-geno"><option value="">Target offspring genotype…</option></select>
-          <input id="bp-target-n" type="number" min="1" max="200" value="6" placeholder="Target n" />
+          <select id="bp-strain"><option value="">All strains</option></select>
+          <input id="bp-target-geno" type="text" list="bp-geno-list"
+                 placeholder="Target offspring genotype (e.g., Adipoq-cre; Dendra2<+/->)"
+                 style="grid-column: span 2;" />
+          <datalist id="bp-geno-list"></datalist>
           <select id="bp-target-sex">
             <option value="">Either sex</option>
             <option value="Female">Female only</option>
             <option value="Male">Male only</option>
           </select>
+          <input id="bp-target-n" type="number" min="1" max="200" value="6" placeholder="Target n (default 6)" />
         </div>
-        <button class="btn" onclick="bpCompute()" style="margin-top:10px;">↻ Compute plan</button>
+        <button class="btn" onclick="bpCompute()" style="margin-top:10px;">🔍 Find breeders</button>
       </div>
       <div class="cb-side">
-        <h4>Plan output</h4>
-        <div id="bp-output" class="cb-empty">Set inputs on the left and click "Compute plan".</div>
+        <h4>2 · Recommended strategies</h4>
+        <div id="bp-output" class="cb-empty">Set your target and click "Find breeders".</div>
       </div>
     </div>
   </div>
@@ -13516,111 +13517,235 @@ function ppRenderDetails(pairIdx) {
   sel.addEventListener("change", () => ppRenderDetails(sel.value));
 })();
 
-// ============= BREEDING PLANNER =============
-function bpPopulateGenotypes(strain, mom, dad, target) {
-  // Mom + Dad genotype options come from the strain (or all if no strain)
-  const mice = strain ? INV.filter(m => m.strain === strain) : INV;
-  const genos = new Set();
-  mice.forEach(m => { const g = (m.genotype || "").trim(); if (g) genos.add(g); });
-  const sortedGenos = Array.from(genos).sort();
-  const opts = ['<option value="">— Select —</option>'].concat(
-    sortedGenos.map(g => `<option value="${g.replace(/"/g, "&quot;")}">${g}</option>`)
-  ).join("");
-  $("#bp-mom-geno").innerHTML = opts;
-  $("#bp-dad-geno").innerHTML = opts;
-  // Target genotype options = predicted distribution given mom/dad selections
-  if (mom && dad) {
-    const { rows } = offspringDistribution(mom, dad);
-    $("#bp-target-geno").innerHTML = '<option value="">— Select target —</option>' +
-      rows.map(r => `<option value="${r.genotype.replace(/"/g, "&quot;")}" data-pct="${r.pct.toFixed(3)}">${r.genotype}  (~${r.pct.toFixed(1)}%)</option>`).join("");
-  } else {
-    $("#bp-target-geno").innerHTML = '<option value="">Set mother + father first</option>';
+// ============= BREEDING PLANNER (reverse: target → parents) =============
+
+// Build the autocomplete list of plausible target genotypes.
+// Two passes:
+//   - At init: cheap union of existing inventory genotypes + cohort-plan targets.
+//   - On first input focus (lazy): expand to include Punnett-predicted genotypes from
+//     every (mom × dad) combination. Lazy because offspringDistribution depends on
+//     constants declared further down (BB_LOCI, PUNNETT) — and the IIFE init runs
+//     during script parsing where those would still be in the temporal dead zone.
+let bpAutocompleteExpanded = false;
+function bpBuildTargetSuggestions(includePredicted) {
+  const set = new Set();
+  INV.forEach(m => { const g = (m.genotype || "").trim(); if (g) set.add(g); });
+  (COLONY.cohort_plans || []).forEach(p => {
+    if (p.target_geno) set.add(p.target_geno);
+    (p.expected_ratios || []).forEach(r => { if (r.genotype) set.add(r.genotype); });
+  });
+  if (includePredicted) {
+    const uniqueGenos = Array.from(new Set(INV.map(m => (m.genotype || "").trim()).filter(Boolean)));
+    for (const a of uniqueGenos) {
+      for (const b of uniqueGenos) {
+        const { rows } = offspringDistribution(a, b);
+        rows.forEach(r => set.add(r.genotype));
+      }
+    }
   }
+  return Array.from(set).sort();
+}
+
+function bpPopulateTargetList(includePredicted) {
+  const dl = $("#bp-geno-list");
+  if (!dl) return;
+  const opts = bpBuildTargetSuggestions(includePredicted);
+  dl.innerHTML = opts.map(g => `<option value="${g.replace(/"/g, "&quot;")}"></option>`).join("");
+}
+
+// Reverse plan: enumerate (mom_geno × dad_geno) combinations in the available colony,
+// score by target-% × min(♀, ♂) capacity, return ranked strategies.
+function bpReversePlan(targetGeno, strainFilter, targetSex) {
+  const targetClean = targetGeno.trim();
+  if (!targetClean) return [];
+
+  // Eligible breeders: opposite sex, breeding-age, available (or already breeding ok too)
+  const eligible = m => {
+    if (!m.genotype) return false;
+    if (strainFilter && m.strain !== strainFilter) return false;
+    if (m.age_months != null && m.age_months < 1.5) return false;   // too young
+    if (m.age_months != null && m.age_months > 10) return false;    // too old (existing breeders excluded)
+    if (m.use === "Breeding") return false;                          // already paired
+    return true;
+  };
+  const females = INV.filter(m => m.sex === "Female" && eligible(m));
+  const males   = INV.filter(m => m.sex === "Male"   && eligible(m));
+
+  // Group by genotype + strain (for cross-strain detection)
+  const groupBy = arr => {
+    const g = new Map();
+    arr.forEach(m => {
+      const key = (m.genotype || "").trim();
+      if (!g.has(key)) g.set(key, []);
+      g.get(key).push(m);
+    });
+    return g;
+  };
+  const femGeno = groupBy(females);
+  const maleGeno = groupBy(males);
+
+  const strategies = [];
+  for (const [momGeno, fems] of femGeno) {
+    for (const [dadGeno, mls] of maleGeno) {
+      const { rows } = offspringDistribution(momGeno, dadGeno);
+      const target = rows.find(r => r.genotype.trim() === targetClean);
+      if (!target || target.pct <= 0) continue;
+
+      // Youngest representative of each genotype
+      const sortedF = fems.slice().sort((a, b) => (a.age_months ?? 999) - (b.age_months ?? 999));
+      const sortedM = mls.slice().sort((a, b) => (a.age_months ?? 999) - (b.age_months ?? 999));
+
+      // Sex multiplier: if user requires a specific sex, only half pups qualify
+      const sexMult = targetSex ? 0.5 : 1.0;
+      const effectivePct = target.pct * sexMult;
+
+      // Score: target % × capacity (with cross-strain penalty)
+      const capacity = Math.min(fems.length, mls.length);
+      const sameStrain = sortedF[0].strain === sortedM[0].strain;
+      const score = effectivePct * Math.sqrt(capacity) * (sameStrain ? 1.0 : 0.4);
+
+      strategies.push({
+        momGeno, dadGeno,
+        targetPct: target.pct,
+        effectivePct,
+        nFems: fems.length, nMls: mls.length,
+        bestFem: sortedF[0], bestMle: sortedM[0],
+        sameStrain, score,
+      });
+    }
+  }
+  strategies.sort((a, b) => b.score - a.score);
+  return strategies;
 }
 
 window.bpCompute = function() {
+  const targetGeno = $("#bp-target-geno").value.trim();
   const strain = $("#bp-strain").value;
-  const mom = $("#bp-mom-geno").value;
-  const dad = $("#bp-dad-geno").value;
-  const target = $("#bp-target-geno").value;
-  const targetN = parseInt($("#bp-target-n").value) || 6;
   const targetSex = $("#bp-target-sex").value;
+  const targetN = parseInt($("#bp-target-n").value) || 6;
   const out = $("#bp-output");
 
-  if (!mom || !dad || !target) {
-    out.innerHTML = `<div class="cb-empty">Pick strain, mother + father genotypes, and target before computing.</div>`;
+  if (!targetGeno) {
+    out.innerHTML = `<div class="cb-empty">Enter a target offspring genotype above.</div>`;
     return;
   }
 
-  // Find predicted % of target in offspring
-  const { rows } = offspringDistribution(mom, dad);
-  const targetRow = rows.find(r => r.genotype === target);
-  if (!targetRow) {
-    out.innerHTML = `<div class="cb-empty">Target genotype not in predicted distribution.</div>`;
-    return;
+  const strategies = bpReversePlan(targetGeno, strain, targetSex);
+
+  // Currently available mice already matching the target
+  const availableNow = INV.filter(m =>
+    (m.genotype || "").trim() === targetGeno &&
+    (strain ? m.strain === strain : true) &&
+    (targetSex ? m.sex === targetSex : true) &&
+    m.use === "Available"
+  ).length;
+  const stillNeeded = Math.max(0, targetN - availableNow);
+
+  // Average litter size from any matching strain we found in strategies, else colony default
+  let avgLitterSize = 6.5;
+  if (strategies.length) {
+    const s = strainBreedingStats(strategies[0].bestFem.strain);
+    if (s && s.avg_litter_size) avgLitterSize = s.avg_litter_size;
   }
-  const targetPct = targetRow.pct / 100;
 
-  // Sex multiplier (half are female / half male)
-  const sexMult = targetSex ? 0.5 : 1.0;
-  const effectivePct = targetPct * sexMult;
-
-  // Historical strain stats
-  const stats = strain ? strainBreedingStats(strain) : null;
-  const avgLitterSize = stats?.avg_litter_size ?? 6.5; // fall back to a default
-  const targetsPerLitter = avgLitterSize * effectivePct;
-  const littersNeeded = Math.ceil(targetN / Math.max(targetsPerLitter, 0.01));
-  // Most pairs produce ~3 litters in their productive window (rough)
-  const littersPerPair = stats && stats.n_pairs ? (BR.filter(b => b.offspring_strain === strain).reduce((s, b) => s + (b.litters || 0), 0) / stats.n_pairs) : 3;
-  const pairsNeeded = Math.max(1, Math.ceil(littersNeeded / Math.max(littersPerPair, 1)));
-
-  // Currently available toward target
-  const availableTarget = INV.filter(m => {
-    if (strain && m.strain !== strain) return false;
-    if ((m.genotype || "").trim() !== target) return false;
-    if (targetSex && m.sex !== targetSex) return false;
-    if (m.use === "Breeding") return false;
-    return true;
-  }).length;
-  const stillNeeded = Math.max(0, targetN - availableTarget);
-
-  out.innerHTML = `
-    <div class="row cols-3" style="margin-bottom: 12px;">
-      <div class="kpi"><div class="kpi-label">Target genotype %</div>
-        <div class="kpi-value">${(targetPct * 100).toFixed(1)}%</div>
-        <div class="kpi-sub">per litter, Mendelian</div></div>
-      <div class="kpi"><div class="kpi-label">Avg litter size (${strain || "any strain"})</div>
-        <div class="kpi-value">${avgLitterSize.toFixed(1)}</div>
-        <div class="kpi-sub">from historical breeding records</div></div>
-      <div class="kpi ok"><div class="kpi-label">Available toward target now</div>
-        <div class="kpi-value">${availableTarget}</div>
-        <div class="kpi-sub">${targetSex || "either sex"}</div></div>
-    </div>
-    <div class="control-suggestions" style="background:#f0fdf4;border-color:#bbf7d0;">
-      <h5 style="color:var(--ok);">Plan to produce n = ${targetN}${targetSex ? " " + targetSex : ""}</h5>
-      <p style="font-size:.85rem;margin:6px 0;color:var(--ink);">
-        Need <strong>${stillNeeded}</strong> more target mice on top of the ${availableTarget} you already have.
-      </p>
-      <table style="font-size:.82rem;">
-        <tr><td>Effective % per litter (after sex filter)</td><td><strong>${(effectivePct * 100).toFixed(1)}%</strong></td></tr>
-        <tr><td>Expected target mice per litter</td><td><strong>${targetsPerLitter.toFixed(1)}</strong> pups</td></tr>
-        <tr><td>Litters needed to hit n = ${targetN}</td><td><strong>${littersNeeded}</strong></td></tr>
-        <tr><td>Historical litters/pair in this strain</td><td>${littersPerPair.toFixed(1)}</td></tr>
-        <tr><td><strong style="color:var(--ok);">Breeding pairs to set up</strong></td><td><strong style="color:var(--ok);font-size:1.05rem;">${pairsNeeded}</strong></td></tr>
-      </table>
-      <p class="muted" style="font-size:.72rem;margin-top:8px;">
-        Assumes independent assortment and historical strain productivity. Add a safety buffer (e.g. +1 pair) for biological variation.
-      </p>
+  let html = `
+    <div class="row cols-2" style="margin-bottom: 12px;">
+      <div class="kpi ok"><div class="kpi-label">Already available toward target</div>
+        <div class="kpi-value">${availableNow}</div>
+        <div class="kpi-sub">${targetSex || "either sex"}${strain ? " · " + strain : ""}</div></div>
+      <div class="kpi ${stillNeeded > 0 ? 'warn' : 'ok'}"><div class="kpi-label">Still needed</div>
+        <div class="kpi-value">${stillNeeded}</div>
+        <div class="kpi-sub">to hit target n = ${targetN}</div></div>
     </div>
   `;
+
+  if (!strategies.length) {
+    html += `<div class="control-suggestions" style="background:#fef2f2;border-color:#fecaca;">
+      <h5 style="color:var(--danger);">⚠ No viable breeding strategies found</h5>
+      <p style="font-size:.85rem;margin:0;">
+        No available ♀ × ♂ combinations in the colony can produce
+        <span class="id-mono">${targetGeno}</span> (with required alleles present in at least one parent).
+        ${strain ? `Try removing the strain filter` : `Try a different target or check your inventory`}.
+      </p>
+    </div>`;
+  } else if (stillNeeded === 0) {
+    html += `<div class="control-suggestions" style="background:#f0fdf4;border-color:#bbf7d0;">
+      <h5 style="color:var(--ok);">✓ You already have enough — no new breeding required</h5>
+      <p style="font-size:.85rem;margin:0;">Use the Cohort Builder to assemble the cohort directly.</p>
+    </div>`;
+  } else {
+    const top = strategies.slice(0, 6);
+    html += `<h4 style="margin: 6px 0 10px; font-size:.92rem; color:var(--ink);">Top breeding strategies — ranked by target % × capacity</h4>`;
+    top.forEach((s, idx) => {
+      const targetsPerLitter = avgLitterSize * s.effectivePct / 100;
+      const littersNeeded = Math.ceil(stillNeeded / Math.max(targetsPerLitter, 0.01));
+      const pairsNeeded = Math.max(1, Math.ceil(littersNeeded / 3));  // ~3 litters per pair productive lifetime
+      html += `
+        <div class="control-suggestions" style="${idx===0 ? 'background:#f0fdf4;border-color:#bbf7d0;' : ''}">
+          <h5>
+            <span>
+              Strategy ${idx + 1}: ♀ <span class="id-mono" style="font-size:.78rem">${s.momGeno}</span>
+              × ♂ <span class="id-mono" style="font-size:.78rem">${s.dadGeno}</span>
+            </span>
+            <span style="color:var(--ok);font-weight:700;">${s.targetPct.toFixed(1)}% target / litter</span>
+          </h5>
+          ${!s.sameStrain ? `<p class="muted" style="font-size:.74rem;margin:0 0 6px;color:var(--warn);">⚠ Cross-strain pair (${s.bestFem.strain} × ${s.bestMle.strain}) — offspring strain assignment may need manual setting.</p>` : ''}
+          <table>
+            <thead><tr><th></th><th>ID</th><th>Strain</th><th>Sex</th><th>Age</th><th>Genotype</th><th>Cage</th><th></th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span class="role-tag" style="background:#fce7f3;color:#9d174d">♀ pick</span></td>
+                <td class="id-mono">${s.bestFem.mouse_id}</td>
+                <td>${tagFor(s.bestFem.strain, "strain")}</td>
+                <td>${tagFor(s.bestFem.sex, "sex")}</td>
+                <td>${s.bestFem.age_months ?? "—"} mo</td>
+                <td class="id-mono" style="font-size:.72rem">${s.bestFem.genotype || ""}</td>
+                <td class="id-mono">${s.bestFem.cage_id}</td>
+                <td><button class="btn small" onclick="bbSelect('mom','${s.bestFem.mouse_id}'); document.querySelector('.panel h3').scrollIntoView();">Use in Breeder Builder</button></td>
+              </tr>
+              <tr>
+                <td><span class="role-tag" style="background:var(--brand-soft);color:var(--brand)">♂ pick</span></td>
+                <td class="id-mono">${s.bestMle.mouse_id}</td>
+                <td>${tagFor(s.bestMle.strain, "strain")}</td>
+                <td>${tagFor(s.bestMle.sex, "sex")}</td>
+                <td>${s.bestMle.age_months ?? "—"} mo</td>
+                <td class="id-mono" style="font-size:.72rem">${s.bestMle.genotype || ""}</td>
+                <td class="id-mono">${s.bestMle.cage_id}</td>
+                <td><button class="btn small" onclick="bbSelect('dad','${s.bestMle.mouse_id}')">Use in Breeder Builder</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px;font-size:.78rem;">
+            <div><span class="muted">Available ♀ of this geno:</span> <strong>${s.nFems}</strong></div>
+            <div><span class="muted">Available ♂ of this geno:</span> <strong>${s.nMls}</strong></div>
+            <div><span class="muted">Target pups per litter:</span> <strong>${targetsPerLitter.toFixed(1)}</strong></div>
+            <div><span class="muted">Litters needed:</span> <strong>${littersNeeded}</strong></div>
+            <div><span class="muted" style="color:var(--ok)"><strong>Pairs to set up:</strong></span>
+                 <strong style="color:var(--ok);font-size:.95rem;">${pairsNeeded}</strong></div>
+          </div>
+        </div>`;
+    });
+    html += `<p class="muted" style="font-size:.72rem;margin-top:8px;">
+      Ranked by target % × √capacity (cross-strain pairs penalized). "Pick" buttons load the suggested mouse into the Breeder Builder above for a full prediction.
+      Assumes independent assortment and historical strain litter sizes (${avgLitterSize.toFixed(1)} pups). Add a buffer pair for biological variation.
+    </p>`;
+  }
+
+  out.innerHTML = html;
 };
 
 (function initBP() {
   $("#bp-strain").innerHTML = `<option value="">All strains</option>` +
     COLONY.strain_order.map(s => `<option>${s}</option>`).join("");
-  ["bp-strain", "bp-mom-geno", "bp-dad-geno"].forEach(id =>
-    $("#" + id).addEventListener("change", () => bpPopulateGenotypes($("#bp-strain").value, $("#bp-mom-geno").value, $("#bp-dad-geno").value, $("#bp-target-geno").value)));
-  bpPopulateGenotypes("", "", "", "");
+  // Initial cheap list (inventory + cohort plan targets only). Expanded lazily
+  // when the user focuses the input, since the full predicted set depends on
+  // constants declared in the BREEDER BUILDER section below.
+  bpPopulateTargetList(false);
+  $("#bp-target-geno").addEventListener("focus", () => {
+    if (bpAutocompleteExpanded) return;
+    bpAutocompleteExpanded = true;
+    bpPopulateTargetList(true);
+  });
 })();
 
 // ============= LITTERS (DOB cohorts) =============
@@ -15401,20 +15526,29 @@ git push</pre>
       </ul>
     ` },
   "breeding-planner": {
-    title: "Breeding planner",
+    title: "Breeding planner — reverse mode",
     body: `
-      <p>Given a target genotype, the planner estimates how many breeding pairs you need to set up to produce a cohort of size n.</p>
+      <p>You enter the offspring genotype you need; the planner searches every available ♀ × ♂ combination in the colony, computes the Mendelian distribution for each, filters to crosses that produce the target, and ranks them.</p>
       <h3>Inputs</h3>
       <ol>
-        <li>Strain (optional — restricts the genotype options + the historical stats used).</li>
-        <li>Mother + father genotypes (proposed cross).</li>
-        <li>Target offspring genotype (auto-populated from the predicted Mendelian distribution).</li>
-        <li>Target cohort size (n) and optional sex restriction.</li>
+        <li><strong>Target offspring genotype</strong> — free text with autocomplete. Suggestions include existing inventory genotypes, cohort-plan targets, and every Punnett-predicted offspring genotype from current pairings.</li>
+        <li>Strain (optional filter — narrows the candidate pool to one strain).</li>
+        <li>Required sex (optional — only counts pups of that sex toward target).</li>
+        <li>Target cohort size n.</li>
       </ol>
-      <h3>Math</h3>
-      <p>Predicted % of target per litter is taken from the Mendelian Punnett (multiplied by 0.5 if a single sex is required). Multiplied by your historical strain average litter size to get "target pups per litter." Litters needed = ceil(n_target / pups-per-litter). Pairs needed = ceil(litters / historical litters-per-pair).</p>
+      <h3>How strategies are ranked</h3>
+      <p>For each ♀-genotype × ♂-genotype combination, the score is:</p>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:.85rem;background:var(--neutral-soft);padding:8px;border-radius:6px;">score = target % × √min(♀ available, ♂ available) × (cross-strain penalty if applicable)</p>
+      <p>Cross-strain pairs are penalized by 60%. Each strategy shows the youngest representative mouse of each sex/genotype, plus the count of available alternatives.</p>
+      <h3>Output per strategy</h3>
+      <ul>
+        <li>Specific suggested ♀ and ♂ (youngest available of each genotype) with "Use in Breeder Builder" buttons that send the mouse to the predictor above for a full check.</li>
+        <li>Target % per litter, expected target pups per litter, litters needed, recommended pairs to set up.</li>
+      </ul>
+      <h3>Eligibility for breeders</h3>
+      <p>Breeders are filtered to: available (not already paired), aged 1.5 – 10 months, has a non-empty genotype. Tweak the filters if your colony uses different breeding-age cutoffs.</p>
       <h3>Caveats</h3>
-      <p>Assumes independent assortment and uses historical strain productivity. Add a buffer pair if you can't tolerate falling short.</p>
+      <p>Mendelian ratios assume independent assortment (true for unlinked loci). The planner uses historical strain average litter size; biological variation can swing the actual yield significantly — add a buffer pair if your timeline is tight.</p>
     ` },
   "breeder-builder": {
     title: "How the Breeder Builder works",
