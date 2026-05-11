@@ -531,6 +531,19 @@ table.data tbody tr:last-child td { border-bottom: none; }
       Click any cage for details. Orange left border = breeders inside. Gray dashed = empty slot.
     </p>
   </div>
+  <!-- Cage Consolidation Alerts -->
+  <div class="panel" style="margin-top: 18px;">
+    <h3>Cage consolidation candidates
+      <button class="info-btn" onclick="openModal('consolidation')">i</button>
+    </h3>
+    <p class="muted" style="font-size: .82rem; margin: 0 0 10px;">
+      Singly-housed (n=1) mice that could be merged with compatible same-strain + same-sex peers to save cage costs.
+      ULAM allows up to 5 adult mice per ventilated cage.
+    </p>
+    <div class="row cols-3" id="consolidation-kpis" style="margin-bottom: 14px;"></div>
+    <div id="consolidation-list"></div>
+  </div>
+
   <div class="cage-list">
     <h3>Unassigned cages — physical location unknown
       <button class="info-btn" onclick="openModal('unassigned')">i</button>
@@ -548,6 +561,14 @@ table.data tbody tr:last-child td { border-bottom: none; }
 
 <!-- ============= BREEDING ============= -->
 <section class="tab-pane" id="pane-breeding">
+  <!-- Non-Productive Breeder Alerts -->
+  <div class="panel" style="margin-bottom: 16px;">
+    <h3>Breeder alerts
+      <button class="info-btn" onclick="openModal('breeder-alerts')">i</button>
+    </h3>
+    <div id="breeder-alerts"></div>
+  </div>
+
   <div class="row cols-3" id="breeding-kpis"></div>
   <div class="row cols-2">
     <div class="panel">
@@ -658,6 +679,57 @@ table.data tbody tr:last-child td { border-bottom: none; }
           Select a mother and father from the lists on the left.
         </div>
         <div id="bb-prediction"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Per-pair pedigree & offspring -->
+  <div class="panel" style="margin-top: 18px;">
+    <h3>Pair pedigree & offspring tracking
+      <button class="info-btn" onclick="openModal('pair-pedigree')">i</button>
+    </h3>
+    <p class="muted" style="font-size: .82rem; margin: 0 0 10px;">
+      Pick an active pair to see putative offspring (inferred from DOB + offspring-strain match within the breeding window),
+      pup-survival rate, observed sex ratio, and observed vs. expected Mendelian genotype distribution.
+    </p>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+      <label style="font-size:.85rem;color:var(--ink-muted);">Pair:</label>
+      <select id="pp-pair-select" style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;font-size:.82rem;font-family:inherit;background:#fff;color:var(--ink);min-width:300px;"></select>
+    </div>
+    <div id="pp-details">
+      <div class="cb-empty">Select a pair above.</div>
+    </div>
+  </div>
+
+  <!-- Breeding Planner -->
+  <div class="panel" style="margin-top: 18px;">
+    <h3>Breeding planner
+      <button class="info-btn" onclick="openModal('breeding-planner')">i</button>
+    </h3>
+    <p class="muted" style="font-size: .85rem; margin: 0 0 14px;">
+      Given a target genotype and a cohort size you need, the planner uses your strain's historical breeding stats
+      and the predicted Mendelian distribution to estimate how many breeding pairs and litters you'll need to set up.
+    </p>
+    <div class="cb-grid">
+      <div class="cb-side">
+        <h4>Plan inputs</h4>
+        <div class="cb-filter-row">
+          <select id="bp-strain"><option value="">Strain…</option></select>
+          <select id="bp-mom-geno"><option value="">Mother genotype…</option></select>
+          <select id="bp-dad-geno"><option value="">Father genotype…</option></select>
+          <select id="bp-target-geno"><option value="">Target offspring genotype…</option></select>
+          <input id="bp-target-n" type="number" min="1" max="200" value="6" placeholder="Target n" />
+          <select id="bp-target-sex">
+            <option value="">Either sex</option>
+            <option value="Female">Female only</option>
+            <option value="Male">Male only</option>
+          </select>
+        </div>
+        <button class="btn" onclick="bpCompute()" style="margin-top:10px;">↻ Compute plan</button>
+      </div>
+      <div class="cb-side">
+        <h4>Plan output</h4>
+        <div id="bp-output" class="cb-empty">Set inputs on the left and click "Compute plan".</div>
       </div>
     </div>
   </div>
@@ -1407,6 +1479,88 @@ $("#unassigned-table tbody").innerHTML = UNASSIGNED.map(c => `
   </tr>
 `).join("");
 
+// ============= CAGE CONSOLIDATION =============
+// Find singly-housed mice that could be merged with same-strain, same-sex peers.
+// ULAM ventilated cage allows up to 5 adult mice.
+const ULAM_VENT_RATE = 1.19; // $/day
+function computeConsolidation() {
+  const singles = COLONY.cages.filter(c => c.n_mice === 1 && !c.has_breeders);
+  // Group by (strain, sex)
+  const byKey = new Map();
+  for (const c of singles) {
+    if (!c.ids || !c.ids.length) continue;
+    const m = INV.find(x => x.mouse_id === c.ids[0]);
+    if (!m || !m.sex || m.sex === "Unknown") continue;
+    if (m.use === "Breeding") continue;
+    const key = m.strain + "||" + m.sex;
+    if (!byKey.has(key)) byKey.set(key, []);
+    byKey.get(key).push({ cage: c, mouse: m });
+  }
+  const groups = [];
+  for (const [key, arr] of byKey) {
+    if (arr.length < 2) continue;
+    const [strain, sex] = key.split("||");
+    arr.sort((a, b) => (a.mouse.age_months || 0) - (b.mouse.age_months || 0));
+    const cagesAfterMerge = Math.ceil(arr.length / 5);
+    const cagesSaved = arr.length - cagesAfterMerge;
+    const annualSavings = cagesSaved * ULAM_VENT_RATE * 365;
+    groups.push({ strain, sex, members: arr, cagesNow: arr.length,
+                  cagesAfterMerge, cagesSaved, annualSavings });
+  }
+  groups.sort((a, b) => b.cagesSaved - a.cagesSaved);
+  return groups;
+}
+
+function renderConsolidation() {
+  const groups = computeConsolidation();
+  const totalSinglesInGroups = groups.reduce((s, g) => s + g.cagesNow, 0);
+  const totalCagesSaved = groups.reduce((s, g) => s + g.cagesSaved, 0);
+  const totalAnnualSavings = groups.reduce((s, g) => s + g.annualSavings, 0);
+
+  $("#consolidation-kpis").innerHTML = `
+    <div class="kpi"><div class="kpi-label">Singly-housed (consolidatable)</div>
+      <div class="kpi-value">${totalSinglesInGroups}</div>
+      <div class="kpi-sub">${groups.length} compatible groups</div></div>
+    <div class="kpi ok"><div class="kpi-label">Cages saved if merged</div>
+      <div class="kpi-value">${totalCagesSaved}</div>
+      <div class="kpi-sub">up to 5 mice per cage</div></div>
+    <div class="kpi ok"><div class="kpi-label">Annual savings (recurring)</div>
+      <div class="kpi-value">$${Math.round(totalAnnualSavings).toLocaleString()}</div>
+      <div class="kpi-sub">at $${ULAM_VENT_RATE}/day · ventilated rate</div></div>
+  `;
+
+  const list = $("#consolidation-list");
+  if (!groups.length) {
+    list.innerHTML = `<div class="cb-empty">No singly-housed mice with compatible peers detected — colony already efficiently housed.</div>`;
+    return;
+  }
+  list.innerHTML = groups.map(g => `
+    <div class="control-suggestions" style="background:${g.cagesSaved >= 3 ? '#f0fdf4' : '#f8fafc'};border-color:${g.cagesSaved >= 3 ? '#bbf7d0' : 'var(--line)'};">
+      <h5>
+        <span>${tagFor(g.strain, "strain")} ${tagFor(g.sex, "sex")} · ${g.cagesNow} singly-housed mice → ${g.cagesAfterMerge} cage${g.cagesAfterMerge>1?'s':''} possible</span>
+        <span style="color:var(--ok);font-weight:700;">save ~$${Math.round(g.annualSavings).toLocaleString()}/yr</span>
+      </h5>
+      <table>
+        <thead><tr><th>Mouse</th><th>Age</th><th>Genotype</th><th>Cage</th><th>Position</th></tr></thead>
+        <tbody>
+          ${g.members.map(({mouse: m, cage: c}) => `
+            <tr>
+              <td class="id-mono">${m.mouse_id}</td>
+              <td>${m.age_months ?? "—"} mo</td>
+              <td class="id-mono" style="font-size:.72rem">${m.genotype || ""}</td>
+              <td class="id-mono">${c.cage_id}</td>
+              <td class="muted">${c.position ? c.position.row + c.position.col : "Unassigned"}</td>
+            </tr>`).join("")}
+        </tbody>
+      </table>
+      <p class="muted" style="font-size:.74rem; margin: 6px 0 0;">
+        Note: avoid merging strangers post-puberty for males (fighting risk). Best practice: introduce in a clean cage simultaneously.
+      </p>
+    </div>
+  `).join("");
+}
+renderConsolidation();
+
 // ============= BREEDING =============
 const BR = COLONY.breedings;
 const brKpis = [
@@ -1471,6 +1625,328 @@ $("#breeding-table tbody").innerHTML = BR.map((b, i) => `
     <td>${b.last_weaned}</td>
   </tr>
 `).join("");
+
+// ============= BREEDER ALERTS =============
+function parseLastWeanedWeeks(s) {
+  if (!s) return null;
+  const m = String(s).match(/(\d+)\s*wks?/i);
+  return m ? parseInt(m[1]) : null;
+}
+
+function computeBreederAlerts() {
+  const alerts = [];
+  BR.forEach((b, i) => {
+    if (b.status !== "Active") return;
+    const ma = b.months_active || 0;
+    const lit = b.litters || 0;
+    const born = b.born || 0;
+    const lwWk = parseLastWeanedWeeks(b.last_weaned);
+    const pairLabel = `#${i+1} ${b.offspring_strain}`;
+
+    // Severity: alert > warn > info
+    if (ma > 2 && lit === 0) {
+      alerts.push({ sev: "alert", pair: i, label: pairLabel, b,
+        msg: `Active ${ma.toFixed(1)} mo with 0 litters — possible infertility or mis-pairing.` });
+    } else if (ma > 6 && (born / ma) < 1) {
+      alerts.push({ sev: "warn", pair: i, label: pairLabel, b,
+        msg: `Low productivity: ${(born / ma).toFixed(2)} pups/mo over ${ma.toFixed(1)} mo (lab average ~2.5).` });
+    } else if (lwWk != null && lwWk > 12 && lit > 0) {
+      alerts.push({ sev: "info", pair: i, label: pairLabel, b,
+        msg: `No litter weaned in ${lwWk} wks — pair may have slowed; consider rest or replacement.` });
+    } else if (ma > 8 && b.avg_litter_size != null && b.avg_litter_size < 4) {
+      alerts.push({ sev: "warn", pair: i, label: pairLabel, b,
+        msg: `Small average litter size: ${b.avg_litter_size.toFixed(1)} pups (typical 6–8). Possible declining fertility.` });
+    }
+  });
+  // Sort: alert > warn > info
+  const sevRank = { alert: 0, warn: 1, info: 2 };
+  alerts.sort((a, b) => sevRank[a.sev] - sevRank[b.sev]);
+  return alerts;
+}
+
+function renderBreederAlerts() {
+  const alerts = computeBreederAlerts();
+  const box = $("#breeder-alerts");
+  if (!alerts.length) {
+    box.innerHTML = `<div class="cb-empty">No breeder alerts — all active pairs are within healthy thresholds.</div>`;
+    return;
+  }
+  const sevColors = {
+    alert: { bg: "#fee2e2", border: "#fca5a5", text: "#9c0006", tag: "danger" },
+    warn:  { bg: "#fef3c7", border: "#fcd34d", text: "#92400e", tag: "warn" },
+    info:  { bg: "#dbeafe", border: "#93c5fd", text: "#1e40af", tag: "brand" },
+  };
+  box.innerHTML = `<div class="cull-list" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">` +
+    alerts.map(a => {
+      const c = sevColors[a.sev];
+      return `
+        <div class="cull-card" style="border-left-color:${c.border};">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+            <div>
+              <span class="tag ${c.tag}">${a.sev.toUpperCase()}</span>
+              <span style="font-weight:700;color:var(--ink);margin-left:6px;">${a.label}</span>
+            </div>
+            <span style="font-size:.74rem;color:var(--muted);">♀${a.b.mother.split('|')[0]} × ♂${a.b.father.split('|')[0]}</span>
+          </div>
+          <div class="desc" style="margin-top:8px;font-size:.82rem;">${a.msg}</div>
+          <div class="muted" style="font-size:.72rem;margin-top:6px;">
+            Active since ${a.b.active_date} · ${a.b.litters} litters · ${a.b.born} pups born · last weaned ${a.b.last_weaned}
+          </div>
+        </div>`;
+    }).join("") + `</div>`;
+}
+renderBreederAlerts();
+
+// ============= PER-PAIR PEDIGREE & OFFSPRING =============
+// Infer offspring of a given pair by matching inventory mice with:
+//   strain == pair.offspring_strain  AND  DOB >= pair.active_date
+function getPairOffspring(pair) {
+  if (!pair.offspring_strain || !pair.active_date) return [];
+  const start = new Date(pair.active_date);
+  return INV.filter(m => {
+    if (m.strain !== pair.offspring_strain) return false;
+    if (!m.dob) return false;
+    const dob = new Date(m.dob);
+    if (dob < start) return false;
+    return true;
+  });
+}
+
+function expectedGenoDist(momGeno, dadGeno) {
+  const { rows } = offspringDistribution(momGeno, dadGeno);
+  return rows; // [{genotype, pct}, ...]
+}
+
+function ppRenderDetails(pairIdx) {
+  const out = $("#pp-details");
+  if (pairIdx == null || pairIdx === "") {
+    out.innerHTML = `<div class="cb-empty">Select a pair above.</div>`;
+    return;
+  }
+  const b = BR[pairIdx];
+  if (!b) { out.innerHTML = `<div class="cb-empty">Pair not found.</div>`; return; }
+
+  const offspring = getPairOffspring(b);
+  const aliveCount = offspring.length;
+  const born = b.born || 0;
+  // Cap survival at 100% — if matches exceed born, some matched mice are from
+  // other concurrent same-strain pairs (heuristic limitation).
+  const cappedAlive = Math.min(aliveCount, born);
+  const survivalPct = born > 0 ? Math.round(100 * cappedAlive / born) : null;
+  const overrun = Math.max(0, aliveCount - born);
+
+  // Sex ratio
+  const f = offspring.filter(m => m.sex === "Female").length;
+  const ml = offspring.filter(m => m.sex === "Male").length;
+  const sexTotal = f + ml;
+  const pctF = sexTotal ? Math.round(100 * f / sexTotal) : null;
+
+  // Observed genotypes
+  const genoMap = new Map();
+  offspring.forEach(m => {
+    const g = (m.genotype || "").trim() || "(blank)";
+    genoMap.set(g, (genoMap.get(g) || 0) + 1);
+  });
+  const observed = Array.from(genoMap.entries()).sort((a, b) => b[1] - a[1]);
+
+  // Expected (Punnett)
+  const expectedRows = expectedGenoDist(b.mother_geno, b.father_geno);
+
+  // Render
+  let html = `
+    <div class="row cols-3" style="margin-bottom:14px;">
+      <div class="kpi"><div class="kpi-label">Pups born (recorded)</div>
+        <div class="kpi-value">${born}</div>
+        <div class="kpi-sub">${b.litters} litters · avg ${b.avg_litter_size ?? "—"}/litter</div></div>
+      <div class="kpi ${survivalPct != null && survivalPct >= 70 ? 'ok' : survivalPct != null && survivalPct < 50 ? 'warn' : ''}">
+        <div class="kpi-label">Estimated alive (of ${born} born)</div>
+        <div class="kpi-value">${cappedAlive}${survivalPct != null ? ` <span style="font-size:.6em;color:var(--muted);">(${survivalPct}%)</span>` : ""}</div>
+        <div class="kpi-sub">${overrun > 0 ? `+${overrun} additional same-strain mice in window (likely from other pairs)` : "strain + DOB match in inventory"}</div></div>
+      <div class="kpi"><div class="kpi-label">Sex ratio (♀ : ♂)</div>
+        <div class="kpi-value">${f} : ${ml}</div>
+        <div class="kpi-sub">${pctF != null ? pctF + "% female" : "no offspring matched"}${pctF != null && (pctF < 35 || pctF > 65) ? " — skewed" : ""}</div></div>
+    </div>
+
+    <div class="row cols-2">
+      <div class="control-suggestions">
+        <h5>Observed offspring genotypes
+          <span class="muted" style="font-weight:400;font-size:.72rem">n = ${aliveCount}</span>
+        </h5>
+        ${observed.length ? `
+        <div class="cohort-ratios">
+          ${observed.map(([g, n]) => {
+            const pct = aliveCount ? (100 * n / aliveCount) : 0;
+            return `<div class="cohort-ratio">
+              <span class="id-mono" style="font-size:.78rem">${g}</span>
+              <span class="pct">${n} (${pct.toFixed(0)}%)</span>
+              <div class="bar"><span style="width:${Math.min(100, pct*1.33).toFixed(0)}%"></span></div>
+            </div>`;
+          }).join("")}
+        </div>` : `<p class="muted" style="font-size:.82rem">No putative offspring matched — DOBs may pre-date the breeding pair or strain field may differ.</p>`}
+      </div>
+      <div class="control-suggestions" style="background:#f0f9ff;border-color:#bae6fd;">
+        <h5 style="color:#0369a1;">Expected (Punnett, from parents)
+          <span class="muted" style="font-weight:400;font-size:.72rem">${b.mother_geno} × ${b.father_geno}</span>
+        </h5>
+        ${expectedRows.length ? `
+        <div class="cohort-ratios">
+          ${expectedRows.map(r => `
+            <div class="cohort-ratio">
+              <span class="id-mono" style="font-size:.78rem">${r.genotype}</span>
+              <span class="pct">${r.pct.toFixed(1)}%</span>
+              <div class="bar"><span style="width:${Math.min(100, r.pct*1.33).toFixed(0)}%"></span></div>
+            </div>`).join("")}
+        </div>` : `<p class="muted" style="font-size:.82rem">Could not parse parent genotypes for Mendelian prediction.</p>`}
+      </div>
+    </div>
+
+    <h4 style="margin: 18px 0 8px; font-size:.92rem;color:var(--ink);">Pedigree</h4>
+    <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;background:#fafbfd;border:1px solid var(--line);border-radius:8px;padding:14px;">
+      <div style="flex:1;min-width:220px;">
+        <div style="font-size:.72rem;color:#9d174d;text-transform:uppercase;font-weight:700;letter-spacing:.04em;">♀ Mother</div>
+        <div class="id-mono" style="font-size:1rem;font-weight:700;color:var(--ink);">${b.mother.split('|')[0]}</div>
+        <div class="id-mono" style="font-size:.72rem;color:var(--ink-muted);">${b.mother_geno}</div>
+      </div>
+      <div style="flex:1;min-width:220px;">
+        <div style="font-size:.72rem;color:var(--brand);text-transform:uppercase;font-weight:700;letter-spacing:.04em;">♂ Father</div>
+        <div class="id-mono" style="font-size:1rem;font-weight:700;color:var(--ink);">${b.father.split('|')[0]}</div>
+        <div class="id-mono" style="font-size:.72rem;color:var(--ink-muted);">${b.father_geno}</div>
+      </div>
+      <div style="flex:2;min-width:300px;">
+        <div style="font-size:.72rem;color:var(--ok);text-transform:uppercase;font-weight:700;letter-spacing:.04em;">↓ Offspring (${aliveCount})</div>
+        <div style="max-height:240px;overflow-y:auto;border-top:1px solid var(--line);padding-top:6px;margin-top:4px;">
+          ${aliveCount ? offspring.sort((a, b) => (a.dob || "").localeCompare(b.dob || "")).map(m => `
+            <div style="display:grid;grid-template-columns:80px 50px 60px 1fr;gap:8px;padding:3px 0;font-size:.78rem;align-items:center;">
+              <span class="id-mono" style="font-weight:600;">${m.mouse_id}</span>
+              <span>${tagFor(m.sex, "sex")}</span>
+              <span class="muted">${m.age_months ?? "—"}mo</span>
+              <span class="id-mono" style="font-size:.72rem;color:var(--ink-muted);">${m.genotype || ""}</span>
+            </div>`).join("") : `<p class="muted" style="font-size:.82rem;font-style:italic;">No offspring detected in the inventory.</p>`}
+        </div>
+      </div>
+    </div>
+    <p class="muted" style="font-size:.72rem;margin-top:8px;">
+      Offspring inferred by strain + DOB ≥ pair active date. May include offspring from other concurrent same-strain pairs.
+    </p>
+  `;
+  out.innerHTML = html;
+}
+
+(function initPP() {
+  const sel = $("#pp-pair-select");
+  sel.innerHTML = `<option value="">Select an active pair…</option>` +
+    BR.map((b, i) => b.status === "Active"
+      ? `<option value="${i}">#${i+1} ${b.offspring_strain} — ♀${b.mother.split('|')[0]} × ♂${b.father.split('|')[0]} (${b.litters} litters, ${b.born} pups)</option>`
+      : "").filter(Boolean).join("");
+  sel.addEventListener("change", () => ppRenderDetails(sel.value));
+})();
+
+// ============= BREEDING PLANNER =============
+function bpPopulateGenotypes(strain, mom, dad, target) {
+  // Mom + Dad genotype options come from the strain (or all if no strain)
+  const mice = strain ? INV.filter(m => m.strain === strain) : INV;
+  const genos = new Set();
+  mice.forEach(m => { const g = (m.genotype || "").trim(); if (g) genos.add(g); });
+  const sortedGenos = Array.from(genos).sort();
+  const opts = ['<option value="">— Select —</option>'].concat(
+    sortedGenos.map(g => `<option value="${g.replace(/"/g, "&quot;")}">${g}</option>`)
+  ).join("");
+  $("#bp-mom-geno").innerHTML = opts;
+  $("#bp-dad-geno").innerHTML = opts;
+  // Target genotype options = predicted distribution given mom/dad selections
+  if (mom && dad) {
+    const { rows } = offspringDistribution(mom, dad);
+    $("#bp-target-geno").innerHTML = '<option value="">— Select target —</option>' +
+      rows.map(r => `<option value="${r.genotype.replace(/"/g, "&quot;")}" data-pct="${r.pct.toFixed(3)}">${r.genotype}  (~${r.pct.toFixed(1)}%)</option>`).join("");
+  } else {
+    $("#bp-target-geno").innerHTML = '<option value="">Set mother + father first</option>';
+  }
+}
+
+window.bpCompute = function() {
+  const strain = $("#bp-strain").value;
+  const mom = $("#bp-mom-geno").value;
+  const dad = $("#bp-dad-geno").value;
+  const target = $("#bp-target-geno").value;
+  const targetN = parseInt($("#bp-target-n").value) || 6;
+  const targetSex = $("#bp-target-sex").value;
+  const out = $("#bp-output");
+
+  if (!mom || !dad || !target) {
+    out.innerHTML = `<div class="cb-empty">Pick strain, mother + father genotypes, and target before computing.</div>`;
+    return;
+  }
+
+  // Find predicted % of target in offspring
+  const { rows } = offspringDistribution(mom, dad);
+  const targetRow = rows.find(r => r.genotype === target);
+  if (!targetRow) {
+    out.innerHTML = `<div class="cb-empty">Target genotype not in predicted distribution.</div>`;
+    return;
+  }
+  const targetPct = targetRow.pct / 100;
+
+  // Sex multiplier (half are female / half male)
+  const sexMult = targetSex ? 0.5 : 1.0;
+  const effectivePct = targetPct * sexMult;
+
+  // Historical strain stats
+  const stats = strain ? strainBreedingStats(strain) : null;
+  const avgLitterSize = stats?.avg_litter_size ?? 6.5; // fall back to a default
+  const targetsPerLitter = avgLitterSize * effectivePct;
+  const littersNeeded = Math.ceil(targetN / Math.max(targetsPerLitter, 0.01));
+  // Most pairs produce ~3 litters in their productive window (rough)
+  const littersPerPair = stats && stats.n_pairs ? (BR.filter(b => b.offspring_strain === strain).reduce((s, b) => s + (b.litters || 0), 0) / stats.n_pairs) : 3;
+  const pairsNeeded = Math.max(1, Math.ceil(littersNeeded / Math.max(littersPerPair, 1)));
+
+  // Currently available toward target
+  const availableTarget = INV.filter(m => {
+    if (strain && m.strain !== strain) return false;
+    if ((m.genotype || "").trim() !== target) return false;
+    if (targetSex && m.sex !== targetSex) return false;
+    if (m.use === "Breeding") return false;
+    return true;
+  }).length;
+  const stillNeeded = Math.max(0, targetN - availableTarget);
+
+  out.innerHTML = `
+    <div class="row cols-3" style="margin-bottom: 12px;">
+      <div class="kpi"><div class="kpi-label">Target genotype %</div>
+        <div class="kpi-value">${(targetPct * 100).toFixed(1)}%</div>
+        <div class="kpi-sub">per litter, Mendelian</div></div>
+      <div class="kpi"><div class="kpi-label">Avg litter size (${strain || "any strain"})</div>
+        <div class="kpi-value">${avgLitterSize.toFixed(1)}</div>
+        <div class="kpi-sub">from historical breeding records</div></div>
+      <div class="kpi ok"><div class="kpi-label">Available toward target now</div>
+        <div class="kpi-value">${availableTarget}</div>
+        <div class="kpi-sub">${targetSex || "either sex"}</div></div>
+    </div>
+    <div class="control-suggestions" style="background:#f0fdf4;border-color:#bbf7d0;">
+      <h5 style="color:var(--ok);">Plan to produce n = ${targetN}${targetSex ? " " + targetSex : ""}</h5>
+      <p style="font-size:.85rem;margin:6px 0;color:var(--ink);">
+        Need <strong>${stillNeeded}</strong> more target mice on top of the ${availableTarget} you already have.
+      </p>
+      <table style="font-size:.82rem;">
+        <tr><td>Effective % per litter (after sex filter)</td><td><strong>${(effectivePct * 100).toFixed(1)}%</strong></td></tr>
+        <tr><td>Expected target mice per litter</td><td><strong>${targetsPerLitter.toFixed(1)}</strong> pups</td></tr>
+        <tr><td>Litters needed to hit n = ${targetN}</td><td><strong>${littersNeeded}</strong></td></tr>
+        <tr><td>Historical litters/pair in this strain</td><td>${littersPerPair.toFixed(1)}</td></tr>
+        <tr><td><strong style="color:var(--ok);">Breeding pairs to set up</strong></td><td><strong style="color:var(--ok);font-size:1.05rem;">${pairsNeeded}</strong></td></tr>
+      </table>
+      <p class="muted" style="font-size:.72rem;margin-top:8px;">
+        Assumes independent assortment and historical strain productivity. Add a safety buffer (e.g. +1 pair) for biological variation.
+      </p>
+    </div>
+  `;
+};
+
+(function initBP() {
+  $("#bp-strain").innerHTML = `<option value="">All strains</option>` +
+    COLONY.strain_order.map(s => `<option>${s}</option>`).join("");
+  ["bp-strain", "bp-mom-geno", "bp-dad-geno"].forEach(id =>
+    $("#" + id).addEventListener("change", () => bpPopulateGenotypes($("#bp-strain").value, $("#bp-mom-geno").value, $("#bp-dad-geno").value, $("#bp-target-geno").value)));
+  bpPopulateGenotypes("", "", "", "");
+})();
 
 // ============= LITTERS (DOB cohorts) =============
 function detectLitters(strainFilter, minN) {
@@ -3202,6 +3678,68 @@ git push</pre>
       </ul>
       <h3>How to use</h3>
       <p>Each row shows the DOB cohort, n, sex split, the genotypes present (with counts), and the full mouse-ID list. Use this to assemble matched-control cohorts directly — the Cohort Builder's "Suggest controls" function automatically prioritizes littermates of the same sex but different genotype.</p>
+    ` },
+  "consolidation": {
+    title: "Cage consolidation candidates",
+    body: `
+      <p>Lists every group of singly-housed (n = 1) mice of the same strain and sex that could be combined into shared cages. ULAM permits up to 5 adult mice per ventilated cage.</p>
+      <h3>What's flagged</h3>
+      <ul>
+        <li>Only Available mice are considered (breeders are excluded automatically).</li>
+        <li>Sex-unknown mice are excluded until ID'd.</li>
+        <li>Each group is ranked by how many cages you could retire.</li>
+      </ul>
+      <h3>Savings</h3>
+      <p>Computed at $${1.19.toFixed(2)}/day (CY26 ULAM ventilated rate). One retired cage = ~$435/year.</p>
+      <h3>Caveats</h3>
+      <ul>
+        <li>Adult males that have been singly-housed for a long time may fight when introduced — best practice is to merge them in a clean cage simultaneously.</li>
+        <li>The dashboard does not check past pairing history; experimenter judgment required.</li>
+      </ul>
+    ` },
+  "breeder-alerts": {
+    title: "Breeder alerts",
+    body: `
+      <p>Automatic flags for active breeding pairs that are underperforming. Thresholds:</p>
+      <ul>
+        <li><span class="tag danger">ALERT</span> Pair active &gt; 2 months with zero litters — possible infertility or mis-pairing.</li>
+        <li><span class="tag warn">WARN</span> Active &gt; 6 months and producing &lt; 1 pup/month — low productivity (lab average ~2.5).</li>
+        <li><span class="tag warn">WARN</span> Active &gt; 8 months with average litter size &lt; 4 pups — possible declining fertility.</li>
+        <li><span class="tag brand">INFO</span> No litter weaned in &gt; 12 weeks (despite producing some) — pair has slowed; consider rest or replacement.</li>
+      </ul>
+      <p>Alerts are computed from the live <span class="code">Breedings.xlsx</span> data each time the page loads.</p>
+    ` },
+  "pair-pedigree": {
+    title: "Pair pedigree & offspring tracking",
+    body: `
+      <p>For the selected active breeding pair, shows:</p>
+      <ul>
+        <li><strong>Pup survival</strong> — recorded "Born" count vs the number of mice in the inventory that match the pair's offspring strain and have a DOB on/after the pair's active date. Putative survival rate = alive / born.</li>
+        <li><strong>Sex ratio</strong> — F:M of matched offspring. Healthy expectation is ~50:50; anything &lt; 35% or &gt; 65% female is flagged as skewed.</li>
+        <li><strong>Observed vs expected Mendelian</strong> — the matched offspring genotypes are compared side-by-side with the Punnett-derived expected distribution from the parents' recorded genotypes.</li>
+        <li><strong>Pedigree</strong> — parents on the left, offspring list on the right, with DOB-sorted IDs.</li>
+      </ul>
+      <h3>Caveats</h3>
+      <ul>
+        <li>Offspring are inferred by strain + DOB heuristic — without per-mouse parent IDs, mice from other concurrent same-strain pairs may be incorrectly attributed. Treat as approximate.</li>
+        <li>"Born" counts include weaned offspring that may have been transferred or culled — the survival % captures both natural loss and intentional cull.</li>
+      </ul>
+    ` },
+  "breeding-planner": {
+    title: "Breeding planner",
+    body: `
+      <p>Given a target genotype, the planner estimates how many breeding pairs you need to set up to produce a cohort of size n.</p>
+      <h3>Inputs</h3>
+      <ol>
+        <li>Strain (optional — restricts the genotype options + the historical stats used).</li>
+        <li>Mother + father genotypes (proposed cross).</li>
+        <li>Target offspring genotype (auto-populated from the predicted Mendelian distribution).</li>
+        <li>Target cohort size (n) and optional sex restriction.</li>
+      </ol>
+      <h3>Math</h3>
+      <p>Predicted % of target per litter is taken from the Mendelian Punnett (multiplied by 0.5 if a single sex is required). Multiplied by your historical strain average litter size to get "target pups per litter." Litters needed = ceil(n_target / pups-per-litter). Pairs needed = ceil(litters / historical litters-per-pair).</p>
+      <h3>Caveats</h3>
+      <p>Assumes independent assortment and uses historical strain productivity. Add a buffer pair if you can't tolerate falling short.</p>
     ` },
   "breeder-builder": {
     title: "How the Breeder Builder works",
