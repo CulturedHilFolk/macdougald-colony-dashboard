@@ -556,10 +556,93 @@ table.data tbody tr:last-child td { border-bottom: none; }
         <thead><tr>
           <th>Pair</th><th>Status</th><th>Strain</th><th>Mother</th><th>Father</th>
           <th>Mother Geno</th><th>Father Geno</th>
-          <th>Active Since</th><th>Mo Active</th><th>Litters</th><th>Born</th><th>Avg Litter</th><th>Last Weaned</th>
+          <th>Active Since</th><th>Mo Active</th><th>Litters</th><th>Born</th>
+          <th>Avg Litter</th><th>Pups / mo</th><th>Last Weaned</th>
         </tr></thead>
         <tbody></tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Detected litters -->
+  <div class="panel" style="margin-top: 18px;">
+    <h3>Detected litters
+      <button class="info-btn" onclick="openModal('litters')">i</button>
+    </h3>
+    <p class="muted" style="font-size: .82rem; margin: 0 0 12px;">
+      Mice grouped by shared DOB + strain (heuristic — likely littermates from the same cross). Use these as built-in matched-control sources.
+    </p>
+    <div class="cb-filter-row" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">
+      <select id="lit-strain"><option value="">All strains</option></select>
+      <input id="lit-min-n" type="number" min="2" max="20" value="2" placeholder="Min litter size" style="padding:7px 10px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:.8rem;" />
+      <span class="count" id="lit-count" style="align-self:center;color:var(--ink-muted);font-size:.82rem;">— litters</span>
+    </div>
+    <div class="cb-table-wrap" style="max-height:380px;margin-top:10px;">
+      <table class="data" id="litters-table">
+        <thead><tr>
+          <th>DOB</th><th>Strain</th><th>n</th><th>♀ : ♂</th>
+          <th>Genotypes (count)</th><th>Mouse IDs</th><th>Mean age (mo)</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Breeder Builder -->
+  <div class="panel" style="margin-top: 18px;">
+    <h3>Breeder Builder
+      <button class="info-btn" onclick="openModal('breeder-builder')">i</button>
+    </h3>
+    <p class="muted" style="font-size: .85rem; margin: 0 0 14px;">
+      Hypothetically pair a female and male — predicted Mendelian offspring distribution, historical strain litter size, and a compatibility check.
+    </p>
+    <div class="cb-grid">
+      <!-- LEFT: selection -->
+      <div class="cb-side">
+        <h4>1 · Pick mother <span class="badge" id="bb-mom-count" style="background:#fce7f3;color:#9d174d">0</span></h4>
+        <div class="cb-filter-row">
+          <select id="bb-mom-strain"><option value="">All strains</option></select>
+          <input id="bb-mom-geno" type="text" placeholder="Genotype contains…" />
+          <select id="bb-mom-use">
+            <option value="Available">Only Available</option>
+            <option value="">Any use</option>
+            <option value="Breeding">Currently Breeding</option>
+          </select>
+        </div>
+        <div class="cb-table-wrap" style="max-height:200px;">
+          <table class="data" id="bb-mom-table">
+            <thead><tr><th></th><th>ID</th><th>Strain</th><th>Age</th><th>Genotype</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <h4 style="margin-top:18px">2 · Pick father <span class="badge" id="bb-dad-count" style="background:var(--brand-soft);color:var(--brand)">0</span></h4>
+        <div class="cb-filter-row">
+          <select id="bb-dad-strain"><option value="">All strains</option></select>
+          <input id="bb-dad-geno" type="text" placeholder="Genotype contains…" />
+          <select id="bb-dad-use">
+            <option value="Available">Only Available</option>
+            <option value="">Any use</option>
+            <option value="Breeding">Currently Breeding</option>
+          </select>
+        </div>
+        <div class="cb-table-wrap" style="max-height:200px;">
+          <table class="data" id="bb-dad-table">
+            <thead><tr><th></th><th>ID</th><th>Strain</th><th>Age</th><th>Genotype</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RIGHT: prediction -->
+      <div class="cb-side">
+        <h4>3 · Predicted outcome</h4>
+        <div id="bb-pair-card"
+             style="background:var(--neutral-soft);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:.85rem;color:var(--ink-muted);">
+          Select a mother and father from the lists on the left.
+        </div>
+        <div id="bb-prediction"></div>
+      </div>
     </div>
   </div>
 </section>
@@ -597,7 +680,8 @@ table.data tbody tr:last-child td { border-bottom: none; }
             <option value="Female">Female</option>
             <option value="Male">Male</option>
           </select>
-          <select id="cb-genotype"><option value="">All genotypes</option></select>
+          <select id="cb-genotype"><option value="">All genotypes (exact)</option></select>
+          <input id="cb-geno-contains" type="text" placeholder="Genotype contains… (cross-strain)" />
           <input id="cb-age-min" type="number" min="0" step="0.1" placeholder="Min age (mo)" />
           <input id="cb-age-max" type="number" min="0" step="0.1" placeholder="Max age (mo)" />
           <select id="cb-use">
@@ -13058,9 +13142,390 @@ $("#breeding-table tbody").innerHTML = BR.map((b, i) => `
     <td>${b.litters}</td>
     <td>${b.born}</td>
     <td>${b.avg_litter_size ?? "—"}</td>
+    <td>${(b.months_active && b.born) ? (b.born / b.months_active).toFixed(2) : "—"}</td>
     <td>${b.last_weaned}</td>
   </tr>
 `).join("");
+
+// ============= LITTERS (DOB cohorts) =============
+function detectLitters(strainFilter, minN) {
+  const groups = new Map(); // key strain||dob → array of mice
+  for (const m of INV) {
+    if (!m.dob) continue;
+    if (strainFilter && m.strain !== strainFilter) continue;
+    const key = m.strain + "||" + m.dob;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(m);
+  }
+  const litters = [];
+  for (const [key, arr] of groups.entries()) {
+    if (arr.length < minN) continue;
+    const [strain, dob] = key.split("||");
+    const f = arr.filter(x => x.sex === "Female").length;
+    const ml = arr.filter(x => x.sex === "Male").length;
+    const ages = arr.map(x => x.age_months).filter(x => x != null);
+    const meanAge = ages.length ? (ages.reduce((s,a)=>s+a,0) / ages.length) : null;
+    const genoMap = new Map();
+    arr.forEach(x => {
+      const g = (x.genotype || "").trim() || "(blank)";
+      genoMap.set(g, (genoMap.get(g) || 0) + 1);
+    });
+    litters.push({
+      dob, strain, n: arr.length, f, m: ml,
+      mean_age: meanAge, genotypes: genoMap, mice: arr,
+    });
+  }
+  // Sort by DOB descending (newest first)
+  litters.sort((a, b) => (b.dob || "").localeCompare(a.dob || ""));
+  return litters;
+}
+
+function renderLitters() {
+  const strain = $("#lit-strain").value;
+  const minN = parseInt($("#lit-min-n").value) || 2;
+  const litters = detectLitters(strain, minN);
+  $("#lit-count").textContent = litters.length + " litters";
+  const tbody = $("#litters-table tbody");
+  if (!litters.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="cb-empty">No litters match current filters.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = litters.slice(0, 100).map(L => {
+    const genoStr = Array.from(L.genotypes.entries())
+      .sort((a,b) => b[1] - a[1])
+      .map(([g, n]) => `${g} (${n})`)
+      .join(" · ");
+    return `
+      <tr>
+        <td class="id-mono">${L.dob}</td>
+        <td>${tagFor(L.strain, "strain")}</td>
+        <td style="font-weight:600">${L.n}</td>
+        <td><span style="color:#9d174d">${L.f}♀</span> : <span style="color:var(--brand)">${L.m}♂</span></td>
+        <td class="id-mono" style="font-size:.72rem">${genoStr}</td>
+        <td class="id-mono" style="font-size:.72rem">${L.mice.map(x => x.mouse_id).join(", ")}</td>
+        <td>${L.mean_age != null ? L.mean_age.toFixed(1) : "—"}</td>
+      </tr>`;
+  }).join("");
+}
+
+(function initLitters() {
+  $("#lit-strain").innerHTML = `<option value="">All strains</option>` +
+    COLONY.strain_order.map(s => `<option>${s}</option>`).join("");
+  ["lit-strain", "lit-min-n"].forEach(id =>
+    $("#" + id).addEventListener("input", renderLitters));
+  renderLitters();
+})();
+
+// ============= BREEDER BUILDER =============
+// Locus parsing: extract per-locus state {wt | het | hom} from a genotype string
+const BB_LOCI = ["Adipoq-Cre", "mTmG", "Dendra2", "Osterix", "Resisten-Cre"];
+
+function parseGenoLoci(g) {
+  const out = {};
+  if (!g) return out;
+  const tokens = g.split(/[;,]/).map(t => t.trim()).filter(Boolean);
+  for (const tok of tokens) {
+    const angle = tok.match(/^([A-Za-z][A-Za-z0-9\-]*)<([^>]+)>$/);
+    if (angle) {
+      const locus = canonicalLocus(angle[1]);
+      const [a1, a2] = angle[2].split("/").map(s => (s || "").trim());
+      out[locus] = allelePairState(a1, a2);
+    } else if (/^WT$/i.test(tok)) {
+      // Bare "WT" → conventionally refers to the Adipoq-Cre locus being WT/WT
+      if (out["Adipoq-Cre"] === undefined) out["Adipoq-Cre"] = "wt";
+    } else if (/Adipoq-cre/i.test(tok)) {
+      // Bare "Adipoq-cre" → het carrier
+      out["Adipoq-Cre"] = "het";
+    } else if (/Resisten-cre/i.test(tok)) {
+      out["Resisten-Cre"] = "het";
+    }
+  }
+  return out;
+}
+
+function canonicalLocus(s) {
+  const k = s.toLowerCase();
+  if (k === "mtmg") return "mTmG";
+  if (k === "dendra2") return "Dendra2";
+  if (k === "osterix") return "Osterix";
+  if (k === "adipoq-cre") return "Adipoq-Cre";
+  if (k === "resisten-cre") return "Resisten-Cre";
+  return s;
+}
+
+function allelePairState(a1, a2) {
+  const norm = a => (a || "").toLowerCase();
+  const x = norm(a1), y = norm(a2);
+  const isMut = v => v && v !== "wt" && v !== "-" && v !== "+" ? true : (v === "+" || v === "mtmg" || v === "mtmg/wt");
+  // For "+/+" "+/-" "-/-" style:
+  if ((x === "+" || x === "-") && (y === "+" || y === "-")) {
+    if (x === "+" && y === "+") return "hom";
+    if (x === "-" && y === "-") return "wt";
+    return "het";
+  }
+  // For mTmG style mTmG/mTmG, mTmG/WT, WT/WT
+  if (x === "wt" && y === "wt") return "wt";
+  if (x === "wt" || y === "wt") return "het";
+  return "hom";
+}
+
+// 3x3 Punnett: maps mother_state → father_state → {wt, het, hom} probabilities (sum = 1)
+const PUNNETT = {
+  wt:  { wt:  { wt: 1.0, het: 0.0, hom: 0.0 },
+         het: { wt: 0.5, het: 0.5, hom: 0.0 },
+         hom: { wt: 0.0, het: 1.0, hom: 0.0 } },
+  het: { wt:  { wt: 0.5, het: 0.5, hom: 0.0 },
+         het: { wt: 0.25, het: 0.5, hom: 0.25 },
+         hom: { wt: 0.0, het: 0.5, hom: 0.5 } },
+  hom: { wt:  { wt: 0.0, het: 1.0, hom: 0.0 },
+         het: { wt: 0.0, het: 0.5, hom: 0.5 },
+         hom: { wt: 0.0, het: 0.0, hom: 1.0 } },
+};
+
+// Format an offspring state at a locus into a readable token
+function formatLocusState(locus, state) {
+  if (locus === "Adipoq-Cre") {
+    if (state === "wt")  return "WT";
+    if (state === "het") return "Adipoq-cre";
+    if (state === "hom") return "Adipoq-cre/cre";
+  }
+  if (locus === "mTmG") {
+    if (state === "wt")  return "mTmG<WT/WT>";
+    if (state === "het") return "mTmG<mTmG/WT>";
+    if (state === "hom") return "mTmG<mTmG/mTmG>";
+  }
+  if (locus === "Dendra2") {
+    if (state === "wt")  return "Dendra2<-/->";
+    if (state === "het") return "Dendra2<+/->";
+    if (state === "hom") return "Dendra2<+/+>";
+  }
+  if (locus === "Osterix") {
+    if (state === "wt")  return "Osterix<-/->";
+    if (state === "het") return "Osterix<+/->";
+    if (state === "hom") return "Osterix<+/+>";
+  }
+  if (locus === "Resisten-Cre") {
+    if (state === "wt")  return "Resisten-cre WT";
+    if (state === "het") return "Resisten-cre het";
+    if (state === "hom") return "Resisten-cre hom";
+  }
+  return locus + "?";
+}
+
+// Combine across loci — Cartesian product of single-locus distributions
+function offspringDistribution(momGeno, dadGeno) {
+  const mom = parseGenoLoci(momGeno);
+  const dad = parseGenoLoci(dadGeno);
+  // Determine loci to model — only those present in BOTH parents (else unknown)
+  const lociUsed = BB_LOCI.filter(loc => mom[loc] !== undefined && dad[loc] !== undefined);
+  if (!lociUsed.length) return { rows: [], lociUsed: [] };
+  // Per-locus distributions
+  const perLocus = lociUsed.map(loc => ({
+    locus: loc,
+    dist: PUNNETT[mom[loc]][dad[loc]],
+  }));
+  // Cartesian
+  let dists = [{ labels: [], prob: 1 }];
+  for (const { locus, dist } of perLocus) {
+    const next = [];
+    for (const cur of dists) {
+      for (const state of ["wt", "het", "hom"]) {
+        if (dist[state] === 0) continue;
+        next.push({
+          labels: cur.labels.concat([formatLocusState(locus, state)]),
+          prob: cur.prob * dist[state],
+        });
+      }
+    }
+    dists = next;
+  }
+  // Convert to rows sorted by prob desc
+  const rows = dists.map(d => ({
+    genotype: d.labels.join("; "),
+    pct: (d.prob * 100),
+  })).sort((a, b) => b.pct - a.pct);
+  return { rows, lociUsed };
+}
+
+// Historical strain breeding stats from COLONY.breedings
+function strainBreedingStats(strain) {
+  const matches = BR.filter(b => (b.offspring_strain || "") === strain);
+  if (!matches.length) return null;
+  const totalLitters = matches.reduce((s, b) => s + (b.litters || 0), 0);
+  const totalBorn = matches.reduce((s, b) => s + (b.born || 0), 0);
+  const totalMonths = matches.reduce((s, b) => s + (b.months_active || 0), 0);
+  const withLitter = matches.filter(b => (b.litters || 0) > 0).length;
+  return {
+    n_pairs: matches.length,
+    avg_litter_size: totalLitters ? (totalBorn / totalLitters) : null,
+    pups_per_month: totalMonths ? (totalBorn / totalMonths) : null,
+    success_rate_pct: matches.length ? (100 * withLitter / matches.length) : null,
+  };
+}
+
+const BB = { mom: null, dad: null };
+
+function bbRenderCandidates(role) {
+  const strain = $(`#bb-${role}-strain`).value;
+  const geno = ($(`#bb-${role}-geno`).value || "").trim().toLowerCase();
+  const use = $(`#bb-${role}-use`).value;
+  const sex = role === "mom" ? "Female" : "Male";
+  const minAgeMo = 1.5;  // skip pups under ~6 weeks for breeder selection
+  const list = INV.filter(m => {
+    if (m.sex !== sex) return false;
+    if (strain && m.strain !== strain) return false;
+    if (use !== "" && m.use !== use) return false;
+    if (use === "" && m.use === "" /* placeholder */) {}
+    if (geno && !(m.genotype || "").toLowerCase().includes(geno)) return false;
+    if (m.age_months != null && m.age_months < minAgeMo) return false;
+    return true;
+  });
+  $(`#bb-${role}-count`).textContent = list.length;
+  const tbody = $(`#bb-${role}-table tbody`);
+  tbody.innerHTML = list.slice(0, 100).map(m => {
+    const selected = BB[role] && BB[role].mouse_id === m.mouse_id;
+    return `
+      <tr>
+        <td>${selected
+            ? '<span class="role-tag exp" style="background:'+(role==='mom'?'#fce7f3':'var(--brand-soft)')+';color:'+(role==='mom'?'#9d174d':'var(--brand)')+'">selected</span>'
+            : `<button class="btn small" onclick="bbSelect('${role}','${m.mouse_id}')">Use</button>`}</td>
+        <td class="id-mono">${m.mouse_id}</td>
+        <td>${tagFor(m.strain, "strain")}</td>
+        <td>${m.age_months ?? "—"}</td>
+        <td class="id-mono" style="font-size:.72rem">${m.genotype || ""}</td>
+      </tr>`;
+  }).join("") || `<tr><td colspan="5" class="cb-empty">No mice match.</td></tr>`;
+  if (list.length > 100) {
+    tbody.innerHTML += `<tr><td colspan="5" class="cb-empty">…showing first 100 of ${list.length}.</td></tr>`;
+  }
+}
+
+window.bbSelect = function(role, mouseId) {
+  BB[role] = INV.find(m => m.mouse_id === mouseId) || null;
+  bbRenderCandidates(role);
+  bbRenderPrediction();
+};
+
+function bbRenderPrediction() {
+  const card = $("#bb-pair-card");
+  const out = $("#bb-prediction");
+  if (!BB.mom || !BB.dad) {
+    card.innerHTML = `<span class="muted">Select a mother and father from the lists on the left.</span>`;
+    out.innerHTML = "";
+    return;
+  }
+  const m = BB.mom, d = BB.dad;
+
+  // Compatibility checks
+  const warnings = [];
+  if (m.sex !== "Female") warnings.push("Mother is not Female.");
+  if (d.sex !== "Male")   warnings.push("Father is not Male.");
+  if (m.age_months != null && m.age_months < 1.5) warnings.push("Mother is < 6 weeks — too young to breed.");
+  if (d.age_months != null && d.age_months < 1.5) warnings.push("Father is < 6 weeks — too young to breed.");
+  if (m.age_months != null && m.age_months > 9)   warnings.push("Mother is > 9 mo — first-litter fertility may be reduced (existing breeders OK).");
+  if (m.dob && d.dob && m.dob === d.dob && m.strain === d.strain) warnings.push("Same DOB + strain — possible littermates / siblings. Outcross instead.");
+  if (m.strain !== d.strain) warnings.push("Cross-strain pair — offspring strain assignment in the colony software may need to be set manually.");
+
+  // Pair card
+  card.innerHTML = `
+    <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;">
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:.72rem;color:#9d174d;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">♀ Mother</div>
+        <div class="id-mono" style="font-size:1.1rem;font-weight:700;color:var(--ink);margin:2px 0;">${m.mouse_id}</div>
+        <div style="font-size:.78rem;color:var(--ink-muted);">${m.strain} · ${m.age_months ?? "—"}mo · ${tagFor(m.sex,"sex")}</div>
+        <div class="id-mono" style="font-size:.72rem;color:var(--ink);margin-top:4px;">${m.genotype || "(no genotype)"}</div>
+      </div>
+      <div style="font-size:1.5rem;color:var(--muted);align-self:center;">×</div>
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:.72rem;color:var(--brand);text-transform:uppercase;letter-spacing:.05em;font-weight:700;">♂ Father</div>
+        <div class="id-mono" style="font-size:1.1rem;font-weight:700;color:var(--ink);margin:2px 0;">${d.mouse_id}</div>
+        <div style="font-size:.78rem;color:var(--ink-muted);">${d.strain} · ${d.age_months ?? "—"}mo · ${tagFor(d.sex,"sex")}</div>
+        <div class="id-mono" style="font-size:.72rem;color:var(--ink);margin-top:4px;">${d.genotype || "(no genotype)"}</div>
+      </div>
+    </div>
+  `;
+  card.style.background = "#fff";
+  card.style.border = "1px solid var(--line)";
+  card.style.color = "var(--ink)";
+
+  // Compute offspring distribution
+  const { rows, lociUsed } = offspringDistribution(m.genotype, d.genotype);
+
+  // Historical strain stats — try mom's strain first (assume offspring registered there)
+  const strainStats = strainBreedingStats(m.strain) || strainBreedingStats(d.strain);
+
+  let html = "";
+
+  // Warnings
+  if (warnings.length) {
+    html += `<div class="control-suggestions" style="background:#fef3c7;border-color:#fcd34d;">
+      <h5 style="color:#92400e;">⚠ Compatibility notes</h5>
+      <ul style="margin:0;padding-left:18px;font-size:.82rem;color:var(--ink);">
+        ${warnings.map(w => `<li>${w}</li>`).join("")}
+      </ul>
+    </div>`;
+  }
+
+  // Mendelian predictions
+  if (!rows.length) {
+    html += `<div class="control-suggestions">
+      <h5>Predicted offspring genotypes</h5>
+      <p class="muted" style="font-size:.82rem">No common loci could be parsed from both genotypes. Try parents with explicit transgene alleles (e.g. <span class="id-mono">Adipoq-cre; Dendra2&lt;+/-&gt;</span>).</p>
+    </div>`;
+  } else {
+    html += `<div class="control-suggestions">
+      <h5>Predicted offspring genotypes
+        <span class="muted" style="font-weight:400;font-size:.72rem">${lociUsed.join(" · ")}</span>
+      </h5>
+      <div class="cohort-ratios">
+        ${rows.map(r => `
+          <div class="cohort-ratio">
+            <span class="id-mono" style="font-size:.78rem">${r.genotype}</span>
+            <span class="pct">${r.pct.toFixed(1)}%</span>
+            <div class="bar"><span style="width:${Math.min(100, r.pct*1.33).toFixed(1)}%"></span></div>
+          </div>`).join("")}
+      </div>
+    </div>`;
+  }
+
+  // Strain historicals
+  if (strainStats) {
+    const targetN = 6;
+    const litterSize = strainStats.avg_litter_size;
+    const litters_needed = litterSize ? Math.ceil(targetN / litterSize) : null;
+    html += `<div class="control-suggestions" style="background:#f0f9ff;border-color:#bae6fd;">
+      <h5 style="color:#0369a1;">Historical strain breeding stats — ${m.strain}</h5>
+      <table>
+        <tr><td style="width:50%">Pairs on record</td><td><strong>${strainStats.n_pairs}</strong></td></tr>
+        <tr><td>Average litter size</td><td><strong>${litterSize != null ? litterSize.toFixed(1) + " pups" : "—"}</strong></td></tr>
+        <tr><td>Productivity</td><td><strong>${strainStats.pups_per_month != null ? strainStats.pups_per_month.toFixed(2) + " pups / mo" : "—"}</strong></td></tr>
+        <tr><td>Success rate (≥1 litter)</td><td><strong>${strainStats.success_rate_pct != null ? strainStats.success_rate_pct.toFixed(0) + "%" : "—"}</strong></td></tr>
+        ${litters_needed ? `<tr><td>To produce n=${targetN} target offspring</td><td><strong>~${litters_needed} litter${litters_needed>1?'s':''}</strong> at avg litter size</td></tr>` : ""}
+      </table>
+    </div>`;
+  } else {
+    html += `<div class="control-suggestions">
+      <h5>Historical strain breeding stats</h5>
+      <p class="muted" style="font-size:.82rem">No prior breeding records for this strain — fall back to colony-wide averages.</p>
+    </div>`;
+  }
+
+  out.innerHTML = html;
+}
+
+(function initBB() {
+  ["bb-mom-strain", "bb-dad-strain"].forEach(id => {
+    $("#" + id).innerHTML = `<option value="">All strains</option>` +
+      COLONY.strain_order.map(s => `<option>${s}</option>`).join("");
+  });
+  ["bb-mom-strain", "bb-mom-geno", "bb-mom-use"].forEach(id =>
+    $("#" + id).addEventListener("input", () => bbRenderCandidates("mom")));
+  ["bb-dad-strain", "bb-dad-geno", "bb-dad-use"].forEach(id =>
+    $("#" + id).addEventListener("input", () => bbRenderCandidates("dad")));
+  bbRenderCandidates("mom");
+  bbRenderCandidates("dad");
+  bbRenderPrediction();
+})();
 
 // ============= COHORT PLANNING =============
 $("#cohort-list").innerHTML = COLONY.cohort_plans.map(c => `
@@ -13270,7 +13735,7 @@ function cbInit() {
     cbApplyFilter();
   });
 
-  ["cb-strain", "cb-sex", "cb-genotype", "cb-age-min", "cb-age-max", "cb-use"]
+  ["cb-strain", "cb-sex", "cb-genotype", "cb-geno-contains", "cb-age-min", "cb-age-max", "cb-use"]
     .forEach(id => $("#" + id).addEventListener("input", cbApplyFilter));
   cbApplyFilter();
   cbRenderCohort();
@@ -13317,6 +13782,7 @@ function cbApplyFilter() {
   const strain = $("#cb-strain").value;
   const sex = $("#cb-sex").value;
   const geno = $("#cb-genotype").value.trim();
+  const genoSubstr = ($("#cb-geno-contains").value || "").trim().toLowerCase();
   const ageMin = parseFloat($("#cb-age-min").value);
   const ageMax = parseFloat($("#cb-age-max").value);
   const use = $("#cb-use").value;
@@ -13326,6 +13792,7 @@ function cbApplyFilter() {
     if (sex && m.sex !== sex) return false;
     if (use && m.use !== use) return false;
     if (geno && (m.genotype || "").trim() !== geno) return false;
+    if (genoSubstr && !(m.genotype || "").toLowerCase().includes(genoSubstr)) return false;
     if (!isNaN(ageMin) && (m.age_months ?? -1) < ageMin) return false;
     if (!isNaN(ageMax) && (m.age_months ?? 9999) > ageMax) return false;
     return true;
@@ -13427,6 +13894,17 @@ function cbRenderCohort() {
     </tr>`).join("");
 }
 
+// Littermate detection — mice with the same DOB AND same strain are treated as
+// putative littermates (born to the same cross on the same day in the same strain).
+function getLittermates(mouse) {
+  if (!mouse || !mouse.dob) return [];
+  return INV.filter(x =>
+    x.mouse_id !== mouse.mouse_id &&
+    x.strain === mouse.strain &&
+    x.dob && x.dob === mouse.dob
+  );
+}
+
 window.cbSuggestControls = function() {
   const exp = Array.from(CB.selected.values()).filter(x => x.role === "experimental");
   if (!exp.length) {
@@ -13442,51 +13920,65 @@ window.cbSuggestControls = function() {
     ctrlGenosByStrain[c.strain] = set;
   });
 
-  let html = `<h4 style="margin: 18px 0 10px; font-size:.92rem; color: var(--ink);">Suggested genetic controls</h4>`;
+  let html = `<h4 style="margin: 18px 0 10px; font-size:.92rem; color: var(--ink);">Suggested genetic controls
+    <span class="muted" style="font-weight:400; font-size:.78rem;">— littermates ranked first, then plan-matched controls, then closest-age</span>
+  </h4>`;
   exp.forEach(({mouse: m}) => {
     const targetGenoNorm = normalizeGeno(m.genotype);
+    const littermates = new Set(getLittermates(m).map(x => x.mouse_id));
     const candidates = INV.filter(x => {
       if (x.strain !== m.strain) return false;
       if (x.sex !== m.sex) return false;
       if (x.mouse_id === m.mouse_id) return false;
-      if (CB.selected.has(x.mouse_id)) return false;  // already in cohort
-      if (normalizeGeno(x.genotype) === targetGenoNorm) return false;  // same geno = not control
+      if (CB.selected.has(x.mouse_id)) return false;
+      if (normalizeGeno(x.genotype) === targetGenoNorm) return false;
       if (x.use === "Breeding") return false;
       return true;
     });
 
-    // Score: prefer mice whose genotype is in the cohort plan's "control" list,
-    // then by absolute age difference.
     const ctrlSet = ctrlGenosByStrain[m.strain] || new Set();
     candidates.forEach(c => {
+      const isLM = littermates.has(c.mouse_id);
       const inPlan = ctrlSet.has(normalizeGeno(c.genotype));
       const ageDiff = (c.age_months != null && m.age_months != null)
         ? Math.abs(c.age_months - m.age_months) : 999;
-      c._score = (inPlan ? 0 : 100) + ageDiff;
+      // Score: littermate < plan-match < age proximity
+      c._score = (isLM ? 0 : 1000) + (inPlan ? 0 : 100) + ageDiff;
+      c._isLittermate = isLM;
       c._inPlan = inPlan;
       c._ageDiff = ageDiff;
     });
     candidates.sort((a,b) => a._score - b._score);
-    const top = candidates.slice(0, 5);
+    const top = candidates.slice(0, 6);
+
+    // Count littermates total for the header summary
+    const lmCount = candidates.filter(c => c._isLittermate).length;
+    const lmBlurb = lmCount > 0
+      ? ` <span class="role-tag" style="background:#fef3c7;color:#92400e">${lmCount} littermate${lmCount>1?'s':''}</span>`
+      : ` <span class="muted" style="font-size:.74rem">no littermates found</span>`;
 
     html += `
       <div class="control-suggestions">
         <h5>
-          <span>For <span class="id-mono">${m.mouse_id}</span> · ${m.strain} · ${m.sex} · ${m.age_months}mo</span>
+          <span>For <span class="id-mono">${m.mouse_id}</span> · ${m.strain} · ${m.sex} · ${m.age_months}mo · DOB ${m.dob || "—"}${lmBlurb}</span>
           <span class="target">${m.genotype || ""}</span>
         </h5>
         ${top.length ? `
         <table>
           <thead><tr>
-            <th>ID</th><th>Sex</th><th>Age</th><th>Δ age</th><th>Genotype</th><th>Cage</th><th></th>
+            <th>ID</th><th>Sex</th><th>Age</th><th>Δ age</th><th>DOB</th><th>Genotype</th><th>Cage</th><th></th>
           </tr></thead>
           <tbody>
             ${top.map(c => `
               <tr>
-                <td class="id-mono">${c.mouse_id}${c._inPlan ? ' <span class="role-tag ctrl" style="margin-left:4px">plan</span>' : ''}</td>
+                <td class="id-mono">${c.mouse_id}${
+                  c._isLittermate ? ' <span class="role-tag" style="background:#fef3c7;color:#92400e;margin-left:4px">litter</span>' :
+                  c._inPlan       ? ' <span class="role-tag ctrl" style="margin-left:4px">plan</span>' : ''
+                }</td>
                 <td>${tagFor(c.sex, "sex")}</td>
                 <td>${c.age_months ?? "—"}</td>
-                <td><span class="age-diff ${c._ageDiff < 1 ? 'close' : ''}">±${c._ageDiff.toFixed(1)} mo</span></td>
+                <td><span class="age-diff ${c._ageDiff < 1 ? 'close' : ''}">${c._ageDiff < 0.5 ? '=' : '±' + c._ageDiff.toFixed(1) + ' mo'}</span></td>
+                <td class="id-mono" style="font-size:.72rem">${c.dob || "—"}</td>
                 <td class="id-mono" style="font-size:.72rem">${c.genotype || ""}</td>
                 <td class="id-mono">${c.cage_id}</td>
                 <td><button class="btn small ok" onclick="cbAdd('${c.mouse_id}','control'); cbSuggestControls();">+ add</button></td>
@@ -13532,7 +14024,8 @@ window.cbExportXlsx = function() {
     ["Filters used at time of export"],
     ["  Strain", $("#cb-strain").value || "(all)"],
     ["  Sex", $("#cb-sex").value || "(all)"],
-    ["  Genotype contains", $("#cb-genotype").value || "(any)"],
+    ["  Genotype (exact)", $("#cb-genotype").value || "(any)"],
+    ["  Genotype contains", $("#cb-geno-contains").value || "(any)"],
     ["  Age min (mo)", $("#cb-age-min").value || "(any)"],
     ["  Age max (mo)", $("#cb-age-max").value || "(any)"],
     ["  Use", $("#cb-use").value || "(any)"],
@@ -14354,29 +14847,59 @@ git push</pre>
   "cohort-builder": {
     title: "How the cohort builder works",
     body: `
+      <h3>Filters</h3>
+      <ul>
+        <li><strong>Strain</strong> — narrows everything. Leave on "All strains" to search across strains.</li>
+        <li><strong>Genotype (exact)</strong> — pick a specific genotype string from the dropdown.</li>
+        <li><strong>Genotype contains</strong> — free-text substring match (cross-strain by default). Use this to find any mouse with e.g. "Adipoq-cre" or "Dendra2&lt;+/-&gt;" regardless of compound-strain background.</li>
+        <li>Sex, age range, and use status compose with the above.</li>
+      </ul>
+      <h3>Control suggestions</h3>
+      <p>For each experimental mouse, the dashboard ranks up to 6 candidate controls by:</p>
+      <ol>
+        <li><strong>Littermate</strong> first — mice with the same DOB and strain (presumed from the same cross). Marked <span class="role-tag" style="background:#fef3c7;color:#92400e">litter</span>.</li>
+        <li><strong>Plan-matched</strong> next — genotypes listed as non-target in that strain's cohort plan. Marked <span class="role-tag ctrl">plan</span>.</li>
+        <li>Then closest <strong>age proximity</strong> (Δ months shown; ≥ 0.5 mo difference shown numerically).</li>
+      </ol>
+      <p>Candidates must be the same strain + same sex, a different genotype than the experimental mouse, not breeding, and not already in the cohort.</p>
+      <h3>Export</h3>
+      <p>Click <strong>"Export to Excel"</strong> for a 2-sheet xlsx (Cohort + Summary, including the filters used at export time as an audit trail).</p>
+    ` },
+  "litters": {
+    title: "Detected litters",
+    body: `
+      <p>Mice in the inventory are grouped by shared <strong>date of birth + strain</strong>. Groups with ≥ 2 mice are surfaced as putative litters.</p>
+      <h3>Why this is a heuristic</h3>
+      <ul>
+        <li>The colony software does not link each mouse to its specific dam/sire, so we infer littermate status from DOB + strain.</li>
+        <li>If two breeding pairs of the same strain happened to deliver on the same day, their litters would be merged here. In practice this is uncommon.</li>
+        <li>If pups were moved between cages after weaning, DOB-based detection still works (it doesn't rely on cage).</li>
+      </ul>
+      <h3>How to use</h3>
+      <p>Each row shows the DOB cohort, n, sex split, the genotypes present (with counts), and the full mouse-ID list. Use this to assemble matched-control cohorts directly — the Cohort Builder's "Suggest controls" function automatically prioritizes littermates of the same sex but different genotype.</p>
+    ` },
+  "breeder-builder": {
+    title: "How the Breeder Builder works",
+    body: `
       <h3>Steps</h3>
       <ol>
-        <li><strong>Filter</strong> the colony by strain, sex, genotype text, age range, and use status.</li>
-        <li><strong>Add</strong> mice as <em>experimental</em> or <em>control</em>. Mice already in the cohort are tagged.</li>
-        <li>Click <strong>"Suggest controls"</strong> — for each experimental mouse, the dashboard surfaces
-            up to 5 best-matched controls by:
-          <ul>
-            <li>Same strain</li>
-            <li>Same sex</li>
-            <li>Different genotype than the experimental mouse</li>
-            <li>Closest age (Δ months shown)</li>
-            <li>Bonus: prioritizes genotypes listed as non-target in that strain's cohort plan
-                (marked with the <span class="role-tag ctrl">plan</span> tag)</li>
-          </ul>
-        </li>
-        <li>Click <strong>"Export to Excel"</strong> — produces a 2-sheet workbook (Cohort + Summary)
-            ready to share or import into Prism / R / Excel directly.</li>
+        <li>Filter and select a <strong>mother (♀)</strong> on the left.</li>
+        <li>Filter and select a <strong>father (♂)</strong> below the mother list.</li>
+        <li>The right panel updates automatically with the prediction.</li>
       </ol>
-      <h3>Notes</h3>
+      <h3>What you get</h3>
       <ul>
-        <li>Breeders are excluded from control suggestions automatically.</li>
-        <li>Mice already in the cohort cannot be re-suggested.</li>
-        <li>The Δ age is shown in months; differences under 1 month are highlighted green.</li>
+        <li><strong>Compatibility check</strong> — warns about age (too young to breed, or > 9 mo first-time), same-DOB siblings, and cross-strain pairs.</li>
+        <li><strong>Predicted offspring</strong> — combines the parents' genotypes locus-by-locus with a Punnett table; results are the Cartesian product of each locus's distribution, sorted by probability.</li>
+        <li><strong>Historical strain stats</strong> — pulled from your Breedings.xlsx for the offspring strain: average litter size, pups/month productivity, success rate (% of pairs with ≥ 1 litter), and an estimate of how many litters you'd need to hit a target n.</li>
+      </ul>
+      <h3>Loci modeled</h3>
+      <p>Adipoq-Cre, mTmG, Dendra2, Osterix, Resisten-Cre. A locus is only included in the prediction if both parents have a parseable allele state at that locus (otherwise the prediction is across the loci that can be modeled, and unmodeled loci are noted).</p>
+      <h3>Caveats</h3>
+      <ul>
+        <li>Mendelian ratios assume independent assortment (true for unlinked loci on different chromosomes — verify if any of your transgenes are linked).</li>
+        <li>"Adipoq-cre" with no allele specifier is treated as heterozygous (Cre/WT). If your colony tracks homozygous Adipoq-cre with a different convention, predictions for Cre/Cre × Cre/Cre crosses may underestimate.</li>
+        <li>This is a planning aid — actual offspring distributions are stochastic.</li>
       </ul>
     ` },
 };
