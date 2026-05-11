@@ -397,6 +397,7 @@ table.data tbody tr:last-child td { border-bottom: none; }
   <button class="tab active" data-pane="overview">Overview</button>
   <button class="tab" data-pane="inventory">Inventory</button>
   <button class="tab" data-pane="cages">Cages</button>
+  <button class="tab" data-pane="costs">Cage Costs</button>
   <button class="tab" data-pane="breeding">Breeding</button>
   <button class="tab" data-pane="cohort">Cohort Planning</button>
   <button class="tab" data-pane="cull">Cull Candidates</button>
@@ -540,6 +541,104 @@ table.data tbody tr:last-child td { border-bottom: none; }
         </tr></thead>
         <tbody></tbody>
       </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============= CAGE COSTS ============= -->
+<section class="tab-pane" id="pane-costs">
+  <div class="panel" style="margin-bottom: 16px;">
+    <h3>What this tab shows
+      <button class="info-btn" onclick="openModal('costs')">i</button>
+    </h3>
+    <p style="font-size: .9rem; margin: 0;">
+      Current cage costs (ULAM CY26 ventilated rate) plus a projection of what those costs become
+      if the <strong>current Smart Cull Plan</strong> is executed. Change priorities on the Smart Cull
+      Plan tab to see this update — the two views stay in sync.
+    </p>
+  </div>
+
+  <!-- Headline KPIs: current cost -->
+  <div class="row cols-3" id="costs-current-kpis" style="margin-bottom: 16px;"></div>
+
+  <!-- Projected savings callout -->
+  <div class="panel" style="margin-bottom: 16px;">
+    <h3>Projected — if Smart Cull Plan is carried out
+      <button class="info-btn" onclick="openModal('costs-projected')">i</button>
+    </h3>
+    <div class="row cols-3" id="costs-projected-kpis"></div>
+  </div>
+
+  <!-- Strain breakdown -->
+  <div class="panel" style="margin-bottom: 16px;">
+    <h3>Breakdown by strain</h3>
+    <div class="scroll-x">
+      <table class="data" id="costs-strain-table">
+        <thead><tr>
+          <th>Strain</th>
+          <th>Cages (now)</th><th>$ / day</th><th>$ / year</th>
+          <th>Cages (after plan)</th><th>$ / day</th><th>$ / year</th>
+          <th>Δ annual</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Cross-cuts -->
+  <div class="row cols-2">
+    <div class="panel">
+      <h3>By breeding status</h3>
+      <div class="scroll-x">
+        <table class="data" id="costs-breeding-table">
+          <thead><tr>
+            <th>Category</th>
+            <th>Cages (now)</th><th>$ / day</th><th>$ / year</th>
+            <th>Cages (after)</th><th>$ / day</th><th>$ / year</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>By housing density</h3>
+      <div class="scroll-x">
+        <table class="data" id="costs-density-table">
+          <thead><tr>
+            <th>Density</th>
+            <th>Cages (now)</th><th>$ / day</th><th>$ / year</th>
+            <th>Cages (after)</th><th>$ / day</th><th>$ / year</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="row cols-2" style="margin-top: 16px;">
+    <div class="panel">
+      <h3>By sex composition</h3>
+      <div class="scroll-x">
+        <table class="data" id="costs-sex-table">
+          <thead><tr>
+            <th>Composition</th>
+            <th>Cages (now)</th><th>$ / day</th><th>$ / year</th>
+            <th>Cages (after)</th><th>$ / day</th><th>$ / year</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Methodology</h3>
+      <ul class="bullet-list" style="font-size:.82rem;">
+        <li>Non-breeding ventilated cage: <strong>$1.19/day</strong> (CY26 rate)</li>
+        <li>Breeding (vented) cage: <strong>$2.16/day</strong></li>
+        <li>"Cages after plan" = cages still occupied by at least one mouse preserved by the current Smart Cull Plan. Empty cages are assumed to be returned to ULAM and stop billing.</li>
+        <li>Breeding status of a cage after the plan = retains its breeding rate if any preserved breeder is still inside.</li>
+        <li>Annual = daily × 365. Husbandry technician labor is billed separately and not included.</li>
+        <li>To change the projection, adjust strain priorities on the <strong>Smart Cull Plan</strong> tab and return here.</li>
+      </ul>
     </div>
   </div>
 </section>
@@ -723,24 +822,14 @@ table.data tbody tr:last-child td { border-bottom: none; }
 
 <!-- ============= COHORT PLANNING ============= -->
 <section class="tab-pane" id="pane-cohort">
-  <div class="panel" style="margin-bottom: 18px;">
-    <h3>What is this tab?</h3>
-    <p class="muted" style="font-size: .88rem;">
-      Each card describes an active research cohort: the cross used to generate it, why we need it,
-      the target genotype, and the expected Mendelian ratios per cross. Use this to plan how many
-      breedings you need to produce the experimental n.
-    </p>
-  </div>
-  <div id="cohort-list"></div>
-
   <!-- ===== Cohort Builder ===== -->
-  <div class="panel" style="margin-top: 24px;">
+  <div class="panel">
     <h3>Build a cohort
       <button class="info-btn" onclick="openModal('cohort-builder')">i</button>
     </h3>
     <p class="muted" style="font-size: .85rem; margin: 0 0 16px;">
       Filter the live colony, hand-pick experimental mice, surface genetic controls
-      best matched by sex and age, and export the assembled cohort to Excel.
+      best matched by sex and age (littermates first), and export the assembled cohort to Excel.
     </p>
 
     <div class="cb-grid">
@@ -9422,32 +9511,9 @@ function bbRenderPrediction() {
 })();
 
 // ============= COHORT PLANNING =============
-$("#cohort-list").innerHTML = COLONY.cohort_plans.map(c => `
-  <div class="cohort-card">
-    <div class="cohort-head">
-      <div>
-        <h4>${c.strain} — ${c.target_label || c.target_geno}</h4>
-        <div class="cohort-cross">${c.cross_desc}</div>
-      </div>
-    </div>
-    <div class="cohort-purpose">${c.purpose}</div>
-    <div class="cohort-target">🎯 Experimental target: <span class="id-mono">${c.target_geno}</span></div>
-    <div class="muted" style="font-size:.78rem; margin-bottom:6px;">Expected Mendelian ratios per cross:</div>
-    <div class="cohort-ratios">
-      ${(c.expected_ratios || []).map(r => `
-        <div class="cohort-ratio ${r.target ? 'target' : ''}">
-          <span class="id-mono" style="font-size:.78rem">${r.genotype}</span>
-          <span class="pct">${r.pct}%</span>
-          <div class="bar"><span style="width:${Math.min(100, r.pct*1.33)}%"></span></div>
-        </div>
-      `).join("")}
-    </div>
-    ${c.currently_available != null ? `
-      <p class="muted" style="font-size:.82rem; margin-top:10px;">
-        Currently available toward target: <strong style="color:var(--ok)">${c.currently_available}</strong> mice
-      </p>` : ''}
-  </div>
-`).join("");
+// (Cohort-plan cards retired — only the Cohort Builder remains on the Cohort Planning tab.
+// The cohort_plans data is still loaded into colony.json and is used by Smart Cull Plan
+// for plan-matched control suggestions and by the reverse Breeding Planner autocomplete.)
 
 // ============= CULL CANDIDATES =============
 const CULL_DEFINITIONS = [
@@ -10364,6 +10430,11 @@ window.scRecompute = function() {
   scRenderSummary();
   scRenderActions();
   scRenderTables();
+  // Cage Costs tab depends on SC.plan — re-render whenever the plan changes.
+  // Deferred via setTimeout(0) because scRecompute() runs during initial script
+  // execution (via scInit) before renderCosts's `const` constants are initialized
+  // (temporal dead zone). After the current execution frame ends all consts are live.
+  setTimeout(() => { if (typeof renderCosts === "function") renderCosts(); }, 0);
 };
 
 function scRenderSummary() {
@@ -10580,6 +10651,175 @@ window.scExportCull = function() {
 
 scInit();
 
+// ============= CAGE COSTS =============
+// Cost model: ULAM CY26 ventilated rates ($1.19/day non-breeding, $2.16/day breeding).
+// "After plan" cage is alive if at least one preserved mouse still lives in it.
+const COSTS_RATE_NONBREEDING = 1.19;
+const COSTS_RATE_BREEDING    = 2.16;
+const fmtUSD  = n => "$" + Math.round(n).toLocaleString();
+const fmtUSD2 = n => "$" + n.toFixed(2);
+const fmtUSDsigned = n => (n >= 0 ? "" : "−") + "$" + Math.round(Math.abs(n)).toLocaleString();
+
+function cageRate(c)            { return c.has_breeders ? COSTS_RATE_BREEDING : COSTS_RATE_NONBREEDING; }
+function cageRateAfter(c, plan) { return plan.has_breeders_after ? COSTS_RATE_BREEDING : COSTS_RATE_NONBREEDING; }
+
+function computeCostStateForCage(cage, survivorSet, breederSurvivorSet) {
+  const survivingIds = (cage.ids || []).filter(id => survivorSet.has(id));
+  const has_breeders_after = survivingIds.some(id => breederSurvivorSet.has(id));
+  return {
+    cage,
+    survivors_in_cage: survivingIds.length,
+    has_breeders_after,
+    active_after: survivingIds.length > 0,
+  };
+}
+
+function aggregateCagesByKey(cageStates, keyFn) {
+  const map = new Map();
+  for (const s of cageStates) {
+    const key = keyFn(s);
+    if (key == null) continue;
+    if (!map.has(key)) map.set(key, {
+      key, cages_now: 0, day_now: 0, year_now: 0,
+      cages_after: 0, day_after: 0, year_after: 0,
+    });
+    const row = map.get(key);
+    const rateNow = cageRate(s.cage);
+    row.cages_now += 1;
+    row.day_now += rateNow;
+    row.year_now += rateNow * 365;
+    if (s.active_after) {
+      const rateAfter = cageRateAfter(s.cage, s);
+      row.cages_after += 1;
+      row.day_after += rateAfter;
+      row.year_after += rateAfter * 365;
+    }
+  }
+  return Array.from(map.values());
+}
+
+function renderCosts() {
+  if (!SC.plan) return;
+  const survivorIds = new Set(SC.plan.preserve.map(p => p.mouse.mouse_id));
+  // Breeders preserved = active breeders that survived
+  const allBreederIds = getActiveBreederIds();
+  const breederSurvivorIds = new Set([...allBreederIds].filter(id => survivorIds.has(id)));
+
+  const cageStates = COLONY.cages.map(c => computeCostStateForCage(c, survivorIds, breederSurvivorIds));
+  const totalNow      = cageStates.reduce((s, x) => s + cageRate(x.cage), 0);
+  const totalAfter    = cageStates.reduce((s, x) => s + (x.active_after ? cageRateAfter(x.cage, x) : 0), 0);
+  const cagesNow      = cageStates.length;
+  const cagesAfter    = cageStates.filter(x => x.active_after).length;
+  const cagesRetired  = cagesNow - cagesAfter;
+
+  // KPIs — current
+  $("#costs-current-kpis").innerHTML = `
+    <div class="kpi"><div class="kpi-label">Per day</div>
+      <div class="kpi-value">${fmtUSD2(totalNow)}</div>
+      <div class="kpi-sub">${cagesNow} cages</div></div>
+    <div class="kpi"><div class="kpi-label">Per month</div>
+      <div class="kpi-value">${fmtUSD(totalNow * 30)}</div>
+      <div class="kpi-sub">30-day run-rate</div></div>
+    <div class="kpi"><div class="kpi-label">Per year</div>
+      <div class="kpi-value">${fmtUSD(totalNow * 365)}</div>
+      <div class="kpi-sub">${$(`#hdr-asof`).textContent}</div></div>`;
+
+  // KPIs — projected after plan
+  const savingsDay  = totalNow - totalAfter;
+  $("#costs-projected-kpis").innerHTML = `
+    <div class="kpi ok"><div class="kpi-label">After plan — per day</div>
+      <div class="kpi-value">${fmtUSD2(totalAfter)}</div>
+      <div class="kpi-sub" style="color:var(--ok)">${fmtUSDsigned(-savingsDay)}/day saved</div></div>
+    <div class="kpi ok"><div class="kpi-label">After plan — per year</div>
+      <div class="kpi-value">${fmtUSD(totalAfter * 365)}</div>
+      <div class="kpi-sub" style="color:var(--ok)">${fmtUSDsigned(-savingsDay * 365)}/year saved</div></div>
+    <div class="kpi ok"><div class="kpi-label">Cages retired</div>
+      <div class="kpi-value">${cagesRetired}</div>
+      <div class="kpi-sub">of ${cagesNow} → ${cagesAfter} remaining</div></div>`;
+
+  // Strain breakdown
+  const byStrain = aggregateCagesByKey(cageStates, s => (s.cage.strain || "(blank)") || "(blank)");
+  byStrain.sort((a, b) => b.year_now - a.year_now);
+  $("#costs-strain-table tbody").innerHTML = byStrain.map(r => {
+    const delta = r.year_after - r.year_now;
+    return `
+      <tr>
+        <td>${tagFor(r.key, "strain")}</td>
+        <td style="text-align:right">${r.cages_now}</td>
+        <td style="text-align:right">${fmtUSD2(r.day_now)}</td>
+        <td style="text-align:right">${fmtUSD(r.year_now)}</td>
+        <td style="text-align:right;font-weight:600">${r.cages_after}</td>
+        <td style="text-align:right;font-weight:600">${fmtUSD2(r.day_after)}</td>
+        <td style="text-align:right;font-weight:600">${fmtUSD(r.year_after)}</td>
+        <td style="text-align:right;color:${delta < 0 ? "var(--ok)" : "var(--ink-muted)"};font-weight:600">${fmtUSDsigned(delta)}</td>
+      </tr>`;
+  }).join("");
+
+  // By breeding status
+  const byBreeding = aggregateCagesByKey(cageStates, s => s.cage.has_breeders ? "Breeding ($2.16/day)" : "Non-breeding ($1.19/day)");
+  $("#costs-breeding-table tbody").innerHTML = byBreeding.map(r => `
+    <tr>
+      <td><strong>${r.key}</strong></td>
+      <td style="text-align:right">${r.cages_now}</td>
+      <td style="text-align:right">${fmtUSD2(r.day_now)}</td>
+      <td style="text-align:right">${fmtUSD(r.year_now)}</td>
+      <td style="text-align:right;font-weight:600">${r.cages_after}</td>
+      <td style="text-align:right;font-weight:600">${fmtUSD2(r.day_after)}</td>
+      <td style="text-align:right;font-weight:600">${fmtUSD(r.year_after)}</td>
+    </tr>`).join("");
+
+  // By housing density
+  const densityFn = s => {
+    const n = s.cage.n_mice || 0;
+    if (n === 0) return "Empty (0 mice)";
+    if (n === 1) return "Singly housed (1)";
+    if (n === 2) return "Pair-housed (2)";
+    if (n <= 4) return "Group (3–4)";
+    return "Group (5+)";
+  };
+  const byDensity = aggregateCagesByKey(cageStates, densityFn);
+  const densityOrder = ["Empty (0 mice)","Singly housed (1)","Pair-housed (2)","Group (3–4)","Group (5+)"];
+  byDensity.sort((a, b) => densityOrder.indexOf(a.key) - densityOrder.indexOf(b.key));
+  $("#costs-density-table tbody").innerHTML = byDensity.map(r => `
+    <tr>
+      <td><strong>${r.key}</strong></td>
+      <td style="text-align:right">${r.cages_now}</td>
+      <td style="text-align:right">${fmtUSD2(r.day_now)}</td>
+      <td style="text-align:right">${fmtUSD(r.year_now)}</td>
+      <td style="text-align:right;font-weight:600">${r.cages_after}</td>
+      <td style="text-align:right;font-weight:600">${fmtUSD2(r.day_after)}</td>
+      <td style="text-align:right;font-weight:600">${fmtUSD(r.year_after)}</td>
+    </tr>`).join("");
+
+  // By sex composition
+  const sexFn = s => {
+    const c = s.cage;
+    if (c.has_breeders) return "Breeding pair";
+    const sexes = (c.sexes || []);
+    if (sexes.length === 0) return "Empty";
+    const f = sexes.filter(x => x === "Female").length;
+    const m = sexes.filter(x => x === "Male").length;
+    const u = sexes.length - f - m;
+    if (f > 0 && m === 0 && u === 0) return "♀ only";
+    if (m > 0 && f === 0 && u === 0) return "♂ only";
+    if (f > 0 && m > 0) return "Mixed sex";
+    return "Sex unknown";
+  };
+  const bySex = aggregateCagesByKey(cageStates, sexFn);
+  bySex.sort((a, b) => b.year_now - a.year_now);
+  $("#costs-sex-table tbody").innerHTML = bySex.map(r => `
+    <tr>
+      <td><strong>${r.key}</strong></td>
+      <td style="text-align:right">${r.cages_now}</td>
+      <td style="text-align:right">${fmtUSD2(r.day_now)}</td>
+      <td style="text-align:right">${fmtUSD(r.year_now)}</td>
+      <td style="text-align:right;font-weight:600">${r.cages_after}</td>
+      <td style="text-align:right;font-weight:600">${fmtUSD2(r.day_after)}</td>
+      <td style="text-align:right;font-weight:600">${fmtUSD(r.year_after)}</td>
+    </tr>`).join("");
+}
+renderCosts();
+
 // ============= EXPERIMENT =============
 $("#exp-strain-list").innerHTML = COLONY.strain_summary.map(s => `
   <li><strong>${s.strain}</strong> — ${s.alive_mice} alive · ${s.active_breedings} active breeding(s) · ${s.active_cages} cages</li>
@@ -10780,6 +11020,47 @@ git push</pre>
       </ul>
       <h3>How to use</h3>
       <p>Each row shows the DOB cohort, n, sex split, the genotypes present (with counts), and the full mouse-ID list. Use this to assemble matched-control cohorts directly — the Cohort Builder's "Suggest controls" function automatically prioritizes littermates of the same sex but different genotype.</p>
+    ` },
+  "costs": {
+    title: "Cage Costs — what's shown",
+    body: `
+      <p>Per-diem cage costs at the ULAM CY26 ventilated rates:</p>
+      <ul>
+        <li>Non-breeding cage: <strong>$1.19/day</strong></li>
+        <li>Breeding cage: <strong>$2.16/day</strong></li>
+      </ul>
+      <p>The <strong>current</strong> figures count every cage in the colony as recorded in the
+      colony software. Daily × 365 = annual; daily × 30 = monthly.</p>
+      <h3>Projection (next panel)</h3>
+      <p>Computes what your costs become if the <em>current</em> Smart Cull Plan is executed.
+      A cage retires if zero of its mice survive the plan; otherwise it remains at the full
+      daily rate (you pay for the cage, not per mouse). Breeding rate is retained if any
+      preserved breeder is still inside.</p>
+      <p>To shift the projection, go to the Smart Cull Plan tab, adjust strain priorities,
+      and come back — the numbers here update automatically.</p>
+      <h3>Breakdowns below</h3>
+      <ul>
+        <li><strong>By strain</strong> — which lines cost you the most, both now and after the plan</li>
+        <li><strong>By breeding status</strong> — split between regular and breeding-rate cages</li>
+        <li><strong>By housing density</strong> — single vs paired vs group-housed (single-housed cages
+            are the obvious consolidation candidates; see Cages tab)</li>
+        <li><strong>By sex composition</strong> — female-only, male-only, mixed, breeding pairs</li>
+      </ul>
+      <h3>Caveat</h3>
+      <p>Husbandry technician labor is billed separately (Husbandry Tech labor rate $41.15/hr) and is not included in these numbers.</p>
+    ` },
+  "costs-projected": {
+    title: "Projected costs — how this works",
+    body: `
+      <p>The projection mirrors the current Smart Cull Plan. For each cage in the colony:</p>
+      <ol>
+        <li>Mark the mouse-IDs that are preserved (per the plan).</li>
+        <li>If <strong>any</strong> preserved mouse remains in that cage, the cage stays alive at the appropriate rate.</li>
+        <li>If <strong>no</strong> preserved mouse remains, the cage is assumed to be returned to ULAM and stops billing.</li>
+      </ol>
+      <p>"Cages retired" is the total number of cages that empty out under the plan.</p>
+      <p>Note: this assumes the experimenter actually returns the empty cage. If you keep an empty cage
+      assigned in the colony software, ULAM will continue billing it.</p>
     ` },
   "consolidation": {
     title: "Cage consolidation candidates",
