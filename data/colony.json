@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-11T12:20:53",
-  "as_of": "2026-05-11",
+  "generated_at": "2026-05-28T11:35:05",
+  "as_of": "2026-05-28",
   "summary": {
-    "as_of": "2026-05-11",
+    "as_of": "2026-05-28",
     "total_mice": 222,
     "total_cages": 108,
     "located_cages": 28,
@@ -10,8 +10,8 @@
     "active_breeders": 20,
     "active_breeding_pairs": 10,
     "available_mice": 202,
-    "aged_over_12mo": 70,
-    "aged_over_18mo": 13,
+    "aged_over_12mo": 90,
+    "aged_over_18mo": 17,
     "unknown_sex": 5,
     "n_strains": 4
   },
@@ -59,27 +59,27 @@
   ],
   "age_dist_total": {
     "0\u20132 mo": 0,
-    "2\u20134 mo": 20,
-    "4\u20136 mo": 25,
-    "6\u201312 mo": 107,
-    ">12 mo": 70,
+    "2\u20134 mo": 14,
+    "4\u20136 mo": 30,
+    "6\u201312 mo": 88,
+    ">12 mo": 90,
     "Unknown": 0
   },
   "age_dist_by_strain": {
     "AdipoGlo": {
       "0\u20132 mo": 0,
       "2\u20134 mo": 8,
-      "4\u20136 mo": 4,
-      "6\u201312 mo": 60,
-      ">12 mo": 26,
+      "4\u20136 mo": 3,
+      "6\u201312 mo": 48,
+      ">12 mo": 39,
       "Unknown": 0
     },
     "AdipoGlo+": {
       "0\u20132 mo": 0,
       "2\u20134 mo": 5,
       "4\u20136 mo": 21,
-      "6\u201312 mo": 46,
-      ">12 mo": 33,
+      "6\u201312 mo": 39,
+      ">12 mo": 40,
       "Unknown": 0
     },
     "Dendra2": {
@@ -92,8 +92,8 @@
     },
     "Marrow Glo": {
       "0\u20132 mo": 0,
-      "2\u20134 mo": 7,
-      "4\u20136 mo": 0,
+      "2\u20134 mo": 1,
+      "4\u20136 mo": 6,
       "6\u201312 mo": 1,
       ">12 mo": 0,
       "Unknown": 0
@@ -274,11 +274,11 @@
       "litters": 3,
       "born": 9,
       "avg_litter_size": 3.0,
-      "last_weaned": "9 wks",
+      "last_weaned": "12 wks",
       "mother_geno": "Adipoq-cre,Dendra2<+/->",
       "father_geno": "Adipoq-cre,Dendra2<+/->",
-      "days_active": 248,
-      "months_active": 8.3
+      "days_active": 265,
+      "months_active": 8.8
     },
     {
       "name": "AdipoGlo",
@@ -290,11 +290,11 @@
       "litters": 5,
       "born": 23,
       "avg_litter_size": 4.6,
-      "last_weaned": "9 wks",
+      "last_weaned": "12 wks",
       "mother_geno": "Adipoq-cre,Dendra2<+/->",
       "father_geno": "Adipoq-cre,Dendra2<+/->",
-      "days_active": 248,
-      "months_active": 8.3
+      "days_active": 265,
+      "months_active": 8.8
     },
     {
       "name": "AdipoGlo",
@@ -309,8 +309,8 @@
       "last_weaned": "-",
       "mother_geno": "Adipoq-cre,Dendra2<+/+>",
       "father_geno": "WT,Dendra2<-/->",
-      "days_active": 55,
-      "months_active": 1.8
+      "days_active": 72,
+      "months_active": 2.4
     },
     {
       "name": "AdipoGlo",
@@ -325,8 +325,8 @@
       "last_weaned": "-",
       "mother_geno": "WT,Dendra2<+/+>",
       "father_geno": "Adipoq-cre,Dendra2<-/->",
-      "days_active": 55,
-      "months_active": 1.8
+      "days_active": 72,
+      "months_active": 2.4
     },
     {
       "name": "AdipoGlo+",
@@ -338,11 +338,11 @@
       "litters": 3,
       "born": 21,
       "avg_litter_size": 7.0,
-      "last_weaned": "15 wks",
+      "last_weaned": "18 wks",
       "mother_geno": "mTmG<mTmG/mTmG>,Adipoq-cre,Dendra2<+/+>",
       "father_geno": "mTmG<mTmG/mTmG>,Adipoq-cre,Dendra2<+/+>",
-      "days_active": 248,
-      "months_active": 8.3
+      "days_active": 265,
+      "months_active": 8.8
     },
     {
       "name": "AdipoGlo+",
@@ -354,11 +354,11 @@
       "litters": 4,
       "born": 20,
       "avg_litter_size": 5.0,
-      "last_weaned": "9 wks",
+      "last_weaned": "12 wks",
       "mother_geno": "mTmG<mTmG/mTmG>,Adipoq-cre,Dendra2<+/+>",
       "father_geno": "mTmG<mTmG/mTmG>,Adipoq-cre,Dendra2<+/+>",
-      "days_active": 248,
-      "months_active": 8.3
+      "days_active": 265,
+      "months_active": 8.8
     },
     {
       "name": "Dendra2",
@@ -373,8 +373,8 @@
       "last_weaned": "-",
       "mother_geno": "Dendra2<+/->",
       "father_geno": "Dendra2<+/->",
-      "days_active": 248,
-      "months_active": 8.3
+      "days_active": 265,
+      "months_active": 8.8
     },
     {
       "name": "Dendra2",
@@ -389,8 +389,8 @@
       "last_weaned": "-",
       "mother_geno": "Dendra2<+/+>",
       "father_geno": "Dendra2<+/->",
-      "days_active": 248,
-      "months_active": 8.3
+      "days_active": 265,
+      "months_active": 8.8
     },
     {
       "name": "Marrow",
@@ -402,11 +402,11 @@
       "litters": 1,
       "born": 6,
       "avg_litter_size": 6.0,
-      "last_weaned": "9 wks",
+      "last_weaned": "12 wks",
       "mother_geno": "WT,Dendra2<+/+>",
       "father_geno": "Osterix<+/->",
-      "days_active": 67,
-      "months_active": 2.2
+      "days_active": 84,
+      "months_active": 2.8
     },
     {
       "name": "Marrow Glo",
@@ -421,8 +421,8 @@
       "last_weaned": "-",
       "mother_geno": "Resisten-cre<+/->,Osterix<+/->",
       "father_geno": "WT,Dendra2<+/->",
-      "days_active": 248,
-      "months_active": 8.3
+      "days_active": 265,
+      "months_active": 8.8
     }
   ],
   "cohort_plans": [
@@ -546,8 +546,8 @@
         "Male"
       ],
       "ages_months": [
-        7.5,
-        7.5
+        8.1,
+        8.1
       ],
       "genotypes": [
         " Aq-cre; Dendra2<-/->",
@@ -576,9 +576,9 @@
         "Male"
       ],
       "ages_months": [
-        11.0,
-        11.0,
-        11.0
+        11.6,
+        11.6,
+        11.6
       ],
       "genotypes": [
         " WT; Dendra2<+/->",
@@ -604,7 +604,7 @@
         "Male"
       ],
       "ages_months": [
-        5.3
+        5.8
       ],
       "genotypes": [
         " WT; Dendra2<+/->"
@@ -634,10 +634,10 @@
         "Female"
       ],
       "ages_months": [
-        3.2,
-        3.2,
-        3.2,
-        3.2
+        3.8,
+        3.8,
+        3.8,
+        3.8
       ],
       "genotypes": [
         " WT; Dendra2<+/->",
@@ -668,9 +668,9 @@
         "Female"
       ],
       "ages_months": [
-        12.9,
-        12.9,
-        12.9
+        13.5,
+        13.5,
+        13.5
       ],
       "genotypes": [
         " mTmG<mTmG/WT>; Aq-cre; Dendra2<-/->",
@@ -700,9 +700,9 @@
         "Female"
       ],
       "ages_months": [
-        11.0,
-        11.0,
-        11.0
+        11.6,
+        11.6,
+        11.6
       ],
       "genotypes": [
         " WT; Dendra2<+/->",
@@ -733,8 +733,8 @@
         "Male"
       ],
       "ages_months": [
-        24.0,
-        24.0
+        24.5,
+        24.5
       ],
       "genotypes": [
         " Dendra2<-/->",
@@ -761,8 +761,8 @@
         "Male"
       ],
       "ages_months": [
-        7.5,
-        7.5
+        8.1,
+        8.1
       ],
       "genotypes": [
         " WT; Dendra2<-/->",
@@ -790,7 +790,7 @@
         "Unknown"
       ],
       "ages_months": [
-        16.1
+        16.7
       ],
       "genotypes": [
         " WT; Dendra2<+/->"
@@ -816,8 +816,8 @@
         "Male"
       ],
       "ages_months": [
-        10.0,
-        10.0
+        10.6,
+        10.6
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->",
@@ -844,8 +844,8 @@
         "Female"
       ],
       "ages_months": [
-        13.2,
-        13.2
+        13.8,
+        13.8
       ],
       "genotypes": [
         " mTmG<WT/WT>; Aq-cre; Dendra2<-/->",
@@ -870,7 +870,7 @@
         "Female"
       ],
       "ages_months": [
-        14.2
+        14.7
       ],
       "genotypes": [
         "nan"
@@ -900,10 +900,10 @@
         "Female"
       ],
       "ages_months": [
-        4.1,
-        4.1,
-        4.1,
-        4.1
+        4.7,
+        4.7,
+        4.7,
+        4.7
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/+>",
@@ -937,9 +937,9 @@
         "Female"
       ],
       "ages_months": [
-        17.7,
-        17.7,
-        17.7
+        18.2,
+        18.2,
+        18.2
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->",
@@ -965,7 +965,7 @@
         "Male"
       ],
       "ages_months": [
-        6.4
+        6.9
       ],
       "genotypes": [
         " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>"
@@ -991,8 +991,8 @@
         "Male"
       ],
       "ages_months": [
-        9.7,
-        9.7
+        10.2,
+        10.2
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->",
@@ -1023,10 +1023,10 @@
         "Female"
       ],
       "ages_months": [
-        11.0,
-        11.0,
-        11.0,
-        11.0
+        11.6,
+        11.6,
+        11.6,
+        11.6
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->",
@@ -1053,7 +1053,7 @@
         "Male"
       ],
       "ages_months": [
-        9.7
+        10.3
       ],
       "genotypes": [
         " mTmG<mTmG/mTmG>; Aq-cre"
@@ -1077,7 +1077,7 @@
         "Female"
       ],
       "ages_months": [
-        4.6
+        5.1
       ],
       "genotypes": [
         " mTmG<mTmG/mTmG>; Aq-cre; Dendra2<+/+>"
@@ -1104,7 +1104,7 @@
         "Male"
       ],
       "ages_months": [
-        15.2
+        15.7
       ],
       "genotypes": [
         " WT; Dendra2<-/->"
@@ -1132,9 +1132,9 @@
         "Male"
       ],
       "ages_months": [
-        7.6,
-        7.6,
-        7.6
+        8.1,
+        8.1,
+        8.1
       ],
       "genotypes": [
         " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
@@ -1162,8 +1162,8 @@
         "Female"
       ],
       "ages_months": [
-        11.7,
-        11.7
+        12.2,
+        12.2
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->",
@@ -1191,7 +1191,7 @@
         "Male"
       ],
       "ages_months": [
-        28.1
+        28.6
       ],
       "genotypes": [
         " Dendra2<+/->"
@@ -1222,9 +1222,9 @@
         "Female"
       ],
       "ages_months": [
-        12.7,
-        12.7,
-        12.7
+        13.3,
+        13.3,
+        13.3
       ],
       "genotypes": [
         " mTmG<mTmG/WT>; Aq-cre; Dendra2<-/->",
@@ -1250,7 +1250,7 @@
         "Unknown"
       ],
       "ages_months": [
-        14.8
+        15.4
       ],
       "genotypes": [
         " WT; Dendra2<+/->"
@@ -1276,8 +1276,8 @@
         "Female"
       ],
       "ages_months": [
-        10.9,
-        10.9
+        11.4,
+        11.4
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->",
@@ -1304,8 +1304,8 @@
         "Female"
       ],
       "ages_months": [
-        9.7,
-        9.7
+        10.2,
+        10.2
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->",
@@ -1333,7 +1333,7 @@
         "Male"
       ],
       "ages_months": [
-        17.7
+        18.3
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->"
@@ -1359,8 +1359,8 @@
         "Female"
       ],
       "ages_months": [
-        10.4,
-        10.4
+        11.0,
+        11.0
       ],
       "genotypes": [
         " mTmG<WT/WT>; WT; Dendra2<+/->",
@@ -1387,8 +1387,8 @@
         "Female"
       ],
       "ages_months": [
-        8.1,
-        8.1
+        8.7,
+        8.7
       ],
       "genotypes": [
         " WT; Dendra2<+/->",
@@ -1413,7 +1413,7 @@
         "Female"
       ],
       "ages_months": [
-        6.7
+        7.3
       ],
       "genotypes": [
         " WT; Dendra2<-/->"
@@ -1440,7 +1440,7 @@
         "Male"
       ],
       "ages_months": [
-        18.6
+        19.1
       ],
       "genotypes": [
         " WT; Dendra2<-/->"
@@ -1468,9 +1468,9 @@
         "Female"
       ],
       "ages_months": [
-        11.7,
-        11.7,
-        11.7
+        12.2,
+        12.2,
+        12.2
       ],
       "genotypes": [
         " WT; Dendra2<+/->",
@@ -1501,8 +1501,8 @@
         "Male"
       ],
       "ages_months": [
-        9.7,
-        9.7
+        10.2,
+        10.2
       ],
       "genotypes": [
         " WT; Dendra2<+/->",
@@ -1533,10 +1533,10 @@
         "Female"
       ],
       "ages_months": [
-        6.4,
-        6.4,
-        6.4,
-        6.4
+        6.9,
+        6.9,
+        6.9,
+        6.9
       ],
       "genotypes": [
         " mTmG<mTmG/mTmG>; WT",
@@ -1563,7 +1563,7 @@
         "Female"
       ],
       "ages_months": [
-        7.5
+        8.1
       ],
       "genotypes": [
         " Aq-cre; Dendra2<-/->"
@@ -1591,9 +1591,9 @@
         "Male"
       ],
       "ages_months": [
-        11.8,
-        11.8,
-        11.8
+        12.4,
+        12.4,
+        12.4
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->",
@@ -1624,8 +1624,8 @@
         "Female"
       ],
       "ages_months": [
-        17.2,
-        17.2
+        17.7,
+        17.7
       ],
       "genotypes": [
         " Aq-cre; Dendra2<-/->",
@@ -1654,9 +1654,9 @@
         "Male"
       ],
       "ages_months": [
-        3.4,
-        3.4,
-        3.4
+        3.9,
+        3.9,
+        3.9
       ],
       "genotypes": [
         " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
@@ -1685,7 +1685,7 @@
         "Male"
       ],
       "ages_months": [
-        21.6
+        22.1
       ],
       "genotypes": [
         " Dendra2<+/+>"
@@ -1709,7 +1709,7 @@
         "Male"
       ],
       "ages_months": [
-        10.9
+        11.4
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->"
@@ -1737,9 +1737,9 @@
         "Female"
       ],
       "ages_months": [
-        13.2,
-        13.2,
-        13.2
+        13.8,
+        13.8,
+        13.8
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->",
@@ -1767,8 +1767,8 @@
         "Female"
       ],
       "ages_months": [
-        7.7,
-        7.7
+        8.2,
+        8.2
       ],
       "genotypes": [
         " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
@@ -1798,8 +1798,8 @@
         "Female"
       ],
       "ages_months": [
-        12.2,
-        12.2
+        12.8,
+        12.8
       ],
       "genotypes": [
         " mTmG<mTmG/WT>; Aq-cre; Dendra2<-/->",
@@ -1828,9 +1828,9 @@
         "Male"
       ],
       "ages_months": [
-        11.1,
-        11.1,
-        11.1
+        11.7,
+        11.7,
+        11.7
       ],
       "genotypes": [
         " mTmG<WT/WT>; WT; Dendra2<+/->",
@@ -1859,7 +1859,7 @@
         "Male"
       ],
       "ages_months": [
-        21.1
+        21.7
       ],
       "genotypes": [
         " Aq-cre; Dendra2<-/->"
@@ -1883,7 +1883,7 @@
         "Male"
       ],
       "ages_months": [
-        4.1
+        4.7
       ],
       "genotypes": [
         " mTmG<mTmG/mTmG>; Aq-cre"
@@ -1893,7 +1893,7 @@
     },
     {
       "cage_id": "Cage 286",
-      "strain": "AdipoGlo+  AdipoGlo",
+      "strain": "AdipoGlo  AdipoGlo+",
       "n_mice": 2,
       "expected_count": 2,
       "rack": null,
@@ -1909,8 +1909,8 @@
         "Female"
       ],
       "ages_months": [
-        6.7,
-        4.6
+        7.2,
+        5.1
       ],
       "genotypes": [
         " Aq-cre; Dendra2<-/->",
@@ -1942,9 +1942,9 @@
         "Male"
       ],
       "ages_months": [
-        11.8,
-        11.8,
-        11.8
+        12.3,
+        12.3,
+        12.3
       ],
       "genotypes": [
         " mTmG<WT/WT>; WT; Dendra2<-/->",
@@ -1977,9 +1977,9 @@
         "Female"
       ],
       "ages_months": [
-        11.8,
-        11.8,
-        11.8
+        12.3,
+        12.3,
+        12.3
       ],
       "genotypes": [
         " mTmG<WT/WT>; Aq-cre; Dendra2<+/->",
@@ -2011,10 +2011,10 @@
         "Male"
       ],
       "ages_months": [
-        10.4,
-        10.4,
-        10.4,
-        10.4
+        11.0,
+        11.0,
+        11.0,
+        11.0
       ],
       "genotypes": [
         " mTmG<mTmG/mTmG>; Aq-cre; Dendra2<+/+>",
@@ -2041,7 +2041,7 @@
         "Female"
       ],
       "ages_months": [
-        6.0
+        6.5
       ],
       "genotypes": [
         " WT; Dendra2<+/->"
@@ -2073,11 +2073,11 @@
         "Female"
       ],
       "ages_months": [
-        4.8,
-        4.8,
-        4.8,
-        4.8,
-        4.8
+        5.4,
+        5.4,
+        5.4,
+        5.4,
+        5.4
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/+>",
@@ -2105,7 +2105,7 @@
         "Female"
       ],
       "ages_months": [
-        5.3
+        5.8
       ],
       "genotypes": [
         " Aq-cre; Dendra2<-/->"
@@ -2134,8 +2134,8 @@
         "Female"
       ],
       "ages_months": [
-        12.2,
-        12.2
+        12.8,
+        12.8
       ],
       "genotypes": [
         " mTmG<WT/WT>; WT; Dendra2<-/->",
@@ -2162,8 +2162,8 @@
         "Female"
       ],
       "ages_months": [
-        14.6,
-        14.6
+        15.2,
+        15.2
       ],
       "genotypes": [
         " Dendra2<-/->",
@@ -2195,9 +2195,9 @@
         "Male"
       ],
       "ages_months": [
-        12.9,
-        12.9,
-        12.9
+        13.5,
+        13.5,
+        13.5
       ],
       "genotypes": [
         " mTmG<mTmG/WT>; WT; Dendra2<-/->",
@@ -2229,10 +2229,10 @@
         "Male"
       ],
       "ages_months": [
-        8.1,
-        8.1,
-        8.1,
-        8.1
+        8.7,
+        8.7,
+        8.7,
+        8.7
       ],
       "genotypes": [
         " WT; Dendra2<+/->",
@@ -2261,8 +2261,8 @@
         "Male"
       ],
       "ages_months": [
-        3.4,
-        3.4
+        4.0,
+        4.0
       ],
       "genotypes": [
         " Dendra2<+/->; Resisten-cre<-/->; Osterix<+/->",
@@ -2287,7 +2287,7 @@
         "Female"
       ],
       "ages_months": [
-        9.7
+        10.2
       ],
       "genotypes": [
         " WT; Dendra2<+/->"
@@ -2316,8 +2316,8 @@
         "Female"
       ],
       "ages_months": [
-        15.2,
-        15.2
+        15.7,
+        15.7
       ],
       "genotypes": [
         " WT; Dendra2<-/->",
@@ -2347,8 +2347,8 @@
         "Female"
       ],
       "ages_months": [
-        15.4,
-        15.4
+        16.0,
+        16.0
       ],
       "genotypes": [
         " mTmG<mTmG/WT>; WT; Dendra2<-/->",
@@ -2373,7 +2373,7 @@
         "Female"
       ],
       "ages_months": [
-        14.6
+        15.1
       ],
       "genotypes": [
         " mTmG<mTmG/mTmG>; Aq-cre; Dendra2<+/+>"
@@ -2399,8 +2399,8 @@
         "Male"
       ],
       "ages_months": [
-        7.5,
-        2.2
+        8.1,
+        2.8
       ],
       "genotypes": [
         " WT; Dendra2<+/+>",
@@ -2425,7 +2425,7 @@
         "Male"
       ],
       "ages_months": [
-        10.4
+        11.0
       ],
       "genotypes": [
         " mTmG<WT/WT>; WT; Dendra2<-/->"
@@ -2449,7 +2449,7 @@
         "Male"
       ],
       "ages_months": [
-        6.7
+        7.3
       ],
       "genotypes": [
         " Aq-cre; Dendra2<-/->"
@@ -2477,9 +2477,9 @@
         "Female"
       ],
       "ages_months": [
-        15.4,
-        15.4,
-        15.4
+        16.0,
+        16.0,
+        16.0
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->",
@@ -2507,8 +2507,8 @@
         "Female"
       ],
       "ages_months": [
-        7.7,
-        7.7
+        8.2,
+        8.2
       ],
       "genotypes": [
         " mTmG<mTmG/mTmG>; Aq-cre; Dendra2<+/+>",
@@ -2535,8 +2535,8 @@
         "Female"
       ],
       "ages_months": [
-        11.8,
-        11.8
+        12.4,
+        12.4
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->",
@@ -2567,10 +2567,10 @@
         "Male"
       ],
       "ages_months": [
-        11.5,
-        11.5,
-        11.5,
-        11.5
+        12.0,
+        12.0,
+        12.0,
+        12.0
       ],
       "genotypes": [
         " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
@@ -2599,8 +2599,8 @@
         "Female"
       ],
       "ages_months": [
-        14.6,
-        16.0
+        15.2,
+        16.6
       ],
       "genotypes": [
         " Dendra2<+/->",
@@ -2630,8 +2630,8 @@
         "Female"
       ],
       "ages_months": [
-        15.5,
-        15.5
+        16.0,
+        16.0
       ],
       "genotypes": [
         " mTmG<mTmG/WT>; WT; Dendra2<-/->",
@@ -2658,8 +2658,8 @@
         "Female"
       ],
       "ages_months": [
-        9.9,
-        9.9
+        10.5,
+        10.5
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->",
@@ -2684,7 +2684,7 @@
         "Male"
       ],
       "ages_months": [
-        3.2
+        3.8
       ],
       "genotypes": [
         " WT; Dendra2<+/->"
@@ -2712,9 +2712,9 @@
         "Male"
       ],
       "ages_months": [
-        3.2,
-        3.2,
-        3.2
+        3.8,
+        3.8,
+        3.8
       ],
       "genotypes": [
         " WT; Dendra2<+/->",
@@ -2745,8 +2745,8 @@
         "Male"
       ],
       "ages_months": [
-        12.7,
-        12.7
+        13.3,
+        13.3
       ],
       "genotypes": [
         " mTmG<mTmG/WT>; Aq-cre; Dendra2<-/->",
@@ -2777,10 +2777,10 @@
         "Female"
       ],
       "ages_months": [
-        3.4,
-        3.4,
-        3.4,
-        3.4
+        4.0,
+        4.0,
+        4.0,
+        4.0
       ],
       "genotypes": [
         " Dendra2<+/->; Resisten-cre<-/->; Osterix<+/->",
@@ -2793,7 +2793,7 @@
     },
     {
       "cage_id": "1003225767",
-      "strain": "Marrow Glo  AdipoGlo",
+      "strain": "AdipoGlo  Marrow Glo",
       "n_mice": 2,
       "expected_count": 2,
       "rack": null,
@@ -2809,8 +2809,8 @@
         "Female"
       ],
       "ages_months": [
-        10.9,
-        10.6
+        11.4,
+        11.2
       ],
       "genotypes": [
         " WT; Dendra2<+/->",
@@ -2835,7 +2835,7 @@
         "Male"
       ],
       "ages_months": [
-        11.8
+        12.4
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->"
@@ -2859,7 +2859,7 @@
         "Male"
       ],
       "ages_months": [
-        14.6
+        15.2
       ],
       "genotypes": [
         " WT; Dendra2<+/->"
@@ -2887,9 +2887,9 @@
         "Male"
       ],
       "ages_months": [
-        11.0,
-        11.0,
-        11.0
+        11.6,
+        11.6,
+        11.6
       ],
       "genotypes": [
         " WT; Dendra2<+/->",
@@ -2915,7 +2915,7 @@
         "Male"
       ],
       "ages_months": [
-        9.9
+        10.5
       ],
       "genotypes": [
         " WT; Dendra2<+/->"
@@ -2942,7 +2942,7 @@
         "Male"
       ],
       "ages_months": [
-        12.2
+        12.8
       ],
       "genotypes": [
         " mTmG<WT/WT>; Aq-cre; Dendra2<+/->"
@@ -2969,7 +2969,7 @@
         "Female"
       ],
       "ages_months": [
-        20.6
+        21.1
       ],
       "genotypes": [
         " Aq-cre; Dendra2<-/->"
@@ -2995,8 +2995,8 @@
         "Female"
       ],
       "ages_months": [
-        11.5,
-        11.5
+        12.0,
+        12.0
       ],
       "genotypes": [
         " mTmG<WT/WT>; WT; Dendra2<+/->",
@@ -3021,7 +3021,7 @@
         "Female"
       ],
       "ages_months": [
-        10.4
+        11.0
       ],
       "genotypes": [
         " mTmG<WT/WT>; WT; Dendra2<+/->"
@@ -3045,7 +3045,7 @@
         "Female"
       ],
       "ages_months": [
-        24.0
+        24.5
       ],
       "genotypes": [
         " Dendra2<+/->"
@@ -3072,7 +3072,7 @@
         "Male"
       ],
       "ages_months": [
-        12.2
+        12.8
       ],
       "genotypes": [
         " mTmG<WT/WT>; WT; Dendra2<+/->"
@@ -3096,7 +3096,7 @@
         "Male"
       ],
       "ages_months": [
-        13.0
+        13.6
       ],
       "genotypes": [
         " mTmG<mTmG/WT>; Aq-cre; Dendra2<-/->"
@@ -3123,7 +3123,7 @@
         "Female"
       ],
       "ages_months": [
-        16.2
+        16.8
       ],
       "genotypes": [
         " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>"
@@ -3149,8 +3149,8 @@
         "Female"
       ],
       "ages_months": [
-        9.7,
-        9.7
+        10.2,
+        10.2
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->",
@@ -3180,8 +3180,8 @@
         "Female"
       ],
       "ages_months": [
-        18.6,
-        18.6
+        19.1,
+        19.1
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->",
@@ -3210,9 +3210,9 @@
         "Unknown"
       ],
       "ages_months": [
-        14.8,
-        14.8,
-        14.8
+        15.4,
+        15.4,
+        15.4
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->",
@@ -3240,8 +3240,8 @@
         "Female"
       ],
       "ages_months": [
-        12.9,
-        12.2
+        13.5,
+        12.8
       ],
       "genotypes": [
         " mTmG<mTmG/mTmG>; Aq-cre; Dendra2<+/+>",
@@ -3268,8 +3268,8 @@
         "Female"
       ],
       "ages_months": [
-        9.6,
-        9.6
+        10.2,
+        10.2
       ],
       "genotypes": [
         " mTmG<WT/WT>; Aq-cre; Dendra2<+/->",
@@ -3296,8 +3296,8 @@
         "Male"
       ],
       "ages_months": [
-        11.7,
-        11.7
+        12.3,
+        12.3
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/->",
@@ -3322,7 +3322,7 @@
         "Male"
       ],
       "ages_months": [
-        9.6
+        10.2
       ],
       "genotypes": [
         " mTmG<WT/WT>; Aq-cre; Dendra2<-/->"
@@ -3348,8 +3348,8 @@
         "Female"
       ],
       "ages_months": [
-        12.7,
-        11.8
+        13.3,
+        12.3
       ],
       "genotypes": [
         " mTmG<mTmG/mTmG>; Aq-cre; Dendra2<+/+>",
@@ -3377,7 +3377,7 @@
         "Male"
       ],
       "ages_months": [
-        19.6
+        20.2
       ],
       "genotypes": [
         " WT; Dendra2<-/->"
@@ -3403,8 +3403,8 @@
         "Female"
       ],
       "ages_months": [
-        3.4,
-        3.4
+        3.9,
+        3.9
       ],
       "genotypes": [
         " mTmG<mTmG/mTmG>; Aq-cre; Dendra2<+/+>",
@@ -3431,8 +3431,8 @@
         "Female"
       ],
       "ages_months": [
-        6.7,
-        5.3
+        7.2,
+        5.8
       ],
       "genotypes": [
         " WT; Dendra2<-/->",
@@ -3465,11 +3465,11 @@
         "Male"
       ],
       "ages_months": [
-        4.8,
-        4.8,
-        4.8,
-        4.8,
-        4.8
+        5.4,
+        5.4,
+        5.4,
+        5.4,
+        5.4
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/+>",
@@ -3503,10 +3503,10 @@
         "Male"
       ],
       "ages_months": [
-        4.6,
-        4.6,
-        4.6,
-        4.6
+        5.1,
+        5.1,
+        5.1,
+        5.1
       ],
       "genotypes": [
         " mTmG<mTmG/mTmG>; WT",
@@ -3537,9 +3537,9 @@
         "Male"
       ],
       "ages_months": [
-        7.7,
-        7.7,
-        7.7
+        8.2,
+        8.2,
+        8.2
       ],
       "genotypes": [
         " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
@@ -3567,8 +3567,8 @@
         "Male"
       ],
       "ages_months": [
-        7.7,
-        7.7
+        8.2,
+        8.2
       ],
       "genotypes": [
         " mTmG<WT/WT>; Aq-cre; Dendra2<+/->",
@@ -3593,7 +3593,7 @@
         "Female"
       ],
       "ages_months": [
-        7.6
+        8.1
       ],
       "genotypes": [
         " Aq-cre; Dendra2<+/+>"
@@ -3622,8 +3622,8 @@
         "Female"
       ],
       "ages_months": [
-        23.0,
-        17.2
+        23.6,
+        17.7
       ],
       "genotypes": [
         " WT; Dendra2<-/->",
@@ -3650,8 +3650,8 @@
         "Male"
       ],
       "ages_months": [
-        14.6,
-        19.0
+        15.2,
+        19.6
       ],
       "genotypes": [
         " Dendra2<+/->",
@@ -3667,8 +3667,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 691,
-      "age_months": 23.0,
+      "age_days": 708,
+      "age_months": 23.6,
       "dob": "2024-06-19",
       "genotype": " WT; Dendra2<-/->",
       "cage_id": "1002947943",
@@ -3682,8 +3682,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 633,
-      "age_months": 21.1,
+      "age_days": 650,
+      "age_months": 21.7,
       "dob": "2024-08-16",
       "genotype": " Adipoq-cre; Dendra2<-/->",
       "cage_id": "1002895314",
@@ -3697,13 +3697,14 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 530,
-      "age_months": 17.7,
+      "age_days": 547,
+      "age_months": 18.2,
       "dob": "2024-11-27",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1002947899",
       "cull_flags": [
-        "aged_>12mo"
+        "aged_>12mo",
+        "aged_>18mo"
       ]
     },
     {
@@ -3711,13 +3712,14 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 530,
-      "age_months": 17.7,
+      "age_days": 547,
+      "age_months": 18.2,
       "dob": "2024-11-27",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1002947899",
       "cull_flags": [
-        "aged_>12mo"
+        "aged_>12mo",
+        "aged_>18mo"
       ]
     },
     {
@@ -3725,13 +3727,14 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 530,
-      "age_months": 17.7,
+      "age_days": 547,
+      "age_months": 18.2,
       "dob": "2024-11-27",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1002947899",
       "cull_flags": [
-        "aged_>12mo"
+        "aged_>12mo",
+        "aged_>18mo"
       ]
     },
     {
@@ -3739,8 +3742,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 515,
-      "age_months": 17.2,
+      "age_days": 532,
+      "age_months": 17.7,
       "dob": "2024-12-12",
       "genotype": " Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003029926",
@@ -3753,8 +3756,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 515,
-      "age_months": 17.2,
+      "age_days": 532,
+      "age_months": 17.7,
       "dob": "2024-12-12",
       "genotype": " Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003029926",
@@ -3767,8 +3770,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 515,
-      "age_months": 17.2,
+      "age_days": 532,
+      "age_months": 17.7,
       "dob": "2024-12-12",
       "genotype": " WT; Dendra2<-/->",
       "cage_id": "1002947943",
@@ -3781,8 +3784,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Unknown",
-      "age_days": 484,
-      "age_months": 16.1,
+      "age_days": 501,
+      "age_months": 16.7,
       "dob": "2025-01-12",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003016678",
@@ -3796,8 +3799,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 455,
-      "age_months": 15.2,
+      "age_days": 472,
+      "age_months": 15.7,
       "dob": "2025-02-10",
       "genotype": " WT; Dendra2<-/->",
       "cage_id": "1003059301",
@@ -3810,8 +3813,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 455,
-      "age_months": 15.2,
+      "age_days": 472,
+      "age_months": 15.7,
       "dob": "2025-02-10",
       "genotype": " WT; Dendra2<-/->",
       "cage_id": "1003059303",
@@ -3824,8 +3827,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 455,
-      "age_months": 15.2,
+      "age_days": 472,
+      "age_months": 15.7,
       "dob": "2025-02-10",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003059303",
@@ -3838,8 +3841,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Unknown",
-      "age_days": 445,
-      "age_months": 14.8,
+      "age_days": 462,
+      "age_months": 15.4,
       "dob": "2025-02-20",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003073323",
@@ -3853,8 +3856,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Unknown",
-      "age_days": 445,
-      "age_months": 14.8,
+      "age_days": 462,
+      "age_months": 15.4,
       "dob": "2025-02-20",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003073324",
@@ -3868,8 +3871,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Unknown",
-      "age_days": 445,
-      "age_months": 14.8,
+      "age_days": 462,
+      "age_months": 15.4,
       "dob": "2025-02-20",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003073324",
@@ -3883,8 +3886,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Unknown",
-      "age_days": 445,
-      "age_months": 14.8,
+      "age_days": 462,
+      "age_months": 15.4,
       "dob": "2025-02-20",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003073324",
@@ -3898,8 +3901,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 438,
-      "age_months": 14.6,
+      "age_days": 455,
+      "age_months": 15.2,
       "dob": "2025-02-27",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "Cage 95",
@@ -3912,8 +3915,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 396,
-      "age_months": 13.2,
+      "age_days": 413,
+      "age_months": 13.8,
       "dob": "2025-04-10",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003093697",
@@ -3926,8 +3929,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 396,
-      "age_months": 13.2,
+      "age_days": 413,
+      "age_months": 13.8,
       "dob": "2025-04-10",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003093697",
@@ -3940,8 +3943,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 396,
-      "age_months": 13.2,
+      "age_days": 413,
+      "age_months": 13.8,
       "dob": "2025-04-10",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003093697",
@@ -3954,164 +3957,190 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 355,
-      "age_months": 11.8,
+      "age_days": 372,
+      "age_months": 12.4,
       "dob": "2025-05-21",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003121754",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "351",
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 355,
-      "age_months": 11.8,
+      "age_days": 372,
+      "age_months": 12.4,
       "dob": "2025-05-21",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003121755",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "352",
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 355,
-      "age_months": 11.8,
+      "age_days": 372,
+      "age_months": 12.4,
       "dob": "2025-05-21",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003121755",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "353",
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 355,
-      "age_months": 11.8,
+      "age_days": 372,
+      "age_months": 12.4,
       "dob": "2025-05-21",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003121755",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "360",
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 350,
-      "age_months": 11.7,
+      "age_days": 367,
+      "age_months": 12.2,
       "dob": "2025-05-26",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003121768",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "361",
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 350,
-      "age_months": 11.7,
+      "age_days": 367,
+      "age_months": 12.2,
       "dob": "2025-05-26",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003121768",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "362",
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 350,
-      "age_months": 11.7,
+      "age_days": 367,
+      "age_months": 12.2,
       "dob": "2025-05-26",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003121768",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "363",
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 350,
-      "age_months": 11.7,
+      "age_days": 367,
+      "age_months": 12.2,
       "dob": "2025-05-26",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003121769",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "364",
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 350,
-      "age_months": 11.7,
+      "age_days": 367,
+      "age_months": 12.2,
       "dob": "2025-05-26",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003121769",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "365",
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 355,
-      "age_months": 11.8,
+      "age_days": 372,
+      "age_months": 12.4,
       "dob": "2025-05-21",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003121756",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "366",
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 355,
-      "age_months": 11.8,
+      "age_days": 372,
+      "age_months": 12.4,
       "dob": "2025-05-21",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003121756",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "374",
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 351,
-      "age_months": 11.7,
+      "age_days": 368,
+      "age_months": 12.3,
       "dob": "2025-05-25",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003089166",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "375",
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 351,
-      "age_months": 11.7,
+      "age_days": 368,
+      "age_months": 12.3,
       "dob": "2025-05-25",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003089166",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "386",
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 330,
-      "age_months": 11.0,
+      "age_days": 347,
+      "age_months": 11.6,
       "dob": "2025-06-15",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003165188",
@@ -4122,8 +4151,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 330,
-      "age_months": 11.0,
+      "age_days": 347,
+      "age_months": 11.6,
       "dob": "2025-06-15",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003165188",
@@ -4134,8 +4163,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 330,
-      "age_months": 11.0,
+      "age_days": 347,
+      "age_months": 11.6,
       "dob": "2025-06-15",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003165188",
@@ -4146,8 +4175,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 330,
-      "age_months": 11.0,
+      "age_days": 347,
+      "age_months": 11.6,
       "dob": "2025-06-15",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003165189",
@@ -4158,8 +4187,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 330,
-      "age_months": 11.0,
+      "age_days": 347,
+      "age_months": 11.6,
       "dob": "2025-06-15",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003165189",
@@ -4170,8 +4199,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 330,
-      "age_months": 11.0,
+      "age_days": 347,
+      "age_months": 11.6,
       "dob": "2025-06-15",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003165189",
@@ -4182,8 +4211,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 330,
-      "age_months": 11.0,
+      "age_days": 347,
+      "age_months": 11.6,
       "dob": "2025-06-15",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003165191",
@@ -4194,8 +4223,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 330,
-      "age_months": 11.0,
+      "age_days": 347,
+      "age_months": 11.6,
       "dob": "2025-06-15",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003165191",
@@ -4206,8 +4235,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 330,
-      "age_months": 11.0,
+      "age_days": 347,
+      "age_months": 11.6,
       "dob": "2025-06-15",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003165191",
@@ -4218,8 +4247,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 330,
-      "age_months": 11.0,
+      "age_days": 347,
+      "age_months": 11.6,
       "dob": "2025-06-15",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003165190",
@@ -4230,8 +4259,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 330,
-      "age_months": 11.0,
+      "age_days": 347,
+      "age_months": 11.6,
       "dob": "2025-06-15",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003165190",
@@ -4242,8 +4271,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 330,
-      "age_months": 11.0,
+      "age_days": 347,
+      "age_months": 11.6,
       "dob": "2025-06-15",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003165190",
@@ -4254,8 +4283,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 330,
-      "age_months": 11.0,
+      "age_days": 347,
+      "age_months": 11.6,
       "dob": "2025-06-15",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003165190",
@@ -4266,8 +4295,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 326,
-      "age_months": 10.9,
+      "age_days": 343,
+      "age_months": 11.4,
       "dob": "2025-06-19",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "Cage 223",
@@ -4278,8 +4307,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 326,
-      "age_months": 10.9,
+      "age_days": 343,
+      "age_months": 11.4,
       "dob": "2025-06-19",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "Cage 223",
@@ -4290,8 +4319,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 326,
-      "age_months": 10.9,
+      "age_days": 343,
+      "age_months": 11.4,
       "dob": "2025-06-19",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "Cage 224",
@@ -4302,8 +4331,8 @@
       "use": "Breeding",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 326,
-      "age_months": 10.9,
+      "age_days": 343,
+      "age_months": 11.4,
       "dob": "2025-06-19",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003225767",
@@ -4314,8 +4343,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 297,
-      "age_months": 9.9,
+      "age_days": 314,
+      "age_months": 10.5,
       "dob": "2025-07-18",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003171989",
@@ -4326,8 +4355,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 297,
-      "age_months": 9.9,
+      "age_days": 314,
+      "age_months": 10.5,
       "dob": "2025-07-18",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003171990",
@@ -4338,8 +4367,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 297,
-      "age_months": 9.9,
+      "age_days": 314,
+      "age_months": 10.5,
       "dob": "2025-07-18",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003171990",
@@ -4350,8 +4379,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 300,
-      "age_months": 10.0,
+      "age_days": 317,
+      "age_months": 10.6,
       "dob": "2025-07-15",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003089210",
@@ -4362,8 +4391,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 300,
-      "age_months": 10.0,
+      "age_days": 317,
+      "age_months": 10.6,
       "dob": "2025-07-15",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003089210",
@@ -4374,8 +4403,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 290,
-      "age_months": 9.7,
+      "age_days": 307,
+      "age_months": 10.2,
       "dob": "2025-07-25",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003172009",
@@ -4386,8 +4415,8 @@
       "use": "Breeding",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 290,
-      "age_months": 9.7,
+      "age_days": 307,
+      "age_months": 10.2,
       "dob": "2025-07-25",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003203137",
@@ -4398,8 +4427,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 290,
-      "age_months": 9.7,
+      "age_days": 307,
+      "age_months": 10.2,
       "dob": "2025-07-25",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003172009",
@@ -4410,8 +4439,8 @@
       "use": "Breeding",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 290,
-      "age_months": 9.7,
+      "age_days": 307,
+      "age_months": 10.2,
       "dob": "2025-07-25",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003203138",
@@ -4422,8 +4451,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 290,
-      "age_months": 9.7,
+      "age_days": 307,
+      "age_months": 10.2,
       "dob": "2025-07-25",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003172008",
@@ -4434,8 +4463,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 290,
-      "age_months": 9.7,
+      "age_days": 307,
+      "age_months": 10.2,
       "dob": "2025-07-25",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003172008",
@@ -4446,8 +4475,8 @@
       "use": "Breeding",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 290,
-      "age_months": 9.7,
+      "age_days": 307,
+      "age_months": 10.2,
       "dob": "2025-07-25",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003203137",
@@ -4458,8 +4487,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 290,
-      "age_months": 9.7,
+      "age_days": 307,
+      "age_months": 10.2,
       "dob": "2025-07-25",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003172012",
@@ -4470,8 +4499,8 @@
       "use": "Breeding",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 290,
-      "age_months": 9.7,
+      "age_days": 307,
+      "age_months": 10.2,
       "dob": "2025-07-25",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003203138",
@@ -4482,8 +4511,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 244,
-      "age_months": 8.1,
+      "age_days": 261,
+      "age_months": 8.7,
       "dob": "2025-09-09",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003224661",
@@ -4494,8 +4523,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 244,
-      "age_months": 8.1,
+      "age_days": 261,
+      "age_months": 8.7,
       "dob": "2025-09-09",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003224661",
@@ -4506,8 +4535,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 244,
-      "age_months": 8.1,
+      "age_days": 261,
+      "age_months": 8.7,
       "dob": "2025-09-09",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003224661",
@@ -4518,8 +4547,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 244,
-      "age_months": 8.1,
+      "age_days": 261,
+      "age_months": 8.7,
       "dob": "2025-09-09",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003224661",
@@ -4530,8 +4559,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 244,
-      "age_months": 8.1,
+      "age_days": 261,
+      "age_months": 8.7,
       "dob": "2025-09-09",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003224662",
@@ -4542,8 +4571,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 244,
-      "age_months": 8.1,
+      "age_days": 261,
+      "age_months": 8.7,
       "dob": "2025-09-09",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003224662",
@@ -4554,8 +4583,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 179,
-      "age_months": 6.0,
+      "age_days": 196,
+      "age_months": 6.5,
       "dob": "2025-11-13",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003225829",
@@ -4566,8 +4595,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 617,
-      "age_months": 20.6,
+      "age_days": 634,
+      "age_months": 21.1,
       "dob": "2024-09-01",
       "genotype": " Adipoq-cre; Dendra2<-/->",
       "cage_id": "1002843854",
@@ -4581,8 +4610,8 @@
       "use": "Breeding",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 200,
-      "age_months": 6.7,
+      "age_days": 217,
+      "age_months": 7.2,
       "dob": "2025-10-23",
       "genotype": " Adipoq-cre; Dendra2<-/->",
       "cage_id": "Cage 286",
@@ -4593,8 +4622,8 @@
       "use": "Breeding",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 200,
-      "age_months": 6.7,
+      "age_days": 217,
+      "age_months": 7.2,
       "dob": "2025-10-23",
       "genotype": " WT; Dendra2<-/->",
       "cage_id": "Cage 285",
@@ -4605,8 +4634,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 201,
-      "age_months": 6.7,
+      "age_days": 218,
+      "age_months": 7.3,
       "dob": "2025-10-22",
       "genotype": " Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003225812",
@@ -4617,8 +4646,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 201,
-      "age_months": 6.7,
+      "age_days": 218,
+      "age_months": 7.3,
       "dob": "2025-10-22",
       "genotype": " WT; Dendra2<-/->",
       "cage_id": "1003225813",
@@ -4629,8 +4658,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 225,
-      "age_months": 7.5,
+      "age_days": 242,
+      "age_months": 8.1,
       "dob": "2025-09-28",
       "genotype": " Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003225798",
@@ -4641,8 +4670,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 225,
-      "age_months": 7.5,
+      "age_days": 242,
+      "age_months": 8.1,
       "dob": "2025-09-28",
       "genotype": " Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003225798",
@@ -4653,8 +4682,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 225,
-      "age_months": 7.5,
+      "age_days": 242,
+      "age_months": 8.1,
       "dob": "2025-09-28",
       "genotype": " WT; Dendra2<-/->",
       "cage_id": "1003225796",
@@ -4665,8 +4694,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 225,
-      "age_months": 7.5,
+      "age_days": 242,
+      "age_months": 8.1,
       "dob": "2025-09-28",
       "genotype": " Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003225796",
@@ -4677,8 +4706,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 225,
-      "age_months": 7.5,
+      "age_days": 242,
+      "age_months": 8.1,
       "dob": "2025-09-28",
       "genotype": " Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003225797",
@@ -4689,8 +4718,8 @@
       "use": "Breeding",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 225,
-      "age_months": 7.5,
+      "age_days": 242,
+      "age_months": 8.1,
       "dob": "2025-09-28",
       "genotype": " WT; Dendra2<+/+>",
       "cage_id": "1003297629",
@@ -4701,8 +4730,8 @@
       "use": "Breeding",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 158,
-      "age_months": 5.3,
+      "age_days": 175,
+      "age_months": 5.8,
       "dob": "2025-12-04",
       "genotype": " Adipoq-cre; Dendra2<+/+>",
       "cage_id": "Cage 285",
@@ -4713,8 +4742,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 158,
-      "age_months": 5.3,
+      "age_days": 175,
+      "age_months": 5.8,
       "dob": "2025-12-04",
       "genotype": " Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003225835",
@@ -4725,8 +4754,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 158,
-      "age_months": 5.3,
+      "age_days": 175,
+      "age_months": 5.8,
       "dob": "2025-12-04",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003225834",
@@ -4737,8 +4766,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 97,
-      "age_months": 3.2,
+      "age_days": 114,
+      "age_months": 3.8,
       "dob": "2026-02-03",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003302354",
@@ -4749,8 +4778,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 97,
-      "age_months": 3.2,
+      "age_days": 114,
+      "age_months": 3.8,
       "dob": "2026-02-03",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003302386",
@@ -4761,8 +4790,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 97,
-      "age_months": 3.2,
+      "age_days": 114,
+      "age_months": 3.8,
       "dob": "2026-02-03",
       "genotype": " Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003302386",
@@ -4773,8 +4802,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 97,
-      "age_months": 3.2,
+      "age_days": 114,
+      "age_months": 3.8,
       "dob": "2026-02-03",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003302386",
@@ -4785,8 +4814,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 97,
-      "age_months": 3.2,
+      "age_days": 114,
+      "age_months": 3.8,
       "dob": "2026-02-03",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003302385",
@@ -4797,8 +4826,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 97,
-      "age_months": 3.2,
+      "age_days": 114,
+      "age_months": 3.8,
       "dob": "2026-02-03",
       "genotype": " Adipoq-cre; Dendra2<+/+>",
       "cage_id": "1003302385",
@@ -4809,8 +4838,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 97,
-      "age_months": 3.2,
+      "age_days": 114,
+      "age_months": 3.8,
       "dob": "2026-02-03",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003302385",
@@ -4821,8 +4850,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 97,
-      "age_months": 3.2,
+      "age_days": 114,
+      "age_months": 3.8,
       "dob": "2026-02-03",
       "genotype": " WT; Dendra2<+/->",
       "cage_id": "1003302385",
@@ -4833,8 +4862,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 588,
-      "age_months": 19.6,
+      "age_days": 605,
+      "age_months": 20.2,
       "dob": "2024-09-30",
       "genotype": " WT; Dendra2<-/->",
       "cage_id": "1002947942",
@@ -4848,8 +4877,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 557,
-      "age_months": 18.6,
+      "age_days": 574,
+      "age_months": 19.1,
       "dob": "2024-10-31",
       "genotype": " WT; Dendra2<-/->",
       "cage_id": "1002947864",
@@ -4863,8 +4892,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 557,
-      "age_months": 18.6,
+      "age_days": 574,
+      "age_months": 19.1,
       "dob": "2024-10-31",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1002947865",
@@ -4878,8 +4907,8 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Female",
-      "age_days": 557,
-      "age_months": 18.6,
+      "age_days": 574,
+      "age_months": 19.1,
       "dob": "2024-10-31",
       "genotype": " Adipoq-cre; Dendra2<-/->",
       "cage_id": "1002947865",
@@ -4893,13 +4922,14 @@
       "use": "Available",
       "strain": "AdipoGlo",
       "sex": "Male",
-      "age_days": 532,
-      "age_months": 17.7,
+      "age_days": 549,
+      "age_months": 18.3,
       "dob": "2024-11-25",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "1002947895",
       "cull_flags": [
-        "aged_>12mo"
+        "aged_>12mo",
+        "aged_>18mo"
       ]
     },
     {
@@ -4907,8 +4937,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 486,
-      "age_months": 16.2,
+      "age_days": 503,
+      "age_months": 16.8,
       "dob": "2025-01-10",
       "genotype": " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
       "cage_id": "1003016672",
@@ -4921,8 +4951,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 464,
-      "age_months": 15.5,
+      "age_days": 481,
+      "age_months": 16.0,
       "dob": "2025-02-01",
       "genotype": " mTmG<mTmG/WT>; WT; Dendra2<-/->",
       "cage_id": "1003059364",
@@ -4935,8 +4965,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 464,
-      "age_months": 15.5,
+      "age_days": 481,
+      "age_months": 16.0,
       "dob": "2025-02-01",
       "genotype": " mTmG<WT/WT>; WT; Dendra2<+/->",
       "cage_id": "1003059364",
@@ -4949,8 +4979,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 463,
-      "age_months": 15.4,
+      "age_days": 480,
+      "age_months": 16.0,
       "dob": "2025-02-02",
       "genotype": " mTmG<mTmG/WT>; WT; Dendra2<-/->",
       "cage_id": "1003059365",
@@ -4963,8 +4993,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 463,
-      "age_months": 15.4,
+      "age_days": 480,
+      "age_months": 16.0,
       "dob": "2025-02-02",
       "genotype": " mTmG<WT/WT>; Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003059365",
@@ -4977,8 +5007,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 437,
-      "age_months": 14.6,
+      "age_days": 454,
+      "age_months": 15.1,
       "dob": "2025-02-28",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre; Dendra2<+/+>",
       "cage_id": "1003089213",
@@ -4991,8 +5021,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 391,
-      "age_months": 13.0,
+      "age_days": 408,
+      "age_months": 13.6,
       "dob": "2025-04-15",
       "genotype": " mTmG<mTmG/WT>; Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003059379",
@@ -5005,8 +5035,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 425,
-      "age_months": 14.2,
+      "age_days": 442,
+      "age_months": 14.7,
       "dob": "2025-03-12",
       "genotype": "",
       "cage_id": "1003090730",
@@ -5019,8 +5049,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 396,
-      "age_months": 13.2,
+      "age_days": 413,
+      "age_months": 13.8,
       "dob": "2025-04-10",
       "genotype": " mTmG<WT/WT>; Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003059397",
@@ -5033,8 +5063,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 396,
-      "age_months": 13.2,
+      "age_days": 413,
+      "age_months": 13.8,
       "dob": "2025-04-10",
       "genotype": " mTmG<WT/WT>; Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003059397",
@@ -5047,8 +5077,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 367,
-      "age_months": 12.2,
+      "age_days": 384,
+      "age_months": 12.8,
       "dob": "2025-05-09",
       "genotype": " mTmG<WT/WT>; Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003054428",
@@ -5061,8 +5091,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 367,
-      "age_months": 12.2,
+      "age_days": 384,
+      "age_months": 12.8,
       "dob": "2025-05-09",
       "genotype": " mTmG<WT/WT>; WT; Dendra2<+/->",
       "cage_id": "1003059429",
@@ -5075,8 +5105,8 @@
       "use": "Breeding",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 382,
-      "age_months": 12.7,
+      "age_days": 399,
+      "age_months": 13.3,
       "dob": "2025-04-24",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre; Dendra2<+/+>",
       "cage_id": "1003225766",
@@ -5089,8 +5119,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 382,
-      "age_months": 12.7,
+      "age_days": 399,
+      "age_months": 13.3,
       "dob": "2025-04-24",
       "genotype": " mTmG<mTmG/WT>; Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003121695",
@@ -5103,8 +5133,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 382,
-      "age_months": 12.7,
+      "age_days": 399,
+      "age_months": 13.3,
       "dob": "2025-04-24",
       "genotype": " mTmG<WT/WT>; WT; Dendra2<-/->",
       "cage_id": "1003121695",
@@ -5117,44 +5147,50 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 353,
-      "age_months": 11.8,
+      "age_days": 370,
+      "age_months": 12.3,
       "dob": "2025-05-23",
       "genotype": " mTmG<WT/WT>; WT; Dendra2<-/->",
       "cage_id": "1003059439",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "321",
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 353,
-      "age_months": 11.8,
+      "age_days": 370,
+      "age_months": 12.3,
       "dob": "2025-05-23",
       "genotype": " mTmG<mTmG/WT>; WT; Dendra2<-/->",
       "cage_id": "1003059439",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "322",
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 353,
-      "age_months": 11.8,
+      "age_days": 370,
+      "age_months": 12.3,
       "dob": "2025-05-23",
       "genotype": " mTmG<WT/WT>; WT; Dendra2<-/->",
       "cage_id": "1003059439",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "324",
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 388,
-      "age_months": 12.9,
+      "age_days": 405,
+      "age_months": 13.5,
       "dob": "2025-04-18",
       "genotype": " mTmG<mTmG/WT>; WT; Dendra2<-/->",
       "cage_id": "1003121675",
@@ -5167,8 +5203,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 388,
-      "age_months": 12.9,
+      "age_days": 405,
+      "age_months": 13.5,
       "dob": "2025-04-18",
       "genotype": " mTmG<mTmG/WT>; WT; Dendra2<-/->",
       "cage_id": "1003121675",
@@ -5181,8 +5217,8 @@
       "use": "Breeding",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 388,
-      "age_months": 12.9,
+      "age_days": 405,
+      "age_months": 13.5,
       "dob": "2025-04-18",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre; Dendra2<+/+>",
       "cage_id": "1003225765",
@@ -5195,8 +5231,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 388,
-      "age_months": 12.9,
+      "age_days": 405,
+      "age_months": 13.5,
       "dob": "2025-04-18",
       "genotype": " mTmG<WT/WT>; Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003121675",
@@ -5209,8 +5245,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 388,
-      "age_months": 12.9,
+      "age_days": 405,
+      "age_months": 13.5,
       "dob": "2025-04-18",
       "genotype": " mTmG<mTmG/WT>; Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003121676",
@@ -5223,8 +5259,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 388,
-      "age_months": 12.9,
+      "age_days": 405,
+      "age_months": 13.5,
       "dob": "2025-04-18",
       "genotype": " mTmG<WT/WT>; Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003121676",
@@ -5237,8 +5273,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 388,
-      "age_months": 12.9,
+      "age_days": 405,
+      "age_months": 13.5,
       "dob": "2025-04-18",
       "genotype": " mTmG<WT/WT>; WT; Dendra2<-/->",
       "cage_id": "1003121676",
@@ -5251,8 +5287,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 367,
-      "age_months": 12.2,
+      "age_days": 384,
+      "age_months": 12.8,
       "dob": "2025-05-09",
       "genotype": " mTmG<mTmG/WT>; Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003059430",
@@ -5265,8 +5301,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 367,
-      "age_months": 12.2,
+      "age_days": 384,
+      "age_months": 12.8,
       "dob": "2025-05-09",
       "genotype": " mTmG<WT/WT>; WT; Dendra2<-/->",
       "cage_id": "1003059430",
@@ -5279,8 +5315,8 @@
       "use": "Breeding",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 367,
-      "age_months": 12.2,
+      "age_days": 384,
+      "age_months": 12.8,
       "dob": "2025-05-09",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre; Dendra2<+/+>",
       "cage_id": "1003225765",
@@ -5293,56 +5329,64 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 353,
-      "age_months": 11.8,
+      "age_days": 370,
+      "age_months": 12.3,
       "dob": "2025-05-23",
       "genotype": " mTmG<WT/WT>; Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003059440",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "336",
       "use": "Breeding",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 353,
-      "age_months": 11.8,
+      "age_days": 370,
+      "age_months": 12.3,
       "dob": "2025-05-23",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre; Dendra2<+/+>",
       "cage_id": "1003225766",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "337",
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 353,
-      "age_months": 11.8,
+      "age_days": 370,
+      "age_months": 12.3,
       "dob": "2025-05-23",
       "genotype": " mTmG<WT/WT>; Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003059440",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "338",
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 353,
-      "age_months": 11.8,
+      "age_days": 370,
+      "age_months": 12.3,
       "dob": "2025-05-23",
       "genotype": " mTmG<WT/WT>; Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003059440",
-      "cull_flags": []
+      "cull_flags": [
+        "aged_>12mo"
+      ]
     },
     {
       "mouse_id": "339",
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 367,
-      "age_months": 12.2,
+      "age_days": 384,
+      "age_months": 12.8,
       "dob": "2025-05-09",
       "genotype": " mTmG<WT/WT>; WT; Dendra2<-/->",
       "cage_id": "1003059431",
@@ -5355,8 +5399,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 367,
-      "age_months": 12.2,
+      "age_days": 384,
+      "age_months": 12.8,
       "dob": "2025-05-09",
       "genotype": " mTmG<mTmG/WT>; WT; Dendra2<-/->",
       "cage_id": "1003059431",
@@ -5369,8 +5413,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 344,
-      "age_months": 11.5,
+      "age_days": 361,
+      "age_months": 12.0,
       "dob": "2025-06-01",
       "genotype": " mTmG<WT/WT>; WT; Dendra2<+/->",
       "cage_id": "1003121781",
@@ -5381,8 +5425,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 344,
-      "age_months": 11.5,
+      "age_days": 361,
+      "age_months": 12.0,
       "dob": "2025-06-01",
       "genotype": " mTmG<mTmG/WT>; Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003121781",
@@ -5393,8 +5437,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 382,
-      "age_months": 12.7,
+      "age_days": 399,
+      "age_months": 13.3,
       "dob": "2025-04-24",
       "genotype": " mTmG<mTmG/WT>; Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003121696",
@@ -5407,8 +5451,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 382,
-      "age_months": 12.7,
+      "age_days": 399,
+      "age_months": 13.3,
       "dob": "2025-04-24",
       "genotype": " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
       "cage_id": "1003121696",
@@ -5421,8 +5465,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 382,
-      "age_months": 12.7,
+      "age_days": 399,
+      "age_months": 13.3,
       "dob": "2025-04-24",
       "genotype": " mTmG<mTmG/WT>; WT; Dendra2<-/->",
       "cage_id": "1003121696",
@@ -5435,8 +5479,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 344,
-      "age_months": 11.5,
+      "age_days": 361,
+      "age_months": 12.0,
       "dob": "2025-06-01",
       "genotype": " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
       "cage_id": "1003121780",
@@ -5447,8 +5491,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 344,
-      "age_months": 11.5,
+      "age_days": 361,
+      "age_months": 12.0,
       "dob": "2025-06-01",
       "genotype": " mTmG<mTmG/WT>; Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003121780",
@@ -5459,8 +5503,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 344,
-      "age_months": 11.5,
+      "age_days": 361,
+      "age_months": 12.0,
       "dob": "2025-06-01",
       "genotype": " mTmG<mTmG/WT>; WT; Dendra2<-/->",
       "cage_id": "1003121780",
@@ -5471,8 +5515,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 344,
-      "age_months": 11.5,
+      "age_days": 361,
+      "age_months": 12.0,
       "dob": "2025-06-01",
       "genotype": " mTmG<WT/WT>; Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003121780",
@@ -5483,8 +5527,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 333,
-      "age_months": 11.1,
+      "age_days": 350,
+      "age_months": 11.7,
       "dob": "2025-06-12",
       "genotype": " mTmG<WT/WT>; WT; Dendra2<+/->",
       "cage_id": "1003165194",
@@ -5495,8 +5539,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 333,
-      "age_months": 11.1,
+      "age_days": 350,
+      "age_months": 11.7,
       "dob": "2025-06-12",
       "genotype": " mTmG<WT/WT>; Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003165194",
@@ -5507,8 +5551,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 333,
-      "age_months": 11.1,
+      "age_days": 350,
+      "age_months": 11.7,
       "dob": "2025-06-12",
       "genotype": " mTmG<WT/WT>; WT; Dendra2<+/->",
       "cage_id": "1003165194",
@@ -5519,8 +5563,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 291,
-      "age_months": 9.7,
+      "age_days": 308,
+      "age_months": 10.3,
       "dob": "2025-07-24",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre",
       "cage_id": "1003089224",
@@ -5531,8 +5575,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 313,
-      "age_months": 10.4,
+      "age_days": 330,
+      "age_months": 11.0,
       "dob": "2025-07-02",
       "genotype": " mTmG<WT/WT>; WT; Dendra2<-/->",
       "cage_id": "100317960",
@@ -5543,8 +5587,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 313,
-      "age_months": 10.4,
+      "age_days": 330,
+      "age_months": 11.0,
       "dob": "2025-07-02",
       "genotype": " mTmG<WT/WT>; WT; Dendra2<+/->",
       "cage_id": "100317961",
@@ -5555,8 +5599,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 312,
-      "age_months": 10.4,
+      "age_days": 329,
+      "age_months": 11.0,
       "dob": "2025-07-03",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre; Dendra2<+/+>",
       "cage_id": "1003171980",
@@ -5567,8 +5611,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 312,
-      "age_months": 10.4,
+      "age_days": 329,
+      "age_months": 11.0,
       "dob": "2025-07-03",
       "genotype": " mTmG<WT/WT>; Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003171980",
@@ -5579,8 +5623,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 312,
-      "age_months": 10.4,
+      "age_days": 329,
+      "age_months": 11.0,
       "dob": "2025-07-03",
       "genotype": " mTmG<mTmG/WT>; Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003171980",
@@ -5591,8 +5635,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 312,
-      "age_months": 10.4,
+      "age_days": 329,
+      "age_months": 11.0,
       "dob": "2025-07-03",
       "genotype": " mTmG<WT/WT>; Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003171980",
@@ -5603,8 +5647,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 312,
-      "age_months": 10.4,
+      "age_days": 329,
+      "age_months": 11.0,
       "dob": "2025-07-03",
       "genotype": " mTmG<WT/WT>; WT; Dendra2<+/->",
       "cage_id": "1003171979",
@@ -5615,8 +5659,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 312,
-      "age_months": 10.4,
+      "age_days": 329,
+      "age_months": 11.0,
       "dob": "2025-07-03",
       "genotype": " mTmG<WT/WT>; Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003171979",
@@ -5627,8 +5671,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 288,
-      "age_months": 9.6,
+      "age_days": 305,
+      "age_months": 10.2,
       "dob": "2025-07-27",
       "genotype": " mTmG<WT/WT>; Adipoq-cre; Dendra2<-/->",
       "cage_id": "1003172011",
@@ -5639,8 +5683,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 288,
-      "age_months": 9.6,
+      "age_days": 305,
+      "age_months": 10.2,
       "dob": "2025-07-27",
       "genotype": " mTmG<WT/WT>; Adipoq-cre; Dendra2<+/->",
       "cage_id": "1003172013",
@@ -5651,8 +5695,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 288,
-      "age_months": 9.6,
+      "age_days": 305,
+      "age_months": 10.2,
       "dob": "2025-07-27",
       "genotype": " mTmG<WT/WT>; WT; Dendra2<-/->",
       "cage_id": "1003172013",
@@ -5663,8 +5707,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 230,
-      "age_months": 7.7,
+      "age_days": 247,
+      "age_months": 8.2,
       "dob": "2025-09-23",
       "genotype": " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
       "cage_id": "Cage 255",
@@ -5675,8 +5719,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 230,
-      "age_months": 7.7,
+      "age_days": 247,
+      "age_months": 8.2,
       "dob": "2025-09-23",
       "genotype": " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
       "cage_id": "Cage 255",
@@ -5687,8 +5731,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 230,
-      "age_months": 7.7,
+      "age_days": 247,
+      "age_months": 8.2,
       "dob": "2025-09-23",
       "genotype": " mTmG<WT/WT>; Adipoq-cre; Dendra2<+/->",
       "cage_id": "Cage 254",
@@ -5699,8 +5743,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 230,
-      "age_months": 7.7,
+      "age_days": 247,
+      "age_months": 8.2,
       "dob": "2025-09-23",
       "genotype": " mTmG<WT/WT>; WT; Dendra2<+/->",
       "cage_id": "Cage 254",
@@ -5711,8 +5755,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 227,
-      "age_months": 7.6,
+      "age_days": 244,
+      "age_months": 8.1,
       "dob": "2025-09-26",
       "genotype": " Adipoq-cre; Dendra2<+/+>",
       "cage_id": "Cage 257",
@@ -5723,8 +5767,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 227,
-      "age_months": 7.6,
+      "age_days": 244,
+      "age_months": 8.1,
       "dob": "2025-09-26",
       "genotype": " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
       "cage_id": "Cage 256",
@@ -5735,8 +5779,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 227,
-      "age_months": 7.6,
+      "age_days": 244,
+      "age_months": 8.1,
       "dob": "2025-09-26",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre; Dendra2<+/+>",
       "cage_id": "Cage 256",
@@ -5747,8 +5791,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 227,
-      "age_months": 7.6,
+      "age_days": 244,
+      "age_months": 8.1,
       "dob": "2025-09-26",
       "genotype": " Adipoq-cre; Dendra2<+/+>",
       "cage_id": "Cage 256",
@@ -5759,8 +5803,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 230,
-      "age_months": 7.7,
+      "age_days": 247,
+      "age_months": 8.2,
       "dob": "2025-09-23",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre; Dendra2<+/+>",
       "cage_id": "Cage 253",
@@ -5771,8 +5815,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 230,
-      "age_months": 7.7,
+      "age_days": 247,
+      "age_months": 8.2,
       "dob": "2025-09-23",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre",
       "cage_id": "Cage 253",
@@ -5783,8 +5827,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 230,
-      "age_months": 7.7,
+      "age_days": 247,
+      "age_months": 8.2,
       "dob": "2025-09-23",
       "genotype": " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
       "cage_id": "Cage 252",
@@ -5795,8 +5839,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 230,
-      "age_months": 7.7,
+      "age_days": 247,
+      "age_months": 8.2,
       "dob": "2025-09-23",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre",
       "cage_id": "Cage 252",
@@ -5807,8 +5851,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 230,
-      "age_months": 7.7,
+      "age_days": 247,
+      "age_months": 8.2,
       "dob": "2025-09-23",
       "genotype": " Adipoq-cre; Dendra2<+/+>",
       "cage_id": "Cage 252",
@@ -5819,8 +5863,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 145,
-      "age_months": 4.8,
+      "age_days": 162,
+      "age_months": 5.4,
       "dob": "2025-12-17",
       "genotype": " Adipoq-cre; Dendra2<+/+>",
       "cage_id": "1003225826",
@@ -5831,8 +5875,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 145,
-      "age_months": 4.8,
+      "age_days": 162,
+      "age_months": 5.4,
       "dob": "2025-12-17",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre; Dendra2<+/+>",
       "cage_id": "1003225826",
@@ -5843,8 +5887,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 145,
-      "age_months": 4.8,
+      "age_days": 162,
+      "age_months": 5.4,
       "dob": "2025-12-17",
       "genotype": " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
       "cage_id": "1003225826",
@@ -5855,8 +5899,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 145,
-      "age_months": 4.8,
+      "age_days": 162,
+      "age_months": 5.4,
       "dob": "2025-12-17",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre; Dendra2<+/+>",
       "cage_id": "1003225826",
@@ -5867,8 +5911,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 145,
-      "age_months": 4.8,
+      "age_days": 162,
+      "age_months": 5.4,
       "dob": "2025-12-17",
       "genotype": " Adipoq-cre; Dendra2<+/+>",
       "cage_id": "1003225826",
@@ -5879,8 +5923,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 145,
-      "age_months": 4.8,
+      "age_days": 162,
+      "age_months": 5.4,
       "dob": "2025-12-17",
       "genotype": " Adipoq-cre; Dendra2<+/+>",
       "cage_id": "10033225827",
@@ -5891,8 +5935,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 145,
-      "age_months": 4.8,
+      "age_days": 162,
+      "age_months": 5.4,
       "dob": "2025-12-17",
       "genotype": " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
       "cage_id": "10033225827",
@@ -5903,8 +5947,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 145,
-      "age_months": 4.8,
+      "age_days": 162,
+      "age_months": 5.4,
       "dob": "2025-12-17",
       "genotype": " Adipoq-cre; Dendra2<+/+>",
       "cage_id": "10033225827",
@@ -5915,8 +5959,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 145,
-      "age_months": 4.8,
+      "age_days": 162,
+      "age_months": 5.4,
       "dob": "2025-12-17",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre; Dendra2<+/+>",
       "cage_id": "10033225827",
@@ -5927,8 +5971,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 145,
-      "age_months": 4.8,
+      "age_days": 162,
+      "age_months": 5.4,
       "dob": "2025-12-17",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre",
       "cage_id": "10033225827",
@@ -5939,8 +5983,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 191,
-      "age_months": 6.4,
+      "age_days": 208,
+      "age_months": 6.9,
       "dob": "2025-11-01",
       "genotype": " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
       "cage_id": "1003225819",
@@ -5951,8 +5995,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 191,
-      "age_months": 6.4,
+      "age_days": 208,
+      "age_months": 6.9,
       "dob": "2025-11-01",
       "genotype": " mTmG<mTmG/mTmG>; WT",
       "cage_id": "1003225820",
@@ -5963,8 +6007,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 191,
-      "age_months": 6.4,
+      "age_days": 208,
+      "age_months": 6.9,
       "dob": "2025-11-01",
       "genotype": " Adipoq-cre; Dendra2<+/+>",
       "cage_id": "1003225820",
@@ -5975,8 +6019,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 191,
-      "age_months": 6.4,
+      "age_days": 208,
+      "age_months": 6.9,
       "dob": "2025-11-01",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre",
       "cage_id": "1003225820",
@@ -5987,8 +6031,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 191,
-      "age_months": 6.4,
+      "age_days": 208,
+      "age_months": 6.9,
       "dob": "2025-11-01",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre",
       "cage_id": "1003225820",
@@ -5999,8 +6043,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 137,
-      "age_months": 4.6,
+      "age_days": 154,
+      "age_months": 5.1,
       "dob": "2025-12-25",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre; Dendra2<+/+>",
       "cage_id": "Cage 272",
@@ -6011,8 +6055,8 @@
       "use": "Breeding",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 137,
-      "age_months": 4.6,
+      "age_days": 154,
+      "age_months": 5.1,
       "dob": "2025-12-25",
       "genotype": " WT; Dendra2<+/+>",
       "cage_id": "Cage 286",
@@ -6023,8 +6067,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 137,
-      "age_months": 4.6,
+      "age_days": 154,
+      "age_months": 5.1,
       "dob": "2025-12-25",
       "genotype": " mTmG<mTmG/mTmG>; WT",
       "cage_id": "Cage 271",
@@ -6035,8 +6079,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 137,
-      "age_months": 4.6,
+      "age_days": 154,
+      "age_months": 5.1,
       "dob": "2025-12-25",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre; Dendra2<+/+>",
       "cage_id": "Cage 271",
@@ -6047,8 +6091,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 137,
-      "age_months": 4.6,
+      "age_days": 154,
+      "age_months": 5.1,
       "dob": "2025-12-25",
       "genotype": " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
       "cage_id": "Cage 271",
@@ -6059,8 +6103,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 137,
-      "age_months": 4.6,
+      "age_days": 154,
+      "age_months": 5.1,
       "dob": "2025-12-25",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre; Dendra2<+/+>",
       "cage_id": "Cage 271",
@@ -6071,8 +6115,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 123,
-      "age_months": 4.1,
+      "age_days": 140,
+      "age_months": 4.7,
       "dob": "2026-01-08",
       "genotype": " Adipoq-cre; Dendra2<+/+>",
       "cage_id": "1003302342",
@@ -6083,8 +6127,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 123,
-      "age_months": 4.1,
+      "age_days": 140,
+      "age_months": 4.7,
       "dob": "2026-01-08",
       "genotype": " mTmG<mTmG/mTmG>; WT",
       "cage_id": "1003302342",
@@ -6095,8 +6139,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 123,
-      "age_months": 4.1,
+      "age_days": 140,
+      "age_months": 4.7,
       "dob": "2026-01-08",
       "genotype": " WT; Dendra2<+/+>",
       "cage_id": "1003302342",
@@ -6107,8 +6151,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 123,
-      "age_months": 4.1,
+      "age_days": 140,
+      "age_months": 4.7,
       "dob": "2026-01-08",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre; Dendra2<+/+>",
       "cage_id": "1003302342",
@@ -6119,8 +6163,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 123,
-      "age_months": 4.1,
+      "age_days": 140,
+      "age_months": 4.7,
       "dob": "2026-01-08",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre",
       "cage_id": "1003302341",
@@ -6131,8 +6175,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 101,
-      "age_months": 3.4,
+      "age_days": 118,
+      "age_months": 3.9,
       "dob": "2026-01-30",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre; Dendra2<+/+>",
       "cage_id": "1003302352",
@@ -6143,8 +6187,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 101,
-      "age_months": 3.4,
+      "age_days": 118,
+      "age_months": 3.9,
       "dob": "2026-01-30",
       "genotype": " Adipoq-cre; Dendra2<+/+>",
       "cage_id": "1003302352",
@@ -6155,8 +6199,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 101,
-      "age_months": 3.4,
+      "age_days": 118,
+      "age_months": 3.9,
       "dob": "2026-01-30",
       "genotype": " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
       "cage_id": "1003302353",
@@ -6167,8 +6211,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 101,
-      "age_months": 3.4,
+      "age_days": 118,
+      "age_months": 3.9,
       "dob": "2026-01-30",
       "genotype": " mTmG<mTmG/mTmG>; Adipoq-cre; Dendra2<+/+>",
       "cage_id": "1003302353",
@@ -6179,8 +6223,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 101,
-      "age_months": 3.4,
+      "age_days": 118,
+      "age_months": 3.9,
       "dob": "2026-01-30",
       "genotype": " WT; Dendra2<+/+>",
       "cage_id": "1003302353",
@@ -6191,8 +6235,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 462,
-      "age_months": 15.4,
+      "age_days": 479,
+      "age_months": 16.0,
       "dob": "2025-02-03",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "Cage 71",
@@ -6205,8 +6249,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Male",
-      "age_days": 462,
-      "age_months": 15.4,
+      "age_days": 479,
+      "age_months": 16.0,
       "dob": "2025-02-03",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "Cage 71",
@@ -6219,8 +6263,8 @@
       "use": "Available",
       "strain": "AdipoGlo+",
       "sex": "Female",
-      "age_days": 462,
-      "age_months": 15.4,
+      "age_days": 479,
+      "age_months": 16.0,
       "dob": "2025-02-03",
       "genotype": " Adipoq-cre; Dendra2<+/->",
       "cage_id": "Cage 71",
@@ -6233,8 +6277,8 @@
       "use": "Available",
       "strain": "Dendra2",
       "sex": "Male",
-      "age_days": 719,
-      "age_months": 24.0,
+      "age_days": 736,
+      "age_months": 24.5,
       "dob": "2024-05-22",
       "genotype": " Dendra2<-/->",
       "cage_id": "1002819508",
@@ -6248,8 +6292,8 @@
       "use": "Available",
       "strain": "Dendra2",
       "sex": "Male",
-      "age_days": 719,
-      "age_months": 24.0,
+      "age_days": 736,
+      "age_months": 24.5,
       "dob": "2024-05-22",
       "genotype": " Dendra2<-/->",
       "cage_id": "1002819508",
@@ -6263,8 +6307,8 @@
       "use": "Available",
       "strain": "Dendra2",
       "sex": "Female",
-      "age_days": 719,
-      "age_months": 24.0,
+      "age_days": 736,
+      "age_months": 24.5,
       "dob": "2024-05-22",
       "genotype": " Dendra2<+/->",
       "cage_id": "1002819507",
@@ -6278,8 +6322,8 @@
       "use": "Available",
       "strain": "Dendra2",
       "sex": "Male",
-      "age_days": 647,
-      "age_months": 21.6,
+      "age_days": 664,
+      "age_months": 22.1,
       "dob": "2024-08-02",
       "genotype": " Dendra2<+/+>",
       "cage_id": "1002947877",
@@ -6293,8 +6337,8 @@
       "use": "Available",
       "strain": "Dendra2",
       "sex": "Male",
-      "age_days": 842,
-      "age_months": 28.1,
+      "age_days": 859,
+      "age_months": 28.6,
       "dob": "2024-01-20",
       "genotype": " Dendra2<+/->",
       "cage_id": "1002819531",
@@ -6308,8 +6352,8 @@
       "use": "Breeding",
       "strain": "Dendra2",
       "sex": "Male",
-      "age_days": 438,
-      "age_months": 14.6,
+      "age_days": 455,
+      "age_months": 15.2,
       "dob": "2025-02-27",
       "genotype": " Dendra2<+/->",
       "cage_id": "1003203136",
@@ -6322,8 +6366,8 @@
       "use": "Breeding",
       "strain": "Dendra2",
       "sex": "Female",
-      "age_days": 438,
-      "age_months": 14.6,
+      "age_days": 455,
+      "age_months": 15.2,
       "dob": "2025-02-27",
       "genotype": " Dendra2<+/->",
       "cage_id": "1003203135",
@@ -6336,8 +6380,8 @@
       "use": "Available",
       "strain": "Dendra2",
       "sex": "Female",
-      "age_days": 438,
-      "age_months": 14.6,
+      "age_days": 455,
+      "age_months": 15.2,
       "dob": "2025-02-27",
       "genotype": " Dendra2<-/->",
       "cage_id": "1003059375",
@@ -6350,8 +6394,8 @@
       "use": "Available",
       "strain": "Dendra2",
       "sex": "Female",
-      "age_days": 438,
-      "age_months": 14.6,
+      "age_days": 455,
+      "age_months": 15.2,
       "dob": "2025-02-27",
       "genotype": " Dendra2<+/->",
       "cage_id": "1003059375",
@@ -6364,8 +6408,8 @@
       "use": "Breeding",
       "strain": "Dendra2",
       "sex": "Female",
-      "age_days": 481,
-      "age_months": 16.0,
+      "age_days": 498,
+      "age_months": 16.6,
       "dob": "2025-01-15",
       "genotype": " Dendra2<+/+>",
       "cage_id": "1003203136",
@@ -6378,8 +6422,8 @@
       "use": "Breeding",
       "strain": "Dendra2",
       "sex": "Male",
-      "age_days": 570,
-      "age_months": 19.0,
+      "age_days": 587,
+      "age_months": 19.6,
       "dob": "2024-10-18",
       "genotype": " Dendra2<+/->",
       "cage_id": "1003203135",
@@ -6393,8 +6437,8 @@
       "use": "Breeding",
       "strain": "Marrow Glo",
       "sex": "Female",
-      "age_days": 319,
-      "age_months": 10.6,
+      "age_days": 336,
+      "age_months": 11.2,
       "dob": "2025-06-26",
       "genotype": " Resisten-cre<+/->; Osterix<+/->",
       "cage_id": "1003225767",
@@ -6405,8 +6449,8 @@
       "use": "Available",
       "strain": "Marrow Glo",
       "sex": "Female",
-      "age_days": 103,
-      "age_months": 3.4,
+      "age_days": 120,
+      "age_months": 4.0,
       "dob": "2026-01-28",
       "genotype": " Dendra2<+/->; Resisten-cre<-/->; Osterix<+/->",
       "cage_id": "1003344625",
@@ -6417,8 +6461,8 @@
       "use": "Available",
       "strain": "Marrow Glo",
       "sex": "Female",
-      "age_days": 103,
-      "age_months": 3.4,
+      "age_days": 120,
+      "age_months": 4.0,
       "dob": "2026-01-28",
       "genotype": " Dendra2<+/->; Resisten-cre<-/->; Osterix<+/->",
       "cage_id": "1003344625",
@@ -6429,8 +6473,8 @@
       "use": "Available",
       "strain": "Marrow Glo",
       "sex": "Female",
-      "age_days": 103,
-      "age_months": 3.4,
+      "age_days": 120,
+      "age_months": 4.0,
       "dob": "2026-01-28",
       "genotype": " Dendra2<+/->; Resisten-cre<-/->; Osterix<+/->",
       "cage_id": "1003344625",
@@ -6441,8 +6485,8 @@
       "use": "Available",
       "strain": "Marrow Glo",
       "sex": "Female",
-      "age_days": 103,
-      "age_months": 3.4,
+      "age_days": 120,
+      "age_months": 4.0,
       "dob": "2026-01-28",
       "genotype": " Dendra2<+/->; Resisten-cre<-/->; Osterix<+/->",
       "cage_id": "1003344625",
@@ -6453,8 +6497,8 @@
       "use": "Available",
       "strain": "Marrow Glo",
       "sex": "Male",
-      "age_days": 103,
-      "age_months": 3.4,
+      "age_days": 120,
+      "age_months": 4.0,
       "dob": "2026-01-28",
       "genotype": " Dendra2<+/->; Resisten-cre<-/->; Osterix<+/->",
       "cage_id": "1003344626",
@@ -6465,8 +6509,8 @@
       "use": "Available",
       "strain": "Marrow Glo",
       "sex": "Male",
-      "age_days": 103,
-      "age_months": 3.4,
+      "age_days": 120,
+      "age_months": 4.0,
       "dob": "2026-01-28",
       "genotype": " Dendra2<+/->; Resisten-cre<-/->; Osterix<+/->",
       "cage_id": "1003344626",
@@ -6477,8 +6521,8 @@
       "use": "Breeding",
       "strain": "Marrow Glo",
       "sex": "Male",
-      "age_days": 67,
-      "age_months": 2.2,
+      "age_days": 84,
+      "age_months": 2.8,
       "dob": "2026-03-05",
       "genotype": " Osterix<+/->",
       "cage_id": "1003297629",
@@ -6487,7 +6531,7 @@
   ],
   "cull_summary": {
     "aged_>12mo_available_nonbreeder": {
-      "count": 63,
+      "count": 82,
       "ids": [
         "00013",
         "0023",
@@ -6509,6 +6553,19 @@
         "293",
         "294",
         "295",
+        "347",
+        "351",
+        "352",
+        "353",
+        "360",
+        "361",
+        "362",
+        "363",
+        "364",
+        "365",
+        "366",
+        "374",
+        "375",
         "48",
         "68",
         "82",
@@ -6525,32 +6582,23 @@
         "258",
         "281",
         "282",
-        "309",
-        "312",
-        "316",
-        "317",
-        "324",
-        "325",
-        "327",
-        "328",
-        "329",
-        "330",
-        "332",
-        "333",
-        "339",
-        "341"
+        "309"
       ]
     },
     "aged_>18mo_any": {
-      "count": 13,
+      "count": 17,
       "ids": [
         "00013",
         "0023",
+        "100",
+        "101",
+        "102",
         "48",
         "68",
         "82",
         "85",
         "87",
+        "92",
         "00001",
         "00002",
         "00008",
@@ -6584,32 +6632,33 @@
     "per_month": 4146.6,
     "per_year": 50450.3,
     "post_cull": {
-      "killed_count": 0,
-      "active_cages": 108,
-      "retired_cages": 0,
-      "per_day": 138.22,
-      "per_month": 4146.6,
-      "per_year": 50450.3,
-      "savings_per_day": 0.0,
-      "savings_per_month": 0.0,
-      "savings_per_year": 0.0,
-      "savings_pct": 0.0,
+      "killed_count": 14,
+      "active_cages": 102,
+      "retired_cages": 6,
+      "per_day": 131.08,
+      "per_month": 3932.4,
+      "per_year": 47844.2,
+      "savings_per_day": 7.14,
+      "savings_per_month": 214.2,
+      "savings_per_year": 2606.1,
+      "savings_pct": 5.2,
       "breakdown": {
         "by_strain": {
-          "AdipoGlo": 62.41,
+          "AdipoGlo": 55.27,
           "AdipoGlo+": 56.68,
           "Dendra2": 10.27,
-          "AdipoGlo+  AdipoGlo": 2.16,
+          "AdipoGlo  AdipoGlo+": 2.16,
           "Marrow Glo": 2.38,
-          "Marrow Glo  AdipoGlo": 4.32
+          "Marrow Glo  AdipoGlo": 2.16,
+          "AdipoGlo  Marrow Glo": 2.16
         },
         "by_breeding": {
           "breeding": 21.6,
-          "non_breeding": 116.62
+          "non_breeding": 109.48
         },
         "by_housing": {
-          "single": 44.03,
-          "group": 94.19,
+          "single": 42.84,
+          "group": 88.24,
           "empty": 0.0
         }
       }
@@ -6619,9 +6668,10 @@
         "AdipoGlo": 62.41,
         "AdipoGlo+": 56.68,
         "Dendra2": 10.27,
-        "AdipoGlo+  AdipoGlo": 2.16,
+        "AdipoGlo  AdipoGlo+": 2.16,
         "Marrow Glo": 2.38,
-        "Marrow Glo  AdipoGlo": 4.32
+        "Marrow Glo  AdipoGlo": 2.16,
+        "AdipoGlo  Marrow Glo": 2.16
       },
       "by_breeding": {
         "breeding": 21.6,
@@ -6676,15 +6726,6 @@
         "year": 3748.55
       },
       {
-        "strain": "Marrow Glo  AdipoGlo",
-        "cages": 2,
-        "mice": 4,
-        "breeding_cages": 2,
-        "day": 4.32,
-        "month": 129.6,
-        "year": 1576.8
-      },
-      {
         "strain": "Marrow Glo",
         "cages": 2,
         "mice": 6,
@@ -6694,7 +6735,25 @@
         "year": 868.7
       },
       {
-        "strain": "AdipoGlo+  AdipoGlo",
+        "strain": "AdipoGlo  AdipoGlo+",
+        "cages": 1,
+        "mice": 2,
+        "breeding_cages": 1,
+        "day": 2.16,
+        "month": 64.8,
+        "year": 788.4
+      },
+      {
+        "strain": "Marrow Glo  AdipoGlo",
+        "cages": 1,
+        "mice": 2,
+        "breeding_cages": 1,
+        "day": 2.16,
+        "month": 64.8,
+        "year": 788.4
+      },
+      {
+        "strain": "AdipoGlo  Marrow Glo",
         "cages": 1,
         "mice": 2,
         "breeding_cages": 1,
@@ -6706,63 +6765,54 @@
     "by_strain_geno_table": [
       {
         "strain": "AdipoGlo",
-        "genotype": " WT; Dendra2<+/->",
-        "cages": 18,
-        "mice": 35,
-        "day": 21.42,
-        "month": 642.6,
-        "year": 7818.3
-      },
-      {
-        "strain": "AdipoGlo",
         "genotype": " Aq-cre; Dendra2<+/->",
-        "cages": 15,
-        "mice": 34,
-        "day": 19.79,
-        "month": 593.7,
-        "year": 7223.35
+        "cages": 21,
+        "mice": 46,
+        "day": 26.93,
+        "month": 807.9,
+        "year": 9829.45
       },
       {
         "strain": "AdipoGlo",
-        "genotype": " Aq-cre; Dendra2<-/->",
-        "cages": 10,
-        "mice": 16,
-        "day": 11.9,
-        "month": 357.0,
-        "year": 4343.5
+        "genotype": " WT; Dendra2<+/->",
+        "cages": 14,
+        "mice": 27,
+        "day": 16.66,
+        "month": 499.8,
+        "year": 6080.9
       },
       {
         "strain": "AdipoGlo+",
         "genotype": " mTmG<mTmG/mTmG>; Aq-cre; Dendra2<+/+>",
-        "cages": 7,
-        "mice": 16,
-        "day": 10.27,
-        "month": 308.1,
-        "year": 3748.55
+        "cages": 10,
+        "mice": 25,
+        "day": 13.84,
+        "month": 415.2,
+        "year": 5051.6
+      },
+      {
+        "strain": "AdipoGlo",
+        "genotype": " Aq-cre; Dendra2<-/->",
+        "cages": 9,
+        "mice": 14,
+        "day": 10.71,
+        "month": 321.3,
+        "year": 3909.15
       },
       {
         "strain": "AdipoGlo+",
-        "genotype": " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
-        "cages": 8,
-        "mice": 20,
-        "day": 9.52,
-        "month": 285.6,
-        "year": 3474.8
+        "genotype": " mTmG<WT/WT>; WT; Dendra2<-/->",
+        "cages": 7,
+        "mice": 15,
+        "day": 8.33,
+        "month": 249.9,
+        "year": 3040.45
       },
       {
         "strain": "AdipoGlo",
         "genotype": " WT; Dendra2<-/->",
-        "cages": 6,
-        "mice": 8,
-        "day": 7.14,
-        "month": 214.2,
-        "year": 2606.1
-      },
-      {
-        "strain": "AdipoGlo+",
-        "genotype": " mTmG<mTmG/WT>; Aq-cre; Dendra2<-/->",
         "cages": 5,
-        "mice": 10,
+        "mice": 6,
         "day": 5.95,
         "month": 178.5,
         "year": 2171.75
@@ -6778,7 +6828,7 @@
       },
       {
         "strain": "AdipoGlo+",
-        "genotype": " mTmG<WT/WT>; WT; Dendra2<+/->",
+        "genotype": " mTmG<mTmG/mTmG>; WT; Dendra2<+/+>",
         "cages": 4,
         "mice": 7,
         "day": 4.76,
@@ -6787,18 +6837,9 @@
       },
       {
         "strain": "AdipoGlo+",
-        "genotype": " Aq-cre; Dendra2<+/+>",
-        "cages": 4,
-        "mice": 13,
-        "day": 4.76,
-        "month": 142.8,
-        "year": 1737.4
-      },
-      {
-        "strain": "AdipoGlo+",
         "genotype": " mTmG<mTmG/WT>; WT; Dendra2<-/->",
         "cages": 4,
-        "mice": 9,
+        "mice": 11,
         "day": 4.76,
         "month": 142.8,
         "year": 1737.4
@@ -6823,9 +6864,27 @@
       },
       {
         "strain": "AdipoGlo+",
+        "genotype": " mTmG<WT/WT>; WT; Dendra2<+/->",
+        "cages": 3,
+        "mice": 5,
+        "day": 3.57,
+        "month": 107.1,
+        "year": 1303.05
+      },
+      {
+        "strain": "AdipoGlo+",
         "genotype": " mTmG<WT/WT>; Aq-cre; Dendra2<+/->",
         "cages": 3,
         "mice": 6,
+        "day": 3.57,
+        "month": 107.1,
+        "year": 1303.05
+      },
+      {
+        "strain": "AdipoGlo+",
+        "genotype": " Aq-cre; Dendra2<+/+>",
+        "cages": 3,
+        "mice": 9,
         "day": 3.57,
         "month": 107.1,
         "year": 1303.05
@@ -6849,15 +6908,6 @@
         "year": 868.7
       },
       {
-        "strain": "AdipoGlo+",
-        "genotype": " mTmG<WT/WT>; WT; Dendra2<-/->",
-        "cages": 2,
-        "mice": 4,
-        "day": 2.38,
-        "month": 71.4,
-        "year": 868.7
-      },
-      {
         "strain": "Marrow Glo",
         "genotype": " Dendra2<+/->; Resisten-cre<-/->; Osterix<+/->",
         "cages": 2,
@@ -6867,7 +6917,16 @@
         "year": 868.7
       },
       {
-        "strain": "AdipoGlo+  AdipoGlo",
+        "strain": "AdipoGlo+",
+        "genotype": " mTmG<mTmG/WT>; Aq-cre; Dendra2<-/->",
+        "cages": 2,
+        "mice": 3,
+        "day": 2.38,
+        "month": 71.4,
+        "year": 868.7
+      },
+      {
+        "strain": "AdipoGlo  AdipoGlo+",
         "genotype": " Aq-cre; Dendra2<-/->",
         "cages": 1,
         "mice": 2,
@@ -6885,8 +6944,8 @@
         "year": 788.4
       },
       {
-        "strain": "Marrow Glo  AdipoGlo",
-        "genotype": " WT; Dendra2<+/->",
+        "strain": "AdipoGlo  Marrow Glo",
+        "genotype": " Resisten-cre<+/->; Osterix<+/->",
         "cages": 1,
         "mice": 2,
         "day": 2.16,
@@ -6907,6 +6966,15 @@
         "genotype": "nan",
         "cages": 1,
         "mice": 1,
+        "day": 1.19,
+        "month": 35.7,
+        "year": 434.35
+      },
+      {
+        "strain": "AdipoGlo+",
+        "genotype": " WT; Dendra2<+/+>",
+        "cages": 1,
+        "mice": 4,
         "day": 1.19,
         "month": 35.7,
         "year": 434.35
