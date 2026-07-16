@@ -9,10 +9,26 @@ import json
 
 DIR = Path("/Users/briandes/Library/CloudStorage/OneDrive-MichiganMedicine/Desktop/MacDougald Lab/Mouse Colony")
 DATA = DIR / "data" / "colony.json"
+SAVED_COHORTS_PATH = DIR / "data" / "saved_cohorts.json"
+PHYS_CAGES_PATH = DIR / "data" / "physical_cages.json"
 OUT = DIR / "index.html"
 
 with open(DATA) as f:
     colony_json_str = f.read()
+
+# Saved cohorts (optional — empty payload if file absent)
+if SAVED_COHORTS_PATH.exists():
+    with open(SAVED_COHORTS_PATH) as f:
+        saved_cohorts_json_str = f.read()
+else:
+    saved_cohorts_json_str = '{"version":1,"cohorts":[]}'
+
+# Physical cage walkthrough (optional — empty payload if file absent)
+if PHYS_CAGES_PATH.exists():
+    with open(PHYS_CAGES_PATH) as f:
+        phys_cages_json_str = f.read()
+else:
+    phys_cages_json_str = '{"version":1,"cages":[]}'
 
 HTML = r"""<!DOCTYPE html>
 <html lang="en">
@@ -416,6 +432,7 @@ table.data tbody tr:last-child td { border-bottom: none; }
   <button class="tab" data-pane="costs">Cage Costs</button>
   <button class="tab" data-pane="breeding">Breeding</button>
   <button class="tab" data-pane="cohort">Cohort Planning</button>
+  <button class="tab" data-pane="scenario">Scenario</button>
   <button class="tab" data-pane="cull">Cull Candidates</button>
   <button class="tab" data-pane="smartcull">Smart Cull Plan</button>
   <button class="tab" data-pane="costs">Cage Costs</button>
@@ -839,6 +856,20 @@ table.data tbody tr:last-child td { border-bottom: none; }
 
 <!-- ============= COHORT PLANNING ============= -->
 <section class="tab-pane" id="pane-cohort">
+  <!-- ===== Saved cohorts ===== -->
+  <div class="panel" id="saved-cohorts-panel" style="margin-bottom: 18px;">
+    <h3>Saved cohorts
+      <button class="info-btn" onclick="openModal('saved-cohorts')">i</button>
+    </h3>
+    <p class="muted" style="font-size: .85rem; margin: 0 0 14px;">
+      Pre-assembled experimental cohorts saved alongside the colony data
+      (<span class="code">data/saved_cohorts.json</span>). Click any cohort to inspect roster,
+      treatment slots, and matched-litter pairs. Open the source Excel for the version sent to
+      collaborators or used in lab records.
+    </p>
+    <div id="saved-cohort-cards" style="display: flex; flex-direction: column; gap: 12px;"></div>
+  </div>
+
   <!-- ===== Cohort Builder ===== -->
   <div class="panel">
     <h3>Build a cohort
@@ -912,6 +943,52 @@ table.data tbody tr:last-child td { border-bottom: none; }
         <div id="cb-control-area"></div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ============= SCENARIO (What-if) ============= -->
+<section class="tab-pane" id="pane-scenario">
+  <div class="panel" style="margin-bottom: 18px;">
+    <h3 style="margin:0 0 6px;">Colony wind-down plan
+      <button class="info-btn" onclick="openModal('scenario')">i</button>
+    </h3>
+    <p class="muted" style="font-size:.85rem;margin:0;max-width:820px;">
+      PI directive: reduce to about 5-10 cages of mostly breeders, ramp back up when needed.
+      This projection walks the colony through five timepoints: today, after Lang ships out,
+      after the cull sweep, after LPS Ex 2 endpoint, and steady state. Numbers update live from
+      <span class="code">colony.json</span>, <span class="code">saved_cohorts.json</span>,
+      and the physical cage-card walkthrough.
+    </p>
+  </div>
+
+  <!-- Baseline reconciliation -->
+  <div class="panel" id="sn-recon-panel" style="margin-bottom: 18px;"></div>
+
+  <!-- Multi-timepoint headline -->
+  <div id="sn-timeline" style="display:grid;grid-template-columns:repeat(5, 1fr);gap:10px;margin-bottom:18px;"></div>
+
+  <!-- Cost trajectory + disposition -->
+  <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:18px;">
+    <div class="panel" id="sn-cost-panel"></div>
+    <div class="panel" id="sn-disp-panel"></div>
+  </div>
+
+  <!-- What stays: breeders + eye candy -->
+  <div class="panel" style="margin-bottom: 18px;">
+    <h3>What stays in the colony</h3>
+    <div id="sn-keeps"></div>
+  </div>
+
+  <!-- What holds temporarily -->
+  <div class="panel" style="margin-bottom: 18px;">
+    <h3>Transitional: LPS Ex 2 cohort (culled at experiment endpoint)</h3>
+    <div id="sn-hold"></div>
+  </div>
+
+  <!-- Cull summary -->
+  <div class="panel" style="margin-bottom: 18px;">
+    <h3>Cull sweep</h3>
+    <div id="sn-cull"></div>
   </div>
 </section>
 
@@ -1275,6 +1352,8 @@ table.data tbody tr:last-child td { border-bottom: none; }
 <script>
 // ============= DATA =============
 const COLONY = __COLONY_JSON__;
+const SAVED_COHORTS = __SAVED_COHORTS_JSON__;
+const PHYS_CAGES = __PHYS_CAGES_JSON__;
 
 // ============= UTILS =============
 const $ = (s, root=document) => root.querySelector(s);
@@ -1337,16 +1416,25 @@ $$(".tab").forEach(btn => {
 });
 
 // ============= HEADER =============
+// Cage counts on the index/Overview anchor to the physical cage-card walkthrough
+// (the true billable count). The detailed Cage Costs tab keeps the full Transnetyx
+// audit count so the reconciliation gap stays inspectable.
+const PHYS_CAGE_COUNT = (PHYS_CAGES.cages || []).length;
+const SOFT_CAGE_COUNT = COLONY.summary.total_cages;
+const INDEX_CAGE_COUNT = PHYS_CAGE_COUNT > 0 ? PHYS_CAGE_COUNT : SOFT_CAGE_COUNT;
+
 $("#hdr-asof").textContent = "As of " + COLONY.as_of;
 $("#hdr-mice").textContent = fmt(COLONY.summary.total_mice) + " mice";
-$("#hdr-cages").textContent = fmt(COLONY.summary.total_cages) + " cages";
+$("#hdr-cages").textContent = fmt(INDEX_CAGE_COUNT) + " cages";
 
 // ============= KPIs =============
 const KPIS = [
   { label: "Total mice", val: COLONY.summary.total_mice, sub: COLONY.summary.n_strains + " strains" },
-  { label: "Total cages", val: COLONY.summary.total_cages,
-    sub: COLONY.summary.located_cages + " located · " + COLONY.summary.unassigned_cages + " unassigned",
-    cls: COLONY.summary.unassigned_cages > 50 ? "warn" : "" },
+  { label: "Total cages", val: INDEX_CAGE_COUNT,
+    sub: PHYS_CAGE_COUNT > 0
+      ? `physical walkthrough · ${SOFT_CAGE_COUNT} in Transnetyx`
+      : COLONY.summary.located_cages + " located · " + COLONY.summary.unassigned_cages + " unassigned",
+    cls: PHYS_CAGE_COUNT > 0 && PHYS_CAGE_COUNT !== SOFT_CAGE_COUNT ? "warn" : "" },
   { label: "Active breeders (mice)", val: COLONY.summary.active_breeders,
     sub: COLONY.summary.active_breeding_pairs + " pairs" },
   { label: "Available", val: COLONY.summary.available_mice, sub: "no project assignment", cls: "ok" },
@@ -2607,6 +2695,589 @@ function bbRenderPrediction() {
 // (Cohort-plan cards retired — only the Cohort Builder remains on the Cohort Planning tab.
 // The cohort_plans data is still loaded into colony.json and is used by Smart Cull Plan
 // for plan-matched control suggestions and by the reverse Breeding Planner autocomplete.)
+
+// ============= SAVED COHORTS =============
+// Render finalized experimental cohorts (e.g. LPS Ex 2, collaborator handoffs) loaded
+// from data/saved_cohorts.json. Each card shows roster, sex/age balance, matched-litter
+// pairs, and an inline expandable mouse table.
+
+function scRenderCards() {
+  const host = $("#saved-cohort-cards");
+  if (!host) return;
+  const cohorts = (SAVED_COHORTS && SAVED_COHORTS.cohorts) || [];
+  if (!cohorts.length) {
+    host.innerHTML = `<p class="muted" style="font-size:.85rem;margin:0;">
+      No saved cohorts yet. Cohorts assembled via the Cohort Builder and committed to
+      <span class="code">data/saved_cohorts.json</span> will appear here.</p>`;
+    return;
+  }
+  host.innerHTML = cohorts.map((c, i) => scRenderCard(c, i)).join("");
+}
+
+function scRenderCard(c, idx) {
+  const allMice = [...(c.exp || []), ...(c.wt || [])];
+  const n = allMice.length;
+  const nExp = (c.exp || []).length, nWt = (c.wt || []).length;
+  const F = allMice.filter(m => m.sex === "Female").length;
+  const M = allMice.filter(m => m.sex === "Male").length;
+  const young = allMice.filter(m => m.age_class === "young").length;
+  const old   = allMice.filter(m => m.age_class === "old").length;
+  const mid   = allMice.filter(m => m.age_class === "mid").length;
+  const matched = (c.matched_pairs || []).length;
+  const pairsTxt = (c.matched_pairs || []).map(p => p.join("↔")).join(", ") || "—";
+
+  return `
+    <div class="cohort-card" style="background: var(--surface); border: 1px solid var(--line);
+         border-radius: 10px; padding: 14px 16px;">
+      <div class="cohort-head">
+        <div>
+          <h4 style="margin:0;">${c.name || c.id}</h4>
+          <div class="cohort-cross" style="font-size:.78rem;color:var(--ink-muted);margin-top:2px;">
+            ${c.owner || ""} · ${c.design || ""}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:flex-start;">
+          <span class="badge">${n} mice</span>
+          <button class="btn small ghost" onclick="scToggle(${idx})">Show roster</button>
+        </div>
+      </div>
+      <p class="cohort-purpose">${c.purpose || ""}</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:6px;
+                  font-size:.78rem;margin:8px 0;">
+        <div><b>EXP:</b> ${nExp}</div>
+        <div><b>WT:</b> ${nWt}</div>
+        <div><b>F:M</b> ${F}:${M}</div>
+        <div><b>Young/Mid/Old</b> ${young}/${mid}/${old}</div>
+        <div><b>Matched pairs:</b> ${matched}</div>
+      </div>
+      <div style="font-size:.78rem;color:var(--ink-muted);">
+        <b>WT definition:</b> ${c.wt_definition || "—"}<br>
+        <b>Matched pairs:</b> ${pairsTxt}
+      </div>
+      ${(c.notes || []).length ? `
+        <ul style="margin:8px 0 0 18px;padding:0;font-size:.78rem;color:var(--ink-muted);">
+          ${c.notes.map(n => `<li>${n}</li>`).join("")}
+        </ul>` : ""}
+      <div id="sc-roster-${idx}" style="display:none;margin-top:12px;"></div>
+    </div>`;
+}
+
+function scToggle(idx) {
+  const host = document.getElementById("sc-roster-" + idx);
+  const cohorts = (SAVED_COHORTS && SAVED_COHORTS.cohorts) || [];
+  const c = cohorts[idx];
+  if (!c) return;
+  if (host.style.display === "none") {
+    host.innerHTML = scRosterTable(c);
+    host.style.display = "block";
+  } else {
+    host.style.display = "none";
+  }
+}
+
+function scRosterTable(c) {
+  const rows = [];
+  const fmtRow = (m, group) => {
+    const matched = (m.litter_pair && m.litter_pair.indexOf("★") >= 0)
+      ? `<b style="color:var(--brand);">${m.litter_pair}</b>` : (m.litter_pair || "—");
+    const treat = m.treatment_slot ? `<span class="badge">${m.treatment_slot}</span>` : "";
+    return `<tr>
+      <td>${m.mouse_id}</td>
+      <td><span style="font-size:.7rem;color:var(--ink-muted);">${group}</span></td>
+      <td>${m.sex || ""}</td>
+      <td>${(m.age_months ?? "").toString().slice(0, 5)}</td>
+      <td>${m.cage_id || ""}</td>
+      <td>${m.strain || ""}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:.74rem;">${m.genotype || ""}</td>
+      <td>${matched}</td>
+      <td>${treat}</td>
+    </tr>`;
+  };
+  (c.exp || []).forEach(m => rows.push(fmtRow(m, "EXP")));
+  (c.wt  || []).forEach(m => rows.push(fmtRow(m, "WT")));
+  return `
+    <div class="scroll-x">
+      <table class="data" style="width:100%;font-size:.8rem;">
+        <thead><tr>
+          <th>ID</th><th>Group</th><th>Sex</th><th>Age (mo)</th>
+          <th>Cage</th><th>Strain</th><th>Genotype</th><th>Litter pair</th><th>Slot</th>
+        </tr></thead>
+        <tbody>${rows.join("")}</tbody>
+      </table>
+    </div>`;
+}
+
+window.scToggle = scToggle;
+scRenderCards();
+
+// ============= SCENARIO (Colony wind-down projection) =============
+// Walks the colony through five timepoints and their cost:
+//   T0 today  →  T1 after Lang ships  →  T2 after cull sweep  →
+//   T3 after LPS Ex 2 endpoint  →  T4 steady state
+//
+// Pure compute over COLONY + SAVED_COHORTS + PHYS_CAGES. Never mutates.
+
+const SN_RATE_VENT  = 1.19;
+const SN_RATE_BREED = 2.16;
+const SN_USD  = n => "$" + n.toLocaleString(undefined, {maximumFractionDigits: 0});
+const SN_USD2 = n => "$" + n.toLocaleString(undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2});
+
+// Breeder cages to preserve (Brian's PI-approved keep list). Hard-coded because it's a
+// strategic decision, not derivable from data alone.
+const SN_BREEDER_KEEPS = [
+  { cage: "1003344651", line: "AdipoGlo (Adipoq-Cre; Dendra2)", role: "primary, prime age" },
+  { cage: "1003344659", line: "AdipoGlo (Adipoq-Cre; Dendra2)", role: "primary, prime age" },
+  { cage: "1003203136", line: "Dendra2 pure",                    role: "primary, aging" },
+  { cage: "1003203135", line: "Dendra2 pure",                    role: "backup, aging" },
+  { cage: "1003225766", line: "AdipoGlo+ (mTmG hom)",             role: "future-cross reserve" },
+  { cage: "1003225767", line: "Marrow Glo (Resistin-Cre; Osterix; Dendra2)", role: "primary" },
+  { cage: "1003297629", line: "Marrow Glo (Resistin-Cre; Osterix; Dendra2)", role: "backup, verify Resistin-Cre" },
+];
+const SN_BREEDER_KEEP_SET = new Set(SN_BREEDER_KEEPS.map(x => x.cage));
+
+function snGroupByCage(mice) {
+  const m = {};
+  mice.forEach(x => {
+    const k = x.cage_id || "UNASSIGNED";
+    (m[k] = m[k] || []).push(x);
+  });
+  return m;
+}
+function snCageType(mice) {
+  return mice.some(m => (m.use || "") === "Breeding") ? "breeding" : "vented";
+}
+function snDailyCost(byCage) {
+  let breed = 0, vent = 0;
+  Object.values(byCage).forEach(ms => {
+    if (snCageType(ms) === "breeding") breed += 1; else vent += 1;
+  });
+  return { breed, vent, daily: breed * SN_RATE_BREED + vent * SN_RATE_VENT };
+}
+function snTimepointCost(cages, breedSet) {
+  const breed = cages.filter(c => breedSet.has(c)).length;
+  const vent  = cages.length - breed;
+  const daily = breed * SN_RATE_BREED + vent * SN_RATE_VENT;
+  return { breed, vent, daily, monthly: daily * 30.4, annual: daily * 365 };
+}
+
+// ---------- Wind-down compute ----------
+// Classify every mouse by disposition. Then walk phase-by-phase:
+//   T0: today
+//   T1: after Lang ships
+//   T2: after cull sweep
+//   T3: after LPS Ex 2 endpoint
+//   T4: steady state (breeders only)
+
+function snClassify() {
+  const inv = COLONY.inventory;
+  const byCage = snGroupByCage(inv);
+
+  // Cohort id sets
+  const langIds = new Set();
+  const lpsIds  = new Set();
+  const eyeIds  = new Set();
+  let langCohort = null, lpsCohort = null, eyeCohort = null;
+  (SAVED_COHORTS.cohorts || []).forEach(c => {
+    const id = String(c.id || "").toLowerCase();
+    const ids = (arr) => (arr || []).map(m => String(m.mouse_id));
+    if (id.indexOf("lang") >= 0) {
+      langCohort = c;
+      ids(c.exp).forEach(x => langIds.add(x));
+      ids(c.wt ).forEach(x => langIds.add(x));
+    } else if (id.indexOf("lps") >= 0) {
+      lpsCohort = c;
+      ids(c.exp).forEach(x => lpsIds.add(x));
+      ids(c.wt ).forEach(x => lpsIds.add(x));
+    } else if (id.indexOf("eye") >= 0 || id.indexOf("triple") >= 0) {
+      eyeCohort = c;
+      ids(c.exp).forEach(x => eyeIds.add(x));
+      ids(c.wt ).forEach(x => eyeIds.add(x));
+    }
+  });
+
+  const dispByMouse = new Map();
+  inv.forEach(m => {
+    const mid = String(m.mouse_id);
+    const cid = m.cage_id || "UNK";
+    let d;
+    if (langIds.has(mid))                       d = "SHIP";
+    else if (eyeIds.has(mid))                   d = "KEEP_EYE";
+    else if (SN_BREEDER_KEEP_SET.has(cid))      d = "KEEP_BREED";
+    else if (lpsIds.has(mid))                   d = "HOLD_LPS";
+    else                                        d = "CULL";
+    dispByMouse.set(mid, d);
+  });
+
+  return { inv, byCage, langIds, lpsIds, eyeIds,
+           langCohort, lpsCohort, eyeCohort, dispByMouse };
+}
+
+function snComputeWindDown() {
+  const cls = snClassify();
+
+  // Physical baseline
+  const physSet   = new Set((PHYS_CAGES.cages || []).map(c => String(c.cage_id)));
+  const physBreed = new Set((PHYS_CAGES.cages || []).filter(c => c.card_type === "breeding").map(c => String(c.cage_id)));
+  const softSet   = new Set(Object.keys(cls.byCage).filter(c => c !== "UNASSIGNED"));
+
+  const reconciliation = {
+    physical: physSet.size,
+    software: softSet.size,
+    both: [...physSet].filter(c => softSet.has(c)).length,
+    softwareOnly: [...softSet].filter(c => !physSet.has(c)),
+    physicalOnly: [...physSet].filter(c => !softSet.has(c)),
+  };
+
+  // Cage sets by disposition, restricted to physical cages
+  const dispCage = new Map();  // cage -> Set of dispositions present
+  cls.inv.forEach(m => {
+    const cid = m.cage_id || "UNK";
+    if (!dispCage.has(cid)) dispCage.set(cid, new Set());
+    dispCage.get(cid).add(cls.dispByMouse.get(String(m.mouse_id)));
+  });
+
+  // Post-Lang eye-candy consolidation target: 522 + 503 F consolidate into one physical cage.
+  // Male eye-candy pairs stay in their existing cages (473+475 in 1003225826, 506+508 in 1003318023).
+  // So eye-candy cages that persist: 1003225826, 1003318023, and one consolidated F cage.
+  // We pick 1003302342 (currently holds 522) as the consolidation cage.
+  const EYE_CAGES_POST = new Set(["1003225826", "1003318023", "1003302342"]);
+
+  // Card-only cages (physical cages Transnetyx doesn't know about) are held through T0-T1
+  // and removed at T2 as part of the cull sweep — the cull is when Transnetyx gets cleaned up.
+  const physOnlyCages = [...physSet].filter(c => !softSet.has(c));
+
+  function cagesAtPhase(phase) {
+    const kept = [];
+    physSet.forEach(cid => {
+      const mice = cls.byCage[cid] || [];
+      const isCardOnly = physOnlyCages.includes(cid);
+      if (!mice.length && !isCardOnly) return;  // software-empty and not a physical card = skip
+
+      if (phase === 0) { kept.push(cid); return; }  // T0: every physical cage
+
+      if (isCardOnly) {
+        // Card-only cages persist through T1, removed at T2 (cull sweep)
+        if (phase <= 1) kept.push(cid);
+        return;
+      }
+
+      // Software-known cages: check mouse-level dispositions
+      let has = false;
+      for (const m of mice) {
+        const d = cls.dispByMouse.get(String(m.mouse_id));
+        if (phase === 1) { if (d !== "SHIP") { has = true; break; } }
+        else if (phase === 2) {
+          if (d === "KEEP_BREED" || d === "HOLD_LPS") { has = true; break; }
+          if (d === "KEEP_EYE" && EYE_CAGES_POST.has(cid)) { has = true; break; }
+        }
+        else if (phase === 3) {
+          if (d === "KEEP_BREED") { has = true; break; }
+          if (d === "KEEP_EYE" && EYE_CAGES_POST.has(cid)) { has = true; break; }
+        }
+        else if (phase === 4) {
+          if (d === "KEEP_BREED") { has = true; break; }
+        }
+      }
+      if (has) kept.push(cid);
+    });
+    return kept;
+  }
+
+  // Assemble timepoints
+  const phaseMeta = [
+    { key: "T0", label: "Today",                   note: "Physical baseline (cage-card walkthrough)" },
+    { key: "T1", label: "After Lang ships",        note: "30 mice out; nothing else changed yet" },
+    { key: "T2", label: "After cull sweep",        note: "Non-keep, non-cohort mice culled" },
+    { key: "T3", label: "After LPS endpoint",      note: "LPS Ex 2 cohort culled at experiment close" },
+    { key: "T4", label: "Steady state",            note: "Breeders only" },
+  ];
+
+  const timepoints = phaseMeta.map((p, i) => {
+    const cages = cagesAtPhase(i);
+    const cost = snTimepointCost(cages, physBreed);
+    // Mouse count
+    const remainingMice = cls.inv.filter(m => {
+      const d = cls.dispByMouse.get(String(m.mouse_id));
+      if (i === 0) return true;
+      if (i === 1) return d !== "SHIP";
+      if (i === 2) return d === "KEEP_BREED" || d === "KEEP_EYE" || d === "HOLD_LPS";
+      if (i === 3) return d === "KEEP_BREED" || d === "KEEP_EYE";
+      if (i === 4) return d === "KEEP_BREED";
+      return true;
+    }).length;
+    return { ...p, cages: cages.length, mice: remainingMice, ...cost };
+  });
+
+  // Disposition counts
+  const dispCount = { SHIP: 0, KEEP_BREED: 0, KEEP_EYE: 0, HOLD_LPS: 0, CULL: 0 };
+  cls.inv.forEach(m => {
+    const d = cls.dispByMouse.get(String(m.mouse_id));
+    if (dispCount[d] !== undefined) dispCount[d] += 1;
+  });
+
+  // Breeder details for the keep list
+  const breederKeeps = SN_BREEDER_KEEPS.map(k => ({
+    ...k,
+    mice: (cls.byCage[k.cage] || []).map(m => ({
+      id: m.mouse_id, sex: (m.sex || "?")[0], age: m.age_months,
+      geno: (m.genotype || "").trim(),
+    })),
+  }));
+
+  // Eye-candy roster
+  const eyeMice = (cls.eyeCohort ? cls.eyeCohort.exp : []).map(m => ({
+    id: m.mouse_id, sex: (m.sex || "?")[0], age: m.age_months,
+    cage: m.cage_id, geno: (m.genotype || "").trim(),
+    note: m.litter_pair || "",
+  }));
+
+  // LPS hold roster
+  const lpsHold = cls.lpsCohort ? [...(cls.lpsCohort.exp || []), ...(cls.lpsCohort.wt || [])].map(m => ({
+    id: m.mouse_id, sex: (m.sex || "?")[0], age: m.age_months,
+    cage: m.cage_id, group: m.group, slot: m.treatment_slot || "",
+  })) : [];
+
+  // Cull preview: group by strain
+  const cullByStrain = {};
+  cls.inv.forEach(m => {
+    if (cls.dispByMouse.get(String(m.mouse_id)) !== "CULL") return;
+    const s = m.strain || "unknown";
+    cullByStrain[s] = (cullByStrain[s] || 0) + 1;
+  });
+
+  // Cull sample (10 mice, oldest first, for quick sanity)
+  const cullList = cls.inv.filter(m => cls.dispByMouse.get(String(m.mouse_id)) === "CULL");
+  cullList.sort((a, b) => (b.age_months || 0) - (a.age_months || 0));
+  const cullSample = cullList.slice(0, 12);
+
+  return {
+    reconciliation,
+    timepoints,
+    dispCount,
+    breederKeeps,
+    eyeMice,
+    lpsHold,
+    cullByStrain,
+    cullSample,
+    cullTotal: cullList.length,
+  };
+}
+
+// ---------- Renderers ----------
+
+function snRenderRecon(s) {
+  const r = s.reconciliation;
+  return `
+    <h3>Baseline reconciliation</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;font-size:.88rem;margin:8px 0 12px;">
+      <div><b>${r.physical}</b><div style="font-size:.7rem;color:var(--ink-muted);text-transform:uppercase;">On physical rack (cage cards)</div></div>
+      <div><b>${r.software}</b><div style="font-size:.7rem;color:var(--ink-muted);text-transform:uppercase;">In Transnetyx</div></div>
+      <div><b>${r.both}</b><div style="font-size:.7rem;color:var(--ink-muted);text-transform:uppercase;">In both (verified)</div></div>
+      <div><b style="color:#92400e;">${r.softwareOnly.length}</b><div style="font-size:.7rem;color:var(--ink-muted);text-transform:uppercase;">Software-only (phantom)</div></div>
+      <div><b style="color:#1e40af;">${r.physicalOnly.length}</b><div style="font-size:.7rem;color:var(--ink-muted);text-transform:uppercase;">Card-only</div></div>
+    </div>
+    <p class="muted" style="font-size:.83rem;margin:0;">
+      Cost projections use the 97-cage physical baseline. Mouse-level views elsewhere in the
+      dashboard still use the full Transnetyx export so nothing is hidden.
+    </p>
+  `;
+}
+
+function snRenderTimeline(s) {
+  const t = s.timepoints;
+  const first = t[0], last = t[t.length - 1];
+  const savings = first.monthly - last.monthly;
+  return t.map((p, i) => {
+    const emphasis = (i === 0 || i === t.length - 1);
+    const border = i === 0 ? "var(--brand)" :
+                   i === t.length - 1 ? "var(--ok)" : "var(--line)";
+    const dCages = i === 0 ? "" : `<div style="font-size:.72rem;color:var(--ink-muted);">${p.cages - first.cages > 0 ? "+" : ""}${p.cages - first.cages} vs today</div>`;
+    return `
+      <div style="background:var(--surface);border:1px solid ${border};border-left:4px solid ${border};border-radius:8px;padding:12px;">
+        <div style="font-size:.68rem;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.05em;">${p.key} · ${p.label}</div>
+        <div style="font-size:1.9rem;font-weight:800;color:${emphasis ? border : "var(--ink)"};margin:6px 0 2px;">${p.cages}</div>
+        <div style="font-size:.72rem;color:var(--ink-muted);text-transform:uppercase;">cages</div>
+        <div style="margin-top:8px;font-size:.85rem;"><b>${p.mice}</b> mice</div>
+        <div style="font-size:.85rem;color:var(--ok);font-weight:700;">${SN_USD(p.monthly)}/mo</div>
+        <div style="margin-top:8px;font-size:.72rem;color:var(--ink-muted);line-height:1.35;">${p.note}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function snRenderCostPanel(s) {
+  const t = s.timepoints;
+  const first = t[0], last = t[t.length - 1];
+  const savings_mo = first.monthly - last.monthly;
+  const savings_yr = first.annual  - last.annual;
+  const rows = t.map(p => `
+    <tr>
+      <td><b>${p.key}</b> ${p.label}</td>
+      <td style="text-align:right;">${p.cages}</td>
+      <td style="text-align:right;">${p.mice}</td>
+      <td style="text-align:right;">${p.breed}b + ${p.vent}v</td>
+      <td style="text-align:right;font-weight:700;">${SN_USD2(p.daily)}</td>
+      <td style="text-align:right;font-weight:700;color:var(--ok);">${SN_USD(p.monthly)}</td>
+    </tr>
+  `).join("");
+  return `
+    <h3>Cost trajectory</h3>
+    <table class="data" style="width:100%;font-size:.85rem;">
+      <thead><tr><th>Phase</th><th>Cages</th><th>Mice</th><th>Breed/Vent</th><th>$/day</th><th>$/mo</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="margin-top:12px;padding:10px 12px;background:var(--ok-soft);border-radius:8px;">
+      <div style="font-size:.72rem;color:var(--ink-muted);text-transform:uppercase;">Steady-state savings vs. today</div>
+      <div style="font-size:1.4rem;font-weight:800;color:var(--ok);">${SN_USD(savings_mo)} / month · ${SN_USD(savings_yr)} / year</div>
+    </div>
+    <p class="muted" style="font-size:.75rem;margin:8px 0 0;">Rates: vented ${SN_USD2(SN_RATE_VENT)}/cage/day, breeding ${SN_USD2(SN_RATE_BREED)}/cage/day (ULAM CY26).</p>
+  `;
+}
+
+function snRenderDisposition(s) {
+  const d = s.dispCount;
+  const total = d.SHIP + d.KEEP_BREED + d.KEEP_EYE + d.HOLD_LPS + d.CULL;
+  const rows = [
+    ["SHIP",        d.SHIP,       "Lang cohort",        "#dbeafe", "#1e40af"],
+    ["KEEP breed",  d.KEEP_BREED, "In 7 breeder cages", "#d1fae5", "#166534"],
+    ["KEEP eye",    d.KEEP_EYE,   "Triple-reporter imaging",  "#d1fae5", "#166534"],
+    ["HOLD",        d.HOLD_LPS,   "LPS Ex 2 (until endpoint)", "#fff7e0", "#92400e"],
+    ["CULL",        d.CULL,       "Not needed",         "#fee2e2", "#b91c1c"],
+  ];
+  return `
+    <h3>Mouse disposition (n=${total})</h3>
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:.88rem;">
+      ${rows.map(([label, count, sub, bg, fg]) => `
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 10px;background:${bg};border-radius:6px;">
+          <div style="min-width:80px;font-size:.72rem;font-weight:800;color:${fg};text-transform:uppercase;letter-spacing:.05em;">${label}</div>
+          <div style="font-size:1.3rem;font-weight:800;color:${fg};min-width:44px;text-align:right;">${count}</div>
+          <div style="color:var(--ink-muted);font-size:.8rem;">${sub}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function snRenderKeeps(s) {
+  const b = s.breederKeeps.map(k => `
+    <tr>
+      <td><code>${k.cage}</code></td>
+      <td>${k.line}</td>
+      <td>${k.mice.map(m => `${m.id} ${m.sex} (${(m.age || 0).toFixed(1)}mo)`).join("<br>")}</td>
+      <td>${k.role}</td>
+    </tr>
+  `).join("");
+  const e = s.eyeMice.map(m => `
+    <tr>
+      <td><code>${m.cage}</code></td>
+      <td>${m.id}</td>
+      <td>${m.sex}</td>
+      <td>${(m.age || 0).toFixed(1)} mo</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:.75rem;">${m.geno}</td>
+      <td style="color:var(--ink-muted);">${m.note}</td>
+    </tr>
+  `).join("");
+  return `
+    <h4 style="margin:6px 0 8px;">Breeders (${s.breederKeeps.length} cages)</h4>
+    <div class="scroll-x">
+      <table class="data" style="width:100%;font-size:.82rem;">
+        <thead><tr><th>Cage</th><th>Line</th><th>Pair</th><th>Role</th></tr></thead>
+        <tbody>${b}</tbody>
+      </table>
+    </div>
+    <h4 style="margin:18px 0 8px;">Eye-candy imaging cohort (${s.eyeMice.length} mice)</h4>
+    <p class="muted" style="font-size:.8rem;margin:0 0 8px;">
+      Triple reporters (mTmG hom + Adipoq-Cre + Dendra2). Held for a future imaging experiment
+      where Dendra2+ mitochondria transferring from adipocytes into mTomato-red non-adipocyte
+      cells would produce green puncta inside red cells.
+    </p>
+    <div class="scroll-x">
+      <table class="data" style="width:100%;font-size:.82rem;">
+        <thead><tr><th>Cage</th><th>ID</th><th>Sex</th><th>Age</th><th>Genotype</th><th>Housing</th></tr></thead>
+        <tbody>${e}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function snRenderHold(s) {
+  const rows = s.lpsHold.map(m => `
+    <tr>
+      <td><code>${m.cage}</code></td>
+      <td>${m.id}</td>
+      <td>${m.sex}</td>
+      <td>${(m.age || 0).toFixed(1)} mo</td>
+      <td>${m.group}</td>
+      <td>${m.slot}</td>
+    </tr>
+  `).join("");
+  return `
+    <p class="muted" style="font-size:.83rem;margin:0 0 10px;">
+      ${s.lpsHold.length} mice, held in place until the LPS Ex 2 experiment reaches its endpoint.
+      All are Adipoq-Cre;Dendra2+ (EXP) or clean no-Cre no-mTmG (WT gate controls).
+    </p>
+    <div class="scroll-x">
+      <table class="data" style="width:100%;font-size:.82rem;">
+        <thead><tr><th>Cage</th><th>ID</th><th>Sex</th><th>Age</th><th>Group</th><th>Slot</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function snRenderCull(s) {
+  const strainRows = Object.entries(s.cullByStrain)
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line);">
+      <span>${k}</span><b>${v}</b></div>`).join("");
+  const sample = s.cullSample.map(m => `
+    <tr>
+      <td>${m.mouse_id}</td>
+      <td>${(m.sex || "?")[0]}</td>
+      <td>${(m.age_months || 0).toFixed(1)} mo</td>
+      <td>${m.strain || ""}</td>
+      <td><code>${m.cage_id || ""}</code></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:.72rem;">${(m.genotype || "").trim()}</td>
+    </tr>
+  `).join("");
+  return `
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:20px;">
+      <div>
+        <div style="font-size:.9rem;font-weight:700;margin-bottom:6px;">Total cull: <b style="color:#b91c1c;">${s.cullTotal}</b> mice</div>
+        <div style="font-size:.8rem;color:var(--ink-muted);text-transform:uppercase;margin-bottom:4px;">By strain</div>
+        ${strainRows}
+      </div>
+      <div>
+        <div style="font-size:.8rem;color:var(--ink-muted);text-transform:uppercase;margin-bottom:4px;">Oldest 12 (sample)</div>
+        <div class="scroll-x">
+          <table class="data" style="width:100%;font-size:.78rem;">
+            <thead><tr><th>ID</th><th>Sex</th><th>Age</th><th>Strain</th><th>Cage</th><th>Genotype</th></tr></thead>
+            <tbody>${sample}</tbody>
+          </table>
+        </div>
+        <p class="muted" style="font-size:.75rem;margin:8px 0 0;">
+          Full cull list with cage grouping is in
+          <span class="code">Colony_Wind_Down_Plan_2026-07-10.xlsx</span> for bench use.
+        </p>
+      </div>
+    </div>
+  `;
+}
+
+function snRender() {
+  const host = document.getElementById("sn-timeline");
+  if (!host) return;
+  const s = snComputeWindDown();
+  document.getElementById("sn-recon-panel").innerHTML = snRenderRecon(s);
+  host.innerHTML = snRenderTimeline(s);
+  document.getElementById("sn-cost-panel").innerHTML = snRenderCostPanel(s);
+  document.getElementById("sn-disp-panel").innerHTML = snRenderDisposition(s);
+  document.getElementById("sn-keeps").innerHTML = snRenderKeeps(s);
+  document.getElementById("sn-hold").innerHTML  = snRenderHold(s);
+  document.getElementById("sn-cull").innerHTML  = snRenderCull(s);
+}
+
+snRender();
 
 // ============= CULL CANDIDATES =============
 const CULL_DEFINITIONS = [
@@ -4083,6 +4754,53 @@ git push</pre>
         <li>Excel export: 3-sheet workbook (Cull, Preserve, Summary)</li>
       </ul>
     ` },
+  "scenario": {
+    title: "Colony wind-down projection",
+    body: `
+      <p>Walks the colony through five timepoints as it winds down to breeder-only steady state per PI directive.</p>
+      <h3>Phases</h3>
+      <ul>
+        <li><b>T0 Today</b>: physical baseline of 97 cages from the last cage-card walkthrough.</li>
+        <li><b>T1 After Lang ships</b>: the 30-mouse Lang cohort leaves. Roughly 10 cages empty.</li>
+        <li><b>T2 After cull sweep</b>: every mouse not in a breeder cage, not in the eye-candy imaging cohort, and not in LPS Ex 2 is culled.</li>
+        <li><b>T3 After LPS endpoint</b>: LPS Ex 2 cohort is euthanized at experiment close. Breeders + eye candy remain.</li>
+        <li><b>T4 Steady state</b>: 7 breeder cages only.</li>
+      </ul>
+      <h3>Assumptions</h3>
+      <ul>
+        <li>Breeder keep list (7 cages) is hard-coded from PI decision. Change it in <span class="code">SN_BREEDER_KEEPS</span> inside <span class="code">build_dashboard_html.py</span>.</li>
+        <li>Eye-candy imaging cohort is defined in <span class="code">data/saved_cohorts.json</span> as <span class="code">eye_candy_imaging_*</span>.</li>
+        <li>Male eye-candy pairs stay in existing cages (fight risk on re-introduction). Female triple-reporter pair consolidates to one cage (1003302342 selected as the consolidation target).</li>
+      </ul>
+      <h3>Rates</h3>
+      <p>ULAM CY26: vented $1.19/cage/day, breeding $2.16/cage/day. Monthly = daily × 30.4. Annual = daily × 365.</p>
+      <h3>What this tab does not do</h3>
+      <p>Nothing here mutates persistent state. To change the plan, edit the underlying data or the hard-coded keep list, then re-run <span class="code">python build_dashboard_html.py</span>.</p>
+    ` },
+  "saved-cohorts": {
+    title: "Saved cohorts",
+    body: `
+      <p>Finalized experimental cohorts saved alongside the colony data. These are not the
+      same as <em>breeding</em> cohort plans (which describe genotype targets for crosses) —
+      saved cohorts are concrete mouse rosters with treatment slots and matched-litter pairs.</p>
+      <h3>Source of truth</h3>
+      <p>Lives in <span class="code">data/saved_cohorts.json</span>. Generate or update via
+      <span class="code">build_cohort_exports.py</span>, which also writes a labeled Excel for
+      each cohort (one per workbook). The Excel is the artifact handed to collaborators or
+      logged in lab records.</p>
+      <h3>What the card shows</h3>
+      <ul>
+        <li><strong>Owner</strong> — whose experiment this is (in-house vs. outgoing).</li>
+        <li><strong>Design</strong> — high-level group breakdown (e.g. PBS / LPS arms).</li>
+        <li><strong>WT definition</strong> — strict (Dendra2&lt;-/-&gt; only) vs. broad (any no-Cre).</li>
+        <li><strong>Matched pairs</strong> — EXP↔WT mice sharing DOB + strain.</li>
+        <li><strong>Show roster</strong> — full mouse-level table including treatment slot.</li>
+      </ul>
+      <h3>Updating</h3>
+      <p>To revise a saved cohort, edit the cohort definitions in
+      <span class="code">build_cohort_exports.py</span>, re-run it to regenerate both Excel
+      and JSON, then rebuild the dashboard with <span class="code">python build_dashboard_html.py</span>.</p>
+    ` },
   "cohort-builder": {
     title: "How the cohort builder works",
     body: `
@@ -4307,6 +5025,11 @@ setTimeout(() => Object.values(charts).forEach(c => c.resize()), 100);
 </html>
 """
 
-OUT.write_text(HTML.replace("__COLONY_JSON__", colony_json_str))
+OUT.write_text(
+    HTML
+    .replace("__COLONY_JSON__", colony_json_str)
+    .replace("__SAVED_COHORTS_JSON__", saved_cohorts_json_str)
+    .replace("__PHYS_CAGES_JSON__", phys_cages_json_str)
+)
 size_kb = OUT.stat().st_size / 1024
 print(f"Wrote {OUT}  ({size_kb:.0f} KB)")

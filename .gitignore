@@ -28,8 +28,29 @@ Observed_Inventory_*.xlsx
 Transnetyx_Submission_*.xlsx
 *_Transnetyx_Upload_*.xlsx
 MacLab_Brian_Mice_*.xlsx
+
+# Cage card transcriptions (mouse-level identifiers — keep local)
+Cage_Cards_Transcription_*.xlsx
+Cull_Checklist_*.xlsx
+Cage_Cards_To_Verify/
+Software_Update_Needed_*.xlsx
 Cull_Checklist_*.xlsx
 Mouse_Colony_Cull_Summary_*.pptx
+
+# Experimental cohort exports (mouse-level identifiers — keep local)
+Mouse_Cohort_*.xlsx
+
+# Wind-down / cull plan Excels (mouse-level identifiers — keep local)
+Colony_Wind_Down_Plan_*.xlsx
+Smart_Cull_Plan_*.xlsx
+
+# Email drafts (contain collaborator addresses — keep local)
+Email_Draft_*.md
+Email_Draft_*.docx
+
+# Cull room photos (large binaries — keep local)
+Cull*.png
+Cull*.jpg
 
 # OS / editor cruft
 *.swp

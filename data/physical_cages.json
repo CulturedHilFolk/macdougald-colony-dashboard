@@ -1,0 +1,394 @@
+{
+  "version": 1,
+  "as_of": "2026-06-02",
+  "cages": [
+    {
+      "cage_id": "1003203135",
+      "card_type": "breeding"
+    },
+    {
+      "cage_id": "1003203136",
+      "card_type": "breeding"
+    },
+    {
+      "cage_id": "1003203137",
+      "card_type": "breeding"
+    },
+    {
+      "cage_id": "1003203138",
+      "card_type": "breeding"
+    },
+    {
+      "cage_id": "1003344651",
+      "card_type": "breeding"
+    },
+    {
+      "cage_id": "1003225765",
+      "card_type": "breeding"
+    },
+    {
+      "cage_id": "1003225766",
+      "card_type": "breeding"
+    },
+    {
+      "cage_id": "1003308536",
+      "card_type": "jackson"
+    },
+    {
+      "cage_id": "1002947865",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003016678",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003059303",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1002947864",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003225767",
+      "card_type": "breeding"
+    },
+    {
+      "cage_id": "1003297629",
+      "card_type": "breeding"
+    },
+    {
+      "cage_id": "1003344659",
+      "card_type": "breeding"
+    },
+    {
+      "cage_id": "1003302385",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003302386",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003344680",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003344679",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003089166",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003302403",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003302402",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003059301",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003344626",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003089224",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003344698",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003089192",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003302353",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003344719",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003165188",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003121695",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003171989",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003059428",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003059431",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003121675",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003344697",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003121696",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003121692",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003297659",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003059379",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003121780",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003171960",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003059364",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003090730",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003121676",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003059430",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003171961",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003059440",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003059397",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003121781",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003171990",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003271981",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003225795",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003302354",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003171980",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003073323",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003302341",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003165191",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003121768",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003089210",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003302342",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003073324",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003344696",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003165190",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003171979",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003302352",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003225835",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003225834",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003271984",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003271983",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003318023",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003225829",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003225826",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003225827",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003225820",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003225819",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003225798",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003318024",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003225812",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003225797",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003224672",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003224673",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003224662",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003224661",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003225790",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003225789",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003225796",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003225768",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003225794",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003344625",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003059439",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003185807",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003165194",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003172008",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003172013",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003172012",
+      "card_type": "holding"
+    },
+    {
+      "cage_id": "1003172009",
+      "card_type": "holding"
+    }
+  ]
+}
