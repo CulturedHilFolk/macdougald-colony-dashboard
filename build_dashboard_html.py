@@ -985,6 +985,12 @@ table.data tbody tr:last-child td { border-bottom: none; }
     <div id="sn-hold"></div>
   </div>
 
+  <!-- Ungenotyped young mice held for genotyping -->
+  <div class="panel" style="margin-bottom: 18px;">
+    <h3>Transitional: ungenotyped pups (held for genotyping)</h3>
+    <div id="sn-young"></div>
+  </div>
+
   <!-- Cull summary -->
   <div class="panel" style="margin-bottom: 18px;">
     <h3>Cull sweep</h3>
@@ -2900,10 +2906,14 @@ function snClassify() {
     const mid = String(m.mouse_id);
     const cid = m.cage_id || "UNK";
     let d;
+    const geno = (m.genotype || "").trim();
+    const untested = geno.length === 0;
+    const ageMo = m.age_months || 0;
     if (langIds.has(mid))                       d = "SHIP";
     else if (eyeIds.has(mid))                   d = "KEEP_EYE";
     else if (SN_BREEDER_KEEP_SET.has(cid))      d = "KEEP_BREED";
     else if (lpsIds.has(mid))                   d = "HOLD_LPS";
+    else if (untested && ageMo <= 4)            d = "HOLD_YOUNG";
     else                                        d = "CULL";
     dispByMouse.set(mid, d);
   });
@@ -2967,11 +2977,11 @@ function snComputeWindDown() {
         const d = cls.dispByMouse.get(String(m.mouse_id));
         if (phase === 1) { if (d !== "SHIP") { has = true; break; } }
         else if (phase === 2) {
-          if (d === "KEEP_BREED" || d === "HOLD_LPS") { has = true; break; }
+          if (d === "KEEP_BREED" || d === "HOLD_LPS" || d === "HOLD_YOUNG") { has = true; break; }
           if (d === "KEEP_EYE" && EYE_CAGES_POST.has(cid)) { has = true; break; }
         }
         else if (phase === 3) {
-          if (d === "KEEP_BREED") { has = true; break; }
+          if (d === "KEEP_BREED" || d === "HOLD_YOUNG") { has = true; break; }
           if (d === "KEEP_EYE" && EYE_CAGES_POST.has(cid)) { has = true; break; }
         }
         else if (phase === 4) {
@@ -3000,8 +3010,8 @@ function snComputeWindDown() {
       const d = cls.dispByMouse.get(String(m.mouse_id));
       if (i === 0) return true;
       if (i === 1) return d !== "SHIP";
-      if (i === 2) return d === "KEEP_BREED" || d === "KEEP_EYE" || d === "HOLD_LPS";
-      if (i === 3) return d === "KEEP_BREED" || d === "KEEP_EYE";
+      if (i === 2) return d === "KEEP_BREED" || d === "KEEP_EYE" || d === "HOLD_LPS" || d === "HOLD_YOUNG";
+      if (i === 3) return d === "KEEP_BREED" || d === "KEEP_EYE" || d === "HOLD_YOUNG";
       if (i === 4) return d === "KEEP_BREED";
       return true;
     }).length;
@@ -3009,7 +3019,7 @@ function snComputeWindDown() {
   });
 
   // Disposition counts
-  const dispCount = { SHIP: 0, KEEP_BREED: 0, KEEP_EYE: 0, HOLD_LPS: 0, CULL: 0 };
+  const dispCount = { SHIP: 0, KEEP_BREED: 0, KEEP_EYE: 0, HOLD_LPS: 0, HOLD_YOUNG: 0, CULL: 0 };
   cls.inv.forEach(m => {
     const d = cls.dispByMouse.get(String(m.mouse_id));
     if (dispCount[d] !== undefined) dispCount[d] += 1;
@@ -3050,6 +3060,16 @@ function snComputeWindDown() {
   cullList.sort((a, b) => (b.age_months || 0) - (a.age_months || 0));
   const cullSample = cullList.slice(0, 12);
 
+  // Ungenotyped young roster
+  const youngHold = cls.inv
+    .filter(m => cls.dispByMouse.get(String(m.mouse_id)) === "HOLD_YOUNG")
+    .map(m => ({
+      id: m.mouse_id, sex: (m.sex || "?")[0], age: m.age_months,
+      cage: m.cage_id, strain: m.strain,
+    }));
+  const youngByCage = {};
+  youngHold.forEach(m => { (youngByCage[m.cage] = youngByCage[m.cage] || []).push(m); });
+
   return {
     reconciliation,
     timepoints,
@@ -3057,6 +3077,8 @@ function snComputeWindDown() {
     breederKeeps,
     eyeMice,
     lpsHold,
+    youngHold,
+    youngByCage,
     cullByStrain,
     cullSample,
     cullTotal: cullList.length,
@@ -3138,11 +3160,12 @@ function snRenderDisposition(s) {
   const d = s.dispCount;
   const total = d.SHIP + d.KEEP_BREED + d.KEEP_EYE + d.HOLD_LPS + d.CULL;
   const rows = [
-    ["SHIP",        d.SHIP,       "Lang cohort",        "#dbeafe", "#1e40af"],
-    ["KEEP breed",  d.KEEP_BREED, "In 7 breeder cages", "#d1fae5", "#166534"],
-    ["KEEP eye",    d.KEEP_EYE,   "Triple-reporter imaging",  "#d1fae5", "#166534"],
-    ["HOLD",        d.HOLD_LPS,   "LPS Ex 2 (until endpoint)", "#fff7e0", "#92400e"],
-    ["CULL",        d.CULL,       "Not needed",         "#fee2e2", "#b91c1c"],
+    ["SHIP",        d.SHIP,        "Lang cohort",                  "#dbeafe", "#1e40af"],
+    ["KEEP breed",  d.KEEP_BREED,  "In 7 breeder cages",           "#d1fae5", "#166534"],
+    ["KEEP eye",    d.KEEP_EYE,    "Triple-reporter imaging",      "#d1fae5", "#166534"],
+    ["HOLD LPS",    d.HOLD_LPS,    "LPS Ex 2 until endpoint",      "#fff7e0", "#92400e"],
+    ["HOLD young",  d.HOLD_YOUNG,  "Ungenotyped pups (~4 mo)",     "#fff7e0", "#92400e"],
+    ["CULL",        d.CULL,        "Not needed",                    "#fee2e2", "#b91c1c"],
   ];
   return `
     <h3>Mouse disposition (n=${total})</h3>
@@ -3195,6 +3218,37 @@ function snRenderKeeps(s) {
       <table class="data" style="width:100%;font-size:.82rem;">
         <thead><tr><th>Cage</th><th>ID</th><th>Sex</th><th>Age</th><th>Genotype</th><th>Housing</th></tr></thead>
         <tbody>${e}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function snRenderYoung(s) {
+  if (!s.youngHold || !s.youngHold.length) return `<p class="muted">No ungenotyped young mice on hold.</p>`;
+  const rows = Object.entries(s.youngByCage)
+    .sort((a, b) => b[1].length - a[1].length)
+    .map(([cid, mice]) => {
+      const strain = mice[0].strain || "?";
+      const ids = mice.map(m => `${m.id}${m.sex}`).join(", ");
+      const ages = `${Math.min(...mice.map(m => m.age)).toFixed(1)}-${Math.max(...mice.map(m => m.age)).toFixed(1)} mo`;
+      return `<tr>
+        <td><code>${cid}</code></td>
+        <td>${strain}</td>
+        <td>${mice.length}</td>
+        <td>${ages}</td>
+        <td style="font-size:.78rem;">${ids}</td>
+      </tr>`;
+    }).join("");
+  return `
+    <p class="muted" style="font-size:.83rem;margin:0 0 10px;">
+      ${s.youngHold.length} mice in ${Object.keys(s.youngByCage).length} cages, all ungenotyped
+      and under 4 months. Held through the cull sweep so they can be genotyped and either
+      promoted to breeder pairs or culled once tested. Assumed dispositioned by steady state.
+    </p>
+    <div class="scroll-x">
+      <table class="data" style="width:100%;font-size:.82rem;">
+        <thead><tr><th>Cage</th><th>Strain</th><th>n</th><th>Age range</th><th>Mouse IDs</th></tr></thead>
+        <tbody>${rows}</tbody>
       </table>
     </div>
   `;
@@ -3274,6 +3328,8 @@ function snRender() {
   document.getElementById("sn-disp-panel").innerHTML = snRenderDisposition(s);
   document.getElementById("sn-keeps").innerHTML = snRenderKeeps(s);
   document.getElementById("sn-hold").innerHTML  = snRenderHold(s);
+  const youngEl = document.getElementById("sn-young");
+  if (youngEl) youngEl.innerHTML = snRenderYoung(s);
   document.getElementById("sn-cull").innerHTML  = snRenderCull(s);
 }
 
